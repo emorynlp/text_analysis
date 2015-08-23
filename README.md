@@ -7,4 +7,4 @@ Vector space models.
 * Replication of the original c version.
 * Preserves long strings.
 * Words are deliminated by `' '` and `'\n'`. 
-* Multiple training files are multi-threaded.
+* Multiple training files 

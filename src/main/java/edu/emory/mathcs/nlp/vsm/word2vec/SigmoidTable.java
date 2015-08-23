@@ -13,34 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.emory.mathcs.nlp.vsm;
+package edu.emory.mathcs.nlp.vsm.word2vec;
 
-import java.util.Random;
-
-import org.junit.Test;
+import edu.emory.mathcs.nlp.common.MathUtils;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
  */
-public class Word2VecTest
+public class SigmoidTable
 {
-	@Test
-	public void test() throws Exception
-	{
-		Random rand = new Random();
-		long st, et, r;
-		
-		for (int i=0; i<100; i++) rand.nextLong();
-		r = rand.nextLong();
-		
-		st = System.currentTimeMillis();
-		for (int i=0; i<10000000; i++) r = nextRandom(r);
-		et = System.currentTimeMillis();
-		System.out.println(et-st);
-	}
+	public final int TABLE_SIZE = 1000;
+	public final int MAX_EXP    = 6;
+
+	private float[] exp_table;
 	
-	long nextRandom(long prev)
+	public SigmoidTable()
 	{
-		return prev * 25214903917L + 11;
+		exp_table = new float[TABLE_SIZE];
+		
+		for (int i=0; i<TABLE_SIZE; i++)
+		{
+			exp_table[i] = (float)Math.exp((MathUtils.divide(i, TABLE_SIZE) * 2 - 1) * MAX_EXP);
+			exp_table[i] /=  (exp_table[i] + 1);
+		}
 	}
 }

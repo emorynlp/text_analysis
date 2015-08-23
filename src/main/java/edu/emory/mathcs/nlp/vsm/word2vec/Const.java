@@ -13,34 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.emory.mathcs.nlp.vsm;
-
-import java.util.Random;
-
-import org.junit.Test;
+package edu.emory.mathcs.nlp.vsm.word2vec;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
  */
-public class Word2VecTest
+public interface Const
 {
-	@Test
-	public void test() throws Exception
-	{
-		Random rand = new Random();
-		long st, et, r;
-		
-		for (int i=0; i<100; i++) rand.nextLong();
-		r = rand.nextLong();
-		
-		st = System.currentTimeMillis();
-		for (int i=0; i<10000000; i++) r = nextRandom(r);
-		et = System.currentTimeMillis();
-		System.out.println(et-st);
-	}
-	
-	long nextRandom(long prev)
-	{
-		return prev * 25214903917L + 11;
-	}
+	int EOL =  0;
+	int EOF = -1;
+	int OOV = -2;
 }
