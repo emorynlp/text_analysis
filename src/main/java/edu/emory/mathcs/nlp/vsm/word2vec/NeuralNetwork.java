@@ -25,7 +25,7 @@ import edu.emory.mathcs.nlp.common.MathUtils;
 public class NeuralNetwork
 {
 	private final int layer_size;
-	private float[] syn0, syn1;
+	float[] syn0, syn1;
 	private Vocabulary vocab;
 	
 	public NeuralNetwork(Vocabulary vocab, int layerSize)
@@ -40,7 +40,7 @@ public class NeuralNetwork
 		
 		for (int i=0; i<size; i++)
 		{
-			random = nextRandom(random);
+			random = Word2Vec.nextRandom(random);
 			syn0[i] = (float)((MathUtils.divide(random & 0xFFFF, 65536) - 0.5) / layerSize);
 		}
 	}
@@ -63,10 +63,5 @@ public class NeuralNetwork
 			
 			out.println();
 	    }
-	}
-	
-	static public long nextRandom(long prev)
-	{
-		return prev * 25214903917L + 11;
 	}
 }

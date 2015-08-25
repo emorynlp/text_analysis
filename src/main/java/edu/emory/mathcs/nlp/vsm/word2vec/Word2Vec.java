@@ -20,18 +20,21 @@ import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 import org.kohsuke.args4j.Option;
 
 import edu.emory.mathcs.nlp.common.BinUtils;
 import edu.emory.mathcs.nlp.common.FileUtils;
 import edu.emory.mathcs.nlp.common.MathUtils;
+import edu.emory.mathcs.nlp.common.collection.atomic.AtomicDouble;
+import edu.emory.mathcs.nlp.common.constant.StringConst;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
@@ -50,18 +53,18 @@ public class Word2Vec
     int vector_size = 100;
 	@Option(name="-window", usage="max-window of contextual words (default: 5).", required=false, metaVar="<int>")
     int max_skip_window = 5;
-	@Option(name="-sample", usage="threshold for occurrence of words (default: 1e-3). Those that appear with higher frequency in the training data will be randomly down-sampled.", required=false, metaVar="<float>")
-    float sample_threshold = 1e-3f;
+	@Option(name="-sample", usage="threshold for occurrence of words (default: 1e-3). Those that appear with higher frequency in the training data will be randomly down-sampled.", required=false, metaVar="<double>")
+    double sample_threshold = 1e-3;
 	@Option(name="-negative", usage="number of negative examples (default: 5; common values are 3 - 10). If negative = 0, use Hierarchical Softmax instead of Negative Sampling.", required=false, metaVar="<int>")
     int num_negative = 5;
 	@Option(name="-threads", usage="number of threads (default: 12).", required=false, metaVar="<int>")
     int num_threads = 12;
 	@Option(name="-iter", usage="number of training iterations (default: 5).", required=false, metaVar="<int>")
-    int train_iter = 5;
+    int train_iteration = 5;
 	@Option(name="-min-count", usage="min-count of words (default: 5). This will discard words that appear less than <int> times.", required=false, metaVar="<int>")
     int min_count = 5;
-	@Option(name="-alpha", usage="starting learning rate (default: 0.025 for skip-gram; use 0.05 for CBOW).", required=false, metaVar="<float>")
-	float alpha = 0.025f;
+	@Option(name="-alpha", usage="initial learning rate (default: 0.025 for skip-gram; use 0.05 for CBOW).", required=false, metaVar="<double>")
+	double alpha_init = 0.025;
 	@Option(name="-binary", usage="If set, save the resulting vectors in binary moded.", required=false, metaVar="<boolean>")
 	boolean binary = false;
 	@Option(name="-cbow", usage="If set, use the continuous bag-of-words model instead of the skip-gram model.", required=false, metaVar="<boolean>")
@@ -70,20 +73,21 @@ public class Word2Vec
 	final int VOCAB_REDUCE_SIZE = 21000000;
 	final int MAX_SENTENCE_LENGTH = 1000;
 	final int MAX_CODE_LENGTH = 40;
-	final float ALPHA_INIT;
 	
-	volatile long word_count;	// total word count from all threads
-	volatile NeuralNetwork network;
+	volatile long word_count_global;	// word count dynamically updated by all threads
+	volatile double alpha_global;		// learning rate dynamically updated by all threads
+	volatile float[] syn0, syn1;
+	
+	
 	Vocabulary vocab;
 	NegativeSampling negative;
-	SigmoidTable sigmoid;
-	long train_words;
+	Sigmoid sigmoid;
+	long word_count_train;
 	
 	public Word2Vec(String[] args)
 	{
 		BinUtils.initArgs(args, this);
-		sigmoid = new SigmoidTable();
-		ALPHA_INIT = alpha;
+		sigmoid = new Sigmoid();
 
 		try
 		{
@@ -96,14 +100,13 @@ public class Word2Vec
 	
 	public void train(List<String> trainFiles) throws Exception
 	{
-		vocab = new Vocabulary();
-		
 		BinUtils.LOG.info("Reading vocabulary:");
+		vocab = new Vocabulary();
 		learnVocabulary(trainFiles);
-		BinUtils.LOG.info(String.format("\n- types = %d, words = %d\n", vocab.size(), train_words));
+		BinUtils.LOG.info(String.format("\n- types = %d, words = %d\n", vocab.size(), word_count_train));
 		
 		BinUtils.LOG.info("Initializing neural network.\n");
-		network = new NeuralNetwork(vocab, vector_size);
+		initNeuralNetwork();
 		
 		if (num_negative > 0)
 		{
@@ -113,7 +116,10 @@ public class Word2Vec
 
 		BinUtils.LOG.info("Training word vectors:");
 		ExecutorService executor = Executors.newFixedThreadPool(num_threads);
-		word_count = 0;
+		word_count_global = 0;
+		alpha_global = alpha_init;
+		
+		
 //		for (a = 0; a < num_threads; a++) pthread_create(&pt[a], NULL, TrainModelThread, (void *)a);
 //		for (a = 0; a < num_threads; a++) pthread_join(pt[a], NULL);
 
@@ -121,87 +127,93 @@ public class Word2Vec
 		saveModel();
 	}
 	
+	class TrainTask implements Runnable
+	{
+		@Override
+		public void run()
+		{
+			
+		}
+		
+	}
+	
 	void TrainModelThread(String trainFile, int id) throws IOException
 	{
-		long cw;
-		long wc = 0, lwc = 0;
-		int[] sen = new int[MAX_SENTENCE_LENGTH];
-		long label, local_iter = train_iter;
+		int local_iter = train_iteration;
 		long random = (long)id;
-		float f, g, ran;
+		
+		int sentence_length = 0, word_position = 0, word, window, cw, i, k, c;
+		long word_count = 0;
+		double d, e;
+		
+		
+		
+		int[] sen = new int[MAX_SENTENCE_LENGTH];
+		long label;
 		float[] neu1  = new float[vector_size];
 		float[] neu1e = new float[vector_size];
 		
-		InputStream fi = new BufferedInputStream(new FileInputStream(trainFile));
-		int word = Const.EOF, target, l1, l2, last_word, sentence_length = 0, sentence_position = 0, c, a, b, d;
+		WordReader in = new WordReader(new BufferedInputStream(new FileInputStream(trainFile)));
+		int target, l1, l2, a, b;
 		
 		while (true)
 		{
-			// TODO: weighting later instances less; could be a issue when samples are not randomly drawn.
-			if (wc - lwc > 10000)
-			{
-				word_count += wc - lwc;
-				lwc = wc;
-				alpha = (float)(ALPHA_INIT * (1 - MathUtils.divide(word_count, train_iter * train_words + 1)));
-				if (alpha < ALPHA_INIT * 0.0001) alpha = ALPHA_INIT * 0.0001f;
-		    }
-			
+			// read next sentence
 			if (sentence_length == 0)
 			{
 				while (true)
 				{
-					word = ReadWordIndex(fi);
-					if (word == EOF) break;		// end-of-file
-					if (word == OOV) continue;	// out-of-vocab
-					wc++;
-					if (word == EOL) break;		// end-of-line
+					word = readWordIndex(in);
+					if (word == Vocabulary.OOV) continue;
+					if (word == Vocabulary.EOL || word == Vocabulary.EOF) break;
+					word_count++;
 					
-					// sub-sampling randomly discards frequent words while keeping the ranking same
+					// sub-sampling: randomly discards frequent words
 					if (sample_threshold > 0)
 					{
-						ran = (Math.sqrt((float)vocab.get(word).count / (sample_threshold * train_words)) + 1) * (sample_threshold * train_words) / vocab.get(word).count;
-						random = nextRandom(random);
-						if (ran < MathUtils.divide(random & 0xFFFF, 65536)) continue;
+						d = sample_threshold * word_count_train;
+						e = (Math.sqrt(MathUtils.divide(vocab.get(word).count, d)) + 1) * (d / vocab.get(word).count);
+						if (e < MathUtils.divide(nextRandom(random) & 0xFFFF, 65536)) continue;
 					}
 					
 					sen[sentence_length++] = word;
 					if (sentence_length >= MAX_SENTENCE_LENGTH) break;
 				}
 				
-				sentence_position = 0;
+				word_position = 0;
 			}
 			
-			if (word == EOF)
+			// no more context
+			if (sentence_length == 0)
 			{
-				word_count += wc - lwc;
+				word_count_global += word_count;
+				alpha_global = alpha_init * (1 - MathUtils.divide(word_count_global, train_iteration * word_count_train + 1));
+				if (alpha_global < alpha_init * 0.0001) alpha_global = alpha_init * 0.0001;
 				if (--local_iter == 0) break;
-				wc = 0;
-				lwc = 0;
+				
+				word_count = 0;
 				sentence_length = 0;
-				fi.close();
-				fi = new BufferedInputStream(new FileInputStream(trainFile));
+				in.close(); in.init(new BufferedInputStream(new FileInputStream(trainFile)));
 				continue;
 			}
 		
-			word = sen[sentence_position];
-			if (word == -1) continue;
-			random = nextRandom(random);
-			b = (int)(random % max_skip_window);
+			Arrays.fill(neu1 , 0);
+			Arrays.fill(neu1e, 0);
+			window = (int)(nextRandom(random) % max_skip_window);
+			word   = sen[word_position];
 			
-			if (cbow)	// continuous bag-of-words architecture
+			if (cbow)	// continuous bag-of-words
 			{
 				// in -> hidden
 				cw = 0;
 				
-				for (a=b; a < max_skip_window*2+1-b; a++)
+				for (i=-window; i<=window; i++)
 				{
-					if (a == max_skip_window) continue;
-					c = sentence_position - max_skip_window + a;
+					if (i == 0) continue;
+					c = word_position + i;
 					if (sentence_length <= c || c < 0) continue;
-					last_word = sen[c];
-					if (last_word == -1) continue;
-					d = last_word * vector_size;
-					for (c=0; c<vector_size; c++) neu1[c] += syn0[c + d];
+					k = sen[c] * vector_size;
+					for (c=0; c<vector_size; c++) neu1[c] += syn0[c + k];
 					cw++;
 				}
 				
@@ -209,30 +221,12 @@ public class Word2Vec
 				{
 					for (c=0; c<vector_size; c++) neu1[c] /= cw;
 					
-					if (hs) for (d=0; d < vocab.get(word).codeLength(); d++)
+					if (num_negative > 0) for (k = 0; k < num_negative + 1; k++)	// negative sampling
 					{
-						f = 0;
-						l2 = vocab.get(word).point[d] * vector_size;
-						// Propagate hidden -> output
-						for (c = 0; c < vector_size; c++) f += neu1[c] * syn1[c + l2];
-						if (f <= -MAX_EXP) continue;
-						else if (f >= MAX_EXP) continue;
-						else f = sigmoid[(int)((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))];
-						// 'g' is the gradient multiplied by the learning rate
-						g = (1 - vocab.get(word).code[d] - f) * alpha;
-						// Propagate errors output -> hidden
-						for (c = 0; c < vector_size; c++) neu1e[c] += g * syn1[c + l2];
-						// Learn weights hidden -> output
-						for (c = 0; c < vector_size; c++) syn1[c + l2] += g * neu1[c];
-					}
-					
-					// NEGATIVE SAMPLING
-					if (num_negative > 0) for (d = 0; d < num_negative + 1; d++)
-					{
-						if (d == 0)
+						if (k == 0)
 						{
 							target = word;
-							label = 1;
+							label  = 1;
 						}
 						else
 						{
@@ -244,61 +238,88 @@ public class Word2Vec
 						}
 						
 						l2 = target * vector_size;
-						f = 0;
-						for (c = 0; c < vector_size; c++) f += neu1[c] * syn1neg[c + l2];
-						if (f > MAX_EXP) g = (label - 1) * alpha;
-						else if (f < -MAX_EXP) g = (label - 0) * alpha;
-						else g = (label - sigmoid[(int)((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]) * alpha;
-						for (c = 0; c < vector_size; c++) neu1e[c] += g * syn1neg[c + l2];
-						for (c = 0; c < vector_size; c++) syn1neg[c + l2] += g * neu1[c];
+						d = 0;
+						for (c = 0; c < vector_size; c++) d += neu1[c] * syn1[c + l2];
+						if (d > MAX_EXP) e = (label - 1) * alpha_global;
+						else if (d < -MAX_EXP) e = (label - 0) * alpha_global;
+						else e = (label - sigmoid[(int)((d + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]) * alpha_global;
+						for (c = 0; c < vector_size; c++) neu1e[c] += e * syn1[c + l2];
+						for (c = 0; c < vector_size; c++) syn1[c + l2] += e * neu1[c];
 					}
+					
+					
+					
+					
+					
+					
+					
+					
+					else for (k=0; k < vocab.get(word).codeLength(); k++)		// hierarchical softmax
+					{
+						d = 0;
+						l2 = vocab.get(word).point[k] * vector_size;
+						// Propagate hidden -> output
+						for (c = 0; c < vector_size; c++) d += neu1[c] * syn1[c + l2];
+						if (d <= -MAX_EXP) continue;
+						else if (d >= MAX_EXP) continue;
+						else d = sigmoid[(int)((d + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))];
+						// 'g' is the gradient multiplied by the learning rate
+						e = (1 - vocab.get(word).code[k] - d) * alpha_global;
+						// Propagate errors output -> hidden
+						for (c = 0; c < vector_size; c++) neu1e[c] += e * syn1[c + l2];
+						// Learn weights hidden -> output
+						for (c = 0; c < vector_size; c++) syn1[c + l2] += e * neu1[c];
+					}
+						
+					// NEGATIVE SAMPLING
+					
 					
 					// hidden -> in
 					for (a = b; a < max_skip_window * 2 + 1 - b; a++) if (a != max_skip_window)
 					{
-						c = sentence_position - max_skip_window + a;
+						c = word_position - max_skip_window + a;
 						if (c < 0) continue;
 						if (c >= sentence_length) continue;
-						last_word = sen[c];
-						if (last_word == -1) continue;
-						for (c = 0; c < vector_size; c++) syn0[c + last_word * vector_size] += neu1e[c];
+						context = sen[c];
+						if (context == -1) continue;
+						for (c = 0; c < vector_size; c++) syn0[c + context * vector_size] += neu1e[c];
 					}
 				}
 			}
-			else	//train skip-gram
+			else	// continuous skip-gram
 			{
 				for (a = b; a < max_skip_window * 2 + 1 - b; a++) if (a != max_skip_window)
 				{
-					c = sentence_position - max_skip_window + a;
+					c = word_position - max_skip_window + a;
 					if (c < 0) continue;
 					if (c >= sentence_length) continue;
-					last_word = sen[c];
-					if (last_word == -1) continue;
-					l1 = last_word * vector_size;
+					context = sen[c];
+					if (context == -1) continue;
+					l1 = context * vector_size;
 					Arrays.fill(neu1e, 0);
 					
 					// HIERARCHICAL SOFTMAX
-					if (hs) for (d = 0; d < vocab.get(word).codeLength(); d++)
+					if (hs) for (k = 0; k < vocab.get(word).codeLength(); k++)
 					{
-						f = 0;
-						l2 = vocab.get(word).point[d] * vector_size;
+						d = 0;
+						l2 = vocab.get(word).point[k] * vector_size;
 						// Propagate hidden -> output
-						for (c = 0; c < vector_size; c++) f += syn0[c + l1] * syn1[c + l2];
-						if (f <= -MAX_EXP) continue;
-						else if (f >= MAX_EXP) continue;
-						else f = sigmoid[(int)((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))];
+						for (c = 0; c < vector_size; c++) d += syn0[c + l1] * syn1[c + l2];
+						if (d <= -MAX_EXP) continue;
+						else if (d >= MAX_EXP) continue;
+						else d = sigmoid[(int)((d + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))];
 						// 'g' is the gradient multiplied by the learning rate
-						g = (1 - vocab.get(word).code[d] - f) * alpha;
+						e = (1 - vocab.get(word).code[k] - d) * alpha_global;
 						// Propagate errors output -> hidden
-						for (c = 0; c < vector_size; c++) neu1e[c] += g * syn1[c + l2];
+						for (c = 0; c < vector_size; c++) neu1e[c] += e * syn1[c + l2];
 						// Learn weights hidden -> output
-						for (c = 0; c < vector_size; c++) syn1[c + l2] += g * syn0[c + l1];
+						for (c = 0; c < vector_size; c++) syn1[c + l2] += e * syn0[c + l1];
 					}
 					
 					// NEGATIVE SAMPLING
-					if (num_negative > 0) for (d = 0; d < num_negative + 1; d++)
+					if (num_negative > 0) for (k = 0; k < num_negative + 1; k++)
 					{
-						if (d == 0)
+						if (k == 0)
 						{
 							target = word;
 							label = 1;
@@ -313,13 +334,13 @@ public class Word2Vec
 						}
 						
 						l2 = target * vector_size;
-						f = 0;
-						for (c = 0; c < vector_size; c++) f += syn0[c + l1] * syn1neg[c + l2];
-						if (f > MAX_EXP) g = (label - 1) * alpha;
-						else if (f < -MAX_EXP) g = (label - 0) * alpha;
-						else g = (label - sigmoid[(int)((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]) * alpha;
-						for (c = 0; c < vector_size; c++) neu1e[c] += g * syn1neg[c + l2];
-						for (c = 0; c < vector_size; c++) syn1neg[c + l2] += g * syn0[c + l1];
+						d = 0;
+						for (c = 0; c < vector_size; c++) d += syn0[c + l1] * syn1neg[c + l2];
+						if (d > MAX_EXP) e = (label - 1) * alpha_global;
+						else if (d < -MAX_EXP) e = (label - 0) * alpha_global;
+						else e = (label - sigmoid[(int)((d + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]) * alpha_global;
+						for (c = 0; c < vector_size; c++) neu1e[c] += e * syn1neg[c + l2];
+						for (c = 0; c < vector_size; c++) syn1neg[c + l2] += e * syn0[c + l1];
 					}
 					
 					// Learn weights input -> hidden
@@ -327,40 +348,45 @@ public class Word2Vec
 				}
 			}
 			
-			sentence_position++;
-			
-			if (sentence_position >= sentence_length)
+			if (++word_position >= sentence_length)
 			{
 				sentence_length = 0;
 				continue;
 			}
 		}
 		
-		fi.close();
+		in.close();
+	}
+	
+	void readSentence(String[] sen)
+	{
+		
 	}
 	
 //	=================================== Helper Methods ===================================
 	
-	void learnVocabulary(List<String> filenames) throws IOException
+	void initNeuralNetwork()
 	{
-		InputStream in;
+		int size = vocab.size() * vector_size;
+		long random = 1;
 		
-		for (String filename : filenames)
+		syn0 = new float[size];
+		syn1 = new float[size];
+		
+		for (int i=0; i<size; i++)
 		{
-			in = new BufferedInputStream(new FileInputStream(filename));
-			vocab.addAll(in, VOCAB_REDUCE_SIZE);
-			in.close(); BinUtils.LOG.debug(".");
+			random = Word2Vec.nextRandom(random);
+			syn0[i] = (float)((MathUtils.divide(random & 0xFFFF, 65536) - 0.5) / vector_size);
 		}
-		
-		train_words = vocab.sort(min_count);
-		vocab.generateHuffmanCodes(MAX_CODE_LENGTH);
 	}
 	
-	/** @return the index of the next word in the reader ; if the word is not in the vocabulary, {@link Const#OOV}; if no word, {@link Const#EOF}. */
-	int ReadWordIndex(InputStream fin) throws IOException
+	
+	
+	/** @return the index of the next word in the reader ; if the word is not in the vocabulary, {@link Vocabulary#OOV}; if no word, {@link Vocabulary#EOF}. */
+	int readWordIndex(WordReader in) throws IOException
 	{
-		String word = vocab.read(fin);
-		return (word != null) ? vocab.indexOf(word) : Const.EOF;
+		String word = in.read();
+		return (word == null) ? Vocabulary.EOF : StringConst.NEW_LINE.equals(word) ? Vocabulary.EOF : vocab.indexOf(word);
 	}
 	
 	void saveModel() throws IOException
@@ -370,18 +396,23 @@ public class Word2Vec
 		out.close();
 	}
 	
+	static long nextRandom(long prev)
+	{
+		return prev * 25214903917L + 11;
+	}
+	
 //	=================================== Neural Network ===================================
-	
-	
-	
+
 	class NegativeSampling
 	{
 		final int TABLE_SIZE = (int)1e8;
 		final double DIST_POWER = 0.75;
 		int[] dist_table;
+		int num_samples;
 		
-		public NegativeSampling()
+		public NegativeSampling(int numSamples)
 		{
+			num_samples = numSamples;
 			initDistributionTable();
 		}
 		
@@ -408,6 +439,58 @@ public class Word2Vec
 		double nextDistribution(int index, double Z)
 		{
 			return Math.pow(vocab.get(index).count, DIST_POWER) / Z;
+		}
+		
+		public void sample(int word)
+		{
+			int target;
+			
+			for (int k=0; k<=num_negative; k++)
+			{
+				if (k == 0)
+				{
+					target = word;
+					label = 1;
+				}
+				else
+				{
+					random = nextRandom(random);
+					target = unigram_table[(int)((long)(random >> 16) % table_size)];
+					if (target == 0) target = (int)(random % (vocab.size() - 1)) + 1;
+					if (target == word) continue;
+					label = 0;
+				}
+				
+				
+			}
+		}
+		
+		void sample(int target, int label, boolean cbow, float[] neu1)
+		{
+			int i, l2 = target * vector_size;
+			double d = 0;
+			
+			for (i=0; i<vector_size; i++)
+				d += cbow ? neu1[i] * syn1[i+l2] : syn0[i + l1] * syn1[i+l2];
+			
+			
+			
+			if (d > MAX_EXP) e = (label - 1) * alpha_global;
+			else if (d < -MAX_EXP) e = (label - 0) * alpha_global;
+			else e = (label - sigmoid[(int)((d + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]) * alpha_global;
+			for (i = 0; i < vector_size; i++) neu1e[i] += e * syn1neg[i + l2];
+			for (i = 0; i < vector_size; i++) syn1neg[i + l2] += e * neu1[i];
+			
+			
+			
+			
+			
+			for (i = 0; i < vector_size; i++) d += syn0[i + l1] * syn1neg[i + l2];
+			if (d > MAX_EXP) e = (label - 1) * alpha_global;
+			else if (d < -MAX_EXP) e = (label - 0) * alpha_global;
+			else e = (label - sigmoid[(int)((d + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]) * alpha_global;
+			for (i = 0; i < vector_size; i++) neu1e[i] += e * syn1neg[i + l2];
+			for (i = 0; i < vector_size; i++) syn1neg[i + l2] += e * syn0[i + l1];
 		}
 	}
 }

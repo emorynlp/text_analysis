@@ -18,16 +18,14 @@ package edu.emory.mathcs.nlp.vsm.word2vec;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.magicwerk.brownies.collections.GapList;
 
-import edu.emory.mathcs.nlp.common.constant.StringConst;
+import edu.emory.mathcs.nlp.common.Joiner;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
@@ -35,6 +33,11 @@ import edu.emory.mathcs.nlp.common.constant.StringConst;
 public class Vocabulary implements Serializable
 {
 	private static final long serialVersionUID = 5406441768049538210L;
+	public static final int MAX_CODE_LENGTH = 40;
+	public static final int OOV = -1;	// out-of-vocabulary
+	public static final int EOL = -2;	// end-of-line
+	public static final int EOF = -3;	// end-of-file
+	
 	private Object2IntMap<String> index_map;
 	private List<Word> word_list;
 	private int min_reduce;
@@ -44,7 +47,6 @@ public class Vocabulary implements Serializable
 		index_map  = new Object2IntOpenHashMap<>();
 		word_list  = new GapList<>();
 		min_reduce = 1;
-		add(StringConst.NEW_LINE).count = 0;
 	}
 	
 	/**
@@ -70,65 +72,15 @@ public class Vocabulary implements Serializable
 		return w;
 	}
 	
-	/**
-	 * Adds all words in the input stream to the vocabulary.
-	 * @param reduceSize calls {@link #reduce()} when the number of word types reach this. 
-	 */
-	public void addAll(InputStream in, int reduceSize) throws IOException
-	{
-		String next;
-		
-		while ((next = read(in)) != null)
-		{
-			add(next);
-			if (size() > reduceSize) reduce();
-		}
-
-		in.close();
-	}
-	
-	/**
-	 * @return the next word in the reader if exists; otherwise, null.
-	 * Uses ' ', '\t', and '\n' as delimiters; '\n' is returned as {@link StringConst#NEW_LINE}.
-	 */
-	public String read(InputStream fin) throws IOException
-	{
-		StringBuilder build = new StringBuilder();
-		int ch;
-		
-		while ((ch = fin.read()) >= 0)
-		{
-			if (ch == 13) continue;	// carriage return
-			
-			if (ch == ' ' || ch == '\t' || ch == '\n')
-			{
-				if (build.length() > 0)
-				{
-					if (ch == '\n') fin.reset();
-					break;
-				}
-				else if (ch == '\n')
-					return StringConst.NEW_LINE;
-				else
-					continue;
-			}
-			
-			build.append((char)ch);
-			fin.mark(1);
-		}
-		
-		return build.length() > 0 ? build.toString() : null;
-	}
-	
 	public Word get(int index)
 	{
 		return word_list.get(index);
 	}
 	
-	/** @return index of the word if exists; otherwise, {@link Const#OOV}. */
+	/** @return index of the word if exists; otherwise, {@link #OOV}. */
 	public int indexOf(String word)
 	{
-		return index_map.getOrDefault(word, Const.OOV);
+		return index_map.getOrDefault(word, OOV);
 	}
 	
 	public int size()
@@ -142,62 +94,51 @@ public class Vocabulary implements Serializable
 	}
 	
 	/**
-	 * Sorts {@link #word_list} by count in descending order; except, keeps {@link StringConst#NEW_LINE} as the first element.  
+	 * Sorts {@link #word_list} by count in descending order.  
 	 * @param minCount words whose counts are less than the minimum count will be discarded.
 	 * @return total number of word counts after sorting.
 	 */
 	public long sort(int minCount)
 	{
-		GapList<Word> list = new GapList<>(size());
-		Word w, eol = get(Const.EOL);
-		long count = eol.count;
+		return reduce(minCount, true);
+	}
+	
+	/**
+	 * Reduces the vocabulary by removing infrequent words.
+	 * @return total number of word counts after reducing.
+	 */
+	public long reduce()
+	{
+		return reduce(++min_reduce, false);
+	}
+	
+	long reduce(int minCount, boolean sort)
+	{
+		ArrayList<Word> list = new ArrayList<>(size());
+		long count = 0;
 		
-		for (int a=1; a<size(); a++)
+		for (Word w : word_list)
 		{
-			w = get(a);
-			
-			if (w.count < minCount)
-				index_map.remove(w.word);
-			else
+			if (w.count >= minCount)
 			{
 				count += w.count;
 				list.add(w);
 			}
 		}
 		
-		Collections.sort(list, Collections.reverseOrder());
-		list.addFirst(eol);
-		list.trimToSize();
-		word_list = list;
+		if (sort) Collections.sort(list, Collections.reverseOrder());
+		list.trimToSize(); word_list = list;
+		
+		index_map = new Object2IntOpenHashMap<>(size());
+		for (int i=0; i<size(); i++) index_map.put(get(i).word, i);
 		return count;
-	}
-	
-	/** Reduces the vocabulary by removing infrequent words. */
-	public void reduce()
-	{
-		Iterator<Word> it = word_list.iterator();
-		Word v;
-		
-		while (it.hasNext())
-		{
-			v = it.next();
-			
-			if (v.count <= min_reduce)
-			{
-				it.remove();
-				index_map.remove(v.word);
-			}
-		}
-		
-		min_reduce++;
 	}
 	
 	/**
 	 * Assigns the Huffman code to each word using its count.
 	 * PRE: {@link #word_list} is already sorted by count in descending order.
-	 * @param maxDepth maximum depth of the binary Huffman tree.
 	 */
-	public void generateHuffmanCodes(int maxDepth)
+	public void generateHuffmanCodes()
 	{
 		int i, j, len, pos1, pos2, min1, min2;
 		final int treeSize  = size() * 2 - 1;
@@ -222,8 +163,8 @@ public class Vocabulary implements Serializable
 			binary[min2] = 1;
 		}
 		
-		byte[] code  = new byte[maxDepth];
-		int [] point = new int [maxDepth];
+		byte[] code  = new byte[MAX_CODE_LENGTH];
+		int [] point = new int [MAX_CODE_LENGTH];
 		Word w;
 		
 		// assign binary code to each word
@@ -252,5 +193,11 @@ public class Vocabulary implements Serializable
 				if (j > 0) w.point[len-j] = point[j] - size();
 			}
 		}
+	}
+	
+	@Override
+	public String toString()
+	{
+		return Joiner.join(word_list, " ");
 	}
 }

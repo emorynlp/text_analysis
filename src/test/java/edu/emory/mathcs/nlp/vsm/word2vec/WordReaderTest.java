@@ -15,26 +15,30 @@
  */
 package edu.emory.mathcs.nlp.vsm.word2vec;
 
-import edu.emory.mathcs.nlp.common.MathUtils;
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
+
+import org.junit.Test;
+
+import edu.emory.mathcs.nlp.common.FileUtils;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
  */
-public class SigmoidTable
+public class WordReaderTest
 {
-	public final int TABLE_SIZE = 1000;
-	public final int MAX_EXP    = 6;
-
-	private float[] exp_table;
-	
-	public SigmoidTable()
+	@Test
+	public void test() throws Exception
 	{
-		exp_table = new float[TABLE_SIZE];
+		List<String> filenames = FileUtils.getFileList("src/test/resources/edu/emory/mathcs/nlp/vsm/word2vec/word2vec.txt", "*", false);
+		Vocabulary vocab = new Vocabulary();
+		WordReader in = new WordReader();
 		
-		for (int i=0; i<TABLE_SIZE; i++)
-		{
-			exp_table[i] = (float)Math.exp((MathUtils.divide(i, TABLE_SIZE) * 2 - 1) * MAX_EXP);
-			exp_table[i] /=  (exp_table[i] + 1);
-		}
+		in.learn(filenames, vocab, 0, 10);
+		assertEquals("D:4 E:4 F:4 C:3 G:3 B:2 H:2 A:1 I:1", vocab.toString());
+		
+		in.learn(filenames, vocab, 0, 10);
+		assertEquals("D:8 E:8 F:8 C:6 G:6 B:4 H:4 A:2 I:2", vocab.toString());
 	}
 }

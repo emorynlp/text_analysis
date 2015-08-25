@@ -20,7 +20,4 @@ package edu.emory.mathcs.nlp.vsm.word2vec;
  */
 public interface Const
 {
-	int EOL =  0;
-	int EOF = -1;
-	int OOV = -2;
 }

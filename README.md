@@ -8,3 +8,5 @@ Vector space models.
 * Preserves long strings.
 * Words are deliminated by `' '` and `'\n'`. 
 * Multiple training files 
+
+* Preprocess data where each word is delimited by ' ' and sentence is delimited by '\n'.

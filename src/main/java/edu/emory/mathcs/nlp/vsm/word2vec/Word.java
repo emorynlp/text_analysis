@@ -61,4 +61,10 @@ public class Word implements Serializable, Comparable<Word>
 	{
 		return MathUtils.signum(count - o.count);
 	}
+
+	@Override
+	public String toString()
+	{
+		return word+":"+count;
+	}
 }
