@@ -153,7 +153,7 @@ public class Word2Vec
 			Random  rand  = new XORShiftRandom(filename.hashCode());
 			float[] neu1  = cbow ? new float[vector_size] : null;
 			float[] neu1e = new float[vector_size];
-			int     iter  = train_iteration;
+			int     iter  = 0;
 			
 			int index, window;
 			int[] words;
@@ -164,7 +164,8 @@ public class Word2Vec
 				
 				if (words == null)
 				{
-					if (--iter == 0) break;
+					BinUtils.LOG.info(String.format("%s: %d\n", FileUtils.getBaseName(filename), iter));
+					if (++iter == train_iteration) break;
 					adjustLearningRate();
 					reader.close(); reader.open(IOUtils.createFileInputStream(filename));
 					continue;
