@@ -303,6 +303,6 @@ public class Word2Vec
 			}
 			
 			out.println();
-	    }
+		}
 	}
 }
