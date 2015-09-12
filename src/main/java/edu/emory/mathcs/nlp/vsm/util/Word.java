@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.emory.mathcs.nlp.vsm.word2vec;
+package edu.emory.mathcs.nlp.vsm.util;
 
 import java.io.Serializable;
 
-import edu.emory.mathcs.nlp.common.MathUtils;
+import edu.emory.mathcs.nlp.common.util.MathUtils;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
@@ -61,7 +61,7 @@ public class Word implements Serializable, Comparable<Word>
 	{
 		return MathUtils.signum(count - o.count);
 	}
-
+	
 	@Override
 	public String toString()
 	{

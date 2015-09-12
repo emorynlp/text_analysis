@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.emory.mathcs.nlp.vsm.word2vec;
+package edu.emory.mathcs.nlp.vsm.reader;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -21,72 +21,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import edu.emory.mathcs.nlp.common.constant.StringConst;
+import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
  */
-public class WordReader
+public abstract class Reader<N>
 {
-	private InputStream in;
-	private boolean new_line;
-	
-	public WordReader()
-	{
-		init(null);
-	}
-	
-	public WordReader(InputStream in)
-	{
-		init(in);
-	}
-	
-	public void init(InputStream in)
-	{
-		this.in  = in;
-		new_line = false;
-	}
-	
-	public void close() throws IOException
-	{
-		if (in != null) in.close();
-	}
-
-	/**
-	 * @return the next word in the reader if exists (including {@link StringConst#NEW_LINE}); otherwise, null.
-	 * Words are delimited by ' ' and sentences are delimited by '\n'.
-	 */
-	public String read() throws IOException
-	{
-		if (new_line)
-		{
-			new_line = false;
-			return StringConst.NEW_LINE;
-		}
-		
-		StringBuilder build = new StringBuilder();
-		int ch;
-		
-		while ((ch = in.read()) >= 0)
-		{
-			if (ch == 13) continue;	// carriage return
-			
-			if (ch == ' ' || ch == '\n')
-			{
-				if (build.length() > 0)
-				{
-					new_line = (ch == '\n');
-					break;
-				}
-				else
-					continue;
-			}
-			
-			build.append((char)ch);
-		}
-		
-		return build.length() > 0 ? build.toString() : null;
-	}
+	public abstract void add(Vocabulary vocab, N[] nodes);
+	public abstract void open(InputStream in);
+	public abstract void close();
+	public abstract N[]  next();
 	
 	/**
 	 * All words in the training files are first added then sorted by their counts in descending order.
@@ -96,24 +41,17 @@ public class WordReader
 	 */
 	public long learn(List<String> filenames, Vocabulary vocab, int minCount, int reduceSize) throws IOException
 	{
-		String next;
+		N[] nodes;
 		
 		for (String filename : filenames)
 		{
-			init(new BufferedInputStream(new FileInputStream(filename)));
-			
-			while ((next = read()) != null)
-			{
-				if (!StringConst.NEW_LINE.equals(next))
-					vocab.add(next);
-			}
-
-			close();
+			open(new BufferedInputStream(new FileInputStream(filename)));
+			while ((nodes = next()) != null) add(vocab, nodes);
 			if (vocab.size() >= reduceSize) vocab.reduce();
+			close();
 		}
 		
 		long count = vocab.sort(minCount);
-		vocab.generateHuffmanCodes();
 		return count;
 	}
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.emory.mathcs.nlp.vsm.word2vec;
+package edu.emory.mathcs.nlp.vsm.util;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -23,9 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.magicwerk.brownies.collections.GapList;
-
-import edu.emory.mathcs.nlp.common.Joiner;
+import edu.emory.mathcs.nlp.common.util.Joiner;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
@@ -34,9 +32,6 @@ public class Vocabulary implements Serializable
 {
 	private static final long serialVersionUID = 5406441768049538210L;
 	public static final int MAX_CODE_LENGTH = 40;
-	public static final int OOV = -1;	// out-of-vocabulary
-	public static final int EOL = -2;	// end-of-line
-	public static final int EOF = -3;	// end-of-file
 	
 	private Object2IntMap<String> index_map;
 	private List<Word> word_list;
@@ -45,7 +40,7 @@ public class Vocabulary implements Serializable
 	public Vocabulary()
 	{
 		index_map  = new Object2IntOpenHashMap<>();
-		word_list  = new GapList<>();
+		word_list  = new ArrayList<>();
 		min_reduce = 1;
 	}
 	
@@ -77,10 +72,10 @@ public class Vocabulary implements Serializable
 		return word_list.get(index);
 	}
 	
-	/** @return index of the word if exists; otherwise, {@link #OOV}. */
+	/** @return index of the word if exists; otherwise, -1. */
 	public int indexOf(String word)
 	{
-		return index_map.getOrDefault(word, OOV);
+		return index_map.getOrDefault(word, -1);
 	}
 	
 	public int size()

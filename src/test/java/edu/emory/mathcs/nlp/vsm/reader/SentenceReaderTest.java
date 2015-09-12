@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.emory.mathcs.nlp.vsm.word2vec;
+package edu.emory.mathcs.nlp.vsm.reader;
 
 import static org.junit.Assert.assertEquals;
 
@@ -21,24 +21,27 @@ import java.util.List;
 
 import org.junit.Test;
 
-import edu.emory.mathcs.nlp.common.FileUtils;
+import edu.emory.mathcs.nlp.common.util.DSUtils;
+import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
  */
-public class WordReaderTest
+public class SentenceReaderTest
 {
 	@Test
 	public void test() throws Exception
 	{
-		List<String> filenames = FileUtils.getFileList("src/test/resources/edu/emory/mathcs/nlp/vsm/word2vec/word2vec.txt", "*", false);
+		List<String> filenames = DSUtils.toList("src/test/resources/dat/word2vec.txt");
 		Vocabulary vocab = new Vocabulary();
-		WordReader in = new WordReader();
+		SentenceReader in = new SentenceReader();
 		
-		in.learn(filenames, vocab, 0, 10);
+		long count = in.learn(filenames, vocab, 0, 10);
 		assertEquals("D:4 E:4 F:4 C:3 G:3 B:2 H:2 A:1 I:1", vocab.toString());
+		assertEquals(24, count);
 		
-		in.learn(filenames, vocab, 0, 10);
+		count = in.learn(filenames, vocab, 0, 10);
 		assertEquals("D:8 E:8 F:8 C:6 G:6 B:4 H:4 A:2 I:2", vocab.toString());
+		assertEquals(48, count);
 	}
 }

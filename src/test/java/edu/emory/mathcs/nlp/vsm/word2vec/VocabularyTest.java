@@ -16,12 +16,15 @@
 package edu.emory.mathcs.nlp.vsm.word2vec;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
 import org.junit.Test;
 
 import edu.emory.mathcs.nlp.common.constant.StringConst;
+import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
+import edu.emory.mathcs.nlp.vsm.util.Word;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
@@ -57,7 +60,7 @@ public class VocabularyTest
 		assertEquals("B:2 A:1 C:2 D:1", vocab.toString());
 		
 		vocab.reduce();
-		assertEquals(Vocabulary.OOV, vocab.indexOf("A"));
+		assertTrue(vocab.indexOf("A") < 0);
 		assertEquals(0, vocab.indexOf("B"));
 		assertEquals(1, vocab.indexOf("C"));
 		assertEquals("B:2 C:2", vocab.toString());
