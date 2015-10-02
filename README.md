@@ -11,7 +11,16 @@ Vector space models.
 
 * Preprocess data where each word is delimited by ' ' and sentence is delimited by '\n'.
 
-#Word2Vec.java Usage  
+#Word2Vec.java Usage
+#####Enviornment Details  
+* Make sure not to run with the 32bit JDK, it limits heap size.
+* Other Java implementations of word2vec reccomend around 10g heap size. This implementation needs more than that (details to come).  
+To set these options from maven, use:  
+'''
+set MAVENOPTS=-Xmx<NUM_GIGS>g -d64
+'''
+where NUM_GIGS is the number of gigabytes you want to allocate for the heap.
+
 #####Command Line parameters, (each prepended with a tag '-'), most take additional arguments
 * train: "path to the training file or the directory containig the training files.  
 * output: "output file to save the resulting word vectors.  
