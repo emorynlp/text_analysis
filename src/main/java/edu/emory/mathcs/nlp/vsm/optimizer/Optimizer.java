@@ -25,8 +25,8 @@ import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
  */
 public abstract class Optimizer
 {
-	protected Vocabulary vocab;
 	protected Sigmoid sigmoid;
+	protected Vocabulary vocab;
 	protected int vector_size;
 	
 	public Optimizer(Vocabulary vocab, Sigmoid sigmoid, int vectorSize)
@@ -37,7 +37,7 @@ public abstract class Optimizer
 	}
 	
 	public abstract void learnBagOfWords(Random rand, int word, float[] syn1, float[] neu1, float[] neu1e, double alpha);
-	public abstract void learnSkipGram(Random rand, int word, float[] syn0, float[] syn1, float[] neu1e, double alpha, int l1);
+	public abstract void learnSkipGram  (Random rand, int word, float[] syn0, float[] syn1, float[] neu1e, double alpha, int l1);
 	
 	protected void learnBagOfWords(int label, int word, float[] syn1, float[] neu1, float[] neu1e, double alpha)
 	{

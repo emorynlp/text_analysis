@@ -15,15 +15,13 @@
  */
 package edu.emory.mathcs.nlp.vsm.optimizer;
 
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-
 import java.util.Arrays;
 import java.util.Random;
 
-import edu.emory.mathcs.nlp.common.util.MathUtils;
 import edu.emory.mathcs.nlp.common.util.Sigmoid;
 import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
@@ -32,7 +30,7 @@ public class NegativeSampling extends Optimizer
 {
 	final double DIST_POWER = 0.75;
 	int[] dist_table;
-	int sample_size;
+	int   sample_size;
 	
 	public NegativeSampling(Vocabulary vocab, Sigmoid sigmoid, int vectorSize, int sampleSize)
 	{
@@ -43,28 +41,25 @@ public class NegativeSampling extends Optimizer
 	
 	private void initDistributionTable()
 	{
-		double d, Z = vocab.list().stream().mapToDouble(v -> Math.pow(v.count, DIST_POWER)).sum();
-		dist_table = new int[vocab.size() * sample_size * 10];
-		int i = 0, j, size = dist_table.length;
+		double d, Z = vocab.list().stream().mapToDouble(v -> nextDistribution(v.count)).sum();
+		int bIdx, eIdx = 0, size = vocab.size() * sample_size * 10;
+		dist_table = new int[size];
 		
-		d = nextDistribution(i, Z);
-		
-		for (j=0; j<size && i<vocab.size(); j++)
+		for (int i=0; i<vocab.size(); i++)
 		{
-			dist_table[j] = i;
-			
-			if (MathUtils.divide(j, size) > d)
-				d += nextDistribution(++i, Z);
+			d = nextDistribution(vocab.get(i).count) / Z;
+			bIdx  = eIdx;
+			eIdx += (int)(d * size);
+			Arrays.fill(dist_table, bIdx, eIdx, i);
 		}
 		
-		if (j < size)
-			Arrays.fill(dist_table, j, size, vocab.size()-1);
+		if (eIdx < size) dist_table = Arrays.copyOf(dist_table, eIdx);
 	}
 	
 	/** Called by {@link #initDistributionTable()}. */
-	private double nextDistribution(int index, double Z)
+	private double nextDistribution(long count)
 	{
-		return Math.pow(vocab.get(index).count, DIST_POWER) / Z;
+		return Math.pow(count, DIST_POWER);
 	}
 	
 	@Override
@@ -92,7 +87,7 @@ public class NegativeSampling extends Optimizer
 
 		while (set.size() < sample_size)
 		{
-			target = dist_table[rand.nextInt() % dist_table.length];
+			target = dist_table[rand.nextInt(Integer.MAX_VALUE) % dist_table.length];
 			if (target != word) set.add(target);
 		}
 		

@@ -36,11 +36,11 @@ public class SentenceReaderTest
 		Vocabulary vocab = new Vocabulary();
 		SentenceReader in = new SentenceReader();
 		
-		long count = in.learn(filenames, vocab, 0, 10);
+		long count = in.learn(filenames, vocab, 0);
 		assertEquals("D:4 E:4 F:4 C:3 G:3 B:2 H:2 A:1 I:1", vocab.toString());
 		assertEquals(24, count);
 		
-		count = in.learn(filenames, vocab, 0, 10);
+		count = in.learn(filenames, vocab, 0);
 		assertEquals("D:8 E:8 F:8 C:6 G:6 B:4 H:4 A:2 I:2", vocab.toString());
 		assertEquals(48, count);
 	}
