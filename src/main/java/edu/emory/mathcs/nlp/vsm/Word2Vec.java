@@ -57,8 +57,8 @@ public class Word2Vec
 	int vector_size = 100;
 	@Option(name="-window", usage="max-window of contextual words (default: 5).", required=false, metaVar="<int>")
 	int max_skip_window = 5;
-	@Option(name="-sample", usage="threshold for occurrence of words (default: 1e-3). Those that appear with higher frequency in the training data will be randomly down-sampled.", required=false, metaVar="<double>")
-	double subsample_threshold = 1e-3;
+	@Option(name="-sample", usage="threshold for occurrence of words (default: 1e-3). Those that appear with higher frequency in the training data will be randomly down-sampled.", required=false, metaVar="<float>")
+	float subsample_threshold = 0.001f;
 	@Option(name="-negative", usage="number of negative examples (default: 5; common values are 3 - 10). If negative = 0, use Hierarchical Softmax instead of Negative Sampling.", required=false, metaVar="<int>")
 	int negative_size = 5;
 	@Option(name="-threads", usage="number of threads (default: 12).", required=false, metaVar="<int>")
@@ -67,24 +67,24 @@ public class Word2Vec
 	int train_iteration = 5;
 	@Option(name="-min-count", usage="min-count of words (default: 5). This will discard words that appear less than <int> times.", required=false, metaVar="<int>")
 	int min_count = 5;
-	@Option(name="-alpha", usage="initial learning rate (default: 0.025 for skip-gram; use 0.05 for CBOW).", required=false, metaVar="<double>")
-	double alpha_init = 0.025;
+	@Option(name="-alpha", usage="initial learning rate (default: 0.025 for skip-gram; use 0.05 for CBOW).", required=false, metaVar="<float>")
+	float alpha_init = 0.025f;
 	@Option(name="-binary", usage="If set, save the resulting vectors in binary moded.", required=false, metaVar="<boolean>")
 	boolean binary = false;
 	@Option(name="-cbow", usage="If set, use the continuous bag-of-words model instead of the skip-gram model.", required=false, metaVar="<boolean>")
 	boolean cbow = false;
 	
-	final double ALPHA_MIN_RATE  = 0.0001;      
-	final int    MAX_CODE_LENGTH = 40;
+	final float ALPHA_MIN_RATE  = 0.0001f;      
+	final int   MAX_CODE_LENGTH = 40;
 	
 	Sigmoid sigmoid;
 	Vocabulary vocab;
 	long word_count_train;
-	double subsample_size;
+	float subsample_size;
 	Optimizer optimizer;
 	
 	volatile long word_count_global;	// word count dynamically updated by all threads
-	volatile double alpha_global;		// learning rate dynamically updated by all threads
+	volatile float alpha_global;		// learning rate dynamically updated by all threads
 	volatile public float[] W;			// weights between the input and the hidden layers
 	volatile public float[] V;			// weights between the hidden and the output layers
 	
@@ -184,7 +184,7 @@ public class Word2Vec
 	
 	void adjustLearningRate()
 	{
-		double rate = Math.max(ALPHA_MIN_RATE, 1 - MathUtils.divide(word_count_global, train_iteration * word_count_train + 1));
+		float rate = Math.max(ALPHA_MIN_RATE, 1 - (float)MathUtils.divide(word_count_global, train_iteration * word_count_train + 1));
 		alpha_global = alpha_init * rate;
 	}
 	

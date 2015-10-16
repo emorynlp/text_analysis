@@ -63,7 +63,7 @@ public class NegativeSampling extends Optimizer
 	}
 	
 	@Override
-	public void learnBagOfWords(Random rand, int word, float[] syn1, float[] neu1, float[] neu1e, double alpha)
+	public void learnBagOfWords(Random rand, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha)
 	{
 		learnBagOfWords(1, word, syn1, neu1, neu1e, alpha);
 		
@@ -72,7 +72,7 @@ public class NegativeSampling extends Optimizer
 	}
 	
 	@Override
-	public void learnSkipGram(Random rand, int word, float[] syn0, float[] syn1, float[] neu1e, double alpha, int l1)
+	public void learnSkipGram(Random rand, int word, float[] syn0, float[] syn1, float[] neu1e, float alpha, int l1)
 	{
 		learnSkipGram(1, word, syn0, syn1, neu1e, alpha, l1);
 		

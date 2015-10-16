@@ -36,13 +36,13 @@ public abstract class Optimizer
 		vector_size  = vectorSize;
 	}
 	
-	public abstract void learnBagOfWords(Random rand, int word, float[] syn1, float[] neu1, float[] neu1e, double alpha);
-	public abstract void learnSkipGram  (Random rand, int word, float[] syn0, float[] syn1, float[] neu1e, double alpha, int l1);
+	public abstract void learnBagOfWords(Random rand, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha);
+	public abstract void learnSkipGram  (Random rand, int word, float[] syn0, float[] syn1, float[] neu1e, float alpha, int l1);
 	
-	protected void learnBagOfWords(int label, int word, float[] syn1, float[] neu1, float[] neu1e, double alpha)
+	protected void learnBagOfWords(int label, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha)
 	{
 		int l = word * vector_size, k;
-		double score = 0, gradient;
+		float score = 0, gradient;
 		
 		// hidden -> output
 		for (k=0; k<vector_size; k++) score += neu1[k] * syn1[k+l];
@@ -57,10 +57,10 @@ public abstract class Optimizer
 		}
 	}
 	
-	protected void learnSkipGram(int label, int word, float[] syn0, float[] syn1, float[] neu1e, double alpha, int l1)
+	protected void learnSkipGram(int label, int word, float[] syn0, float[] syn1, float[] neu1e, float alpha, int l1)
 	{
 		int l2 = word * vector_size, k;
-		double score = 0, gradient;
+		float score = 0, gradient;
 		
 		// input -> output
 		for (k=0; k<vector_size; k++) score += syn0[k+l1] * syn1[k+l2];
