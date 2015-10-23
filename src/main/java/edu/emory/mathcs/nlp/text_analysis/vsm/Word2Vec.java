@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.emory.mathcs.nlp.vsm;
+package edu.emory.mathcs.nlp.text_analysis.vsm;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -34,11 +34,11 @@ import edu.emory.mathcs.nlp.common.util.FileUtils;
 import edu.emory.mathcs.nlp.common.util.IOUtils;
 import edu.emory.mathcs.nlp.common.util.MathUtils;
 import edu.emory.mathcs.nlp.common.util.Sigmoid;
-import edu.emory.mathcs.nlp.vsm.optimizer.HierarchicalSoftmax;
-import edu.emory.mathcs.nlp.vsm.optimizer.NegativeSampling;
-import edu.emory.mathcs.nlp.vsm.optimizer.Optimizer;
-import edu.emory.mathcs.nlp.vsm.reader.SentenceReader;
-import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
+import edu.emory.mathcs.nlp.text_analysis.vsm.optimizer.HierarchicalSoftmax;
+import edu.emory.mathcs.nlp.text_analysis.vsm.optimizer.NegativeSampling;
+import edu.emory.mathcs.nlp.text_analysis.vsm.optimizer.Optimizer;
+import edu.emory.mathcs.nlp.text_analysis.vsm.reader.SentenceReader;
+import edu.emory.mathcs.nlp.text_analysis.vsm.util.Vocabulary;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})

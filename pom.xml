@@ -3,16 +3,16 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>edu.emory.mathcs.nlp</groupId>
-  <artifactId>vsm</artifactId>
+  <artifactId>text_analysis</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <url>http://nlp.mathcs.emory.edu</url>
   
   <scm>
-    <url>https://github.com/emorynlp/common</url>
-    <connection>scm:git:git://github.com/emorynlp/common.git</connection>
-    <developerConnection>scm:git:git@github.com:emorynlp/common.git</developerConnection>
+    <url>https://github.com/emorynlp/text_analysis</url>
+    <connection>scm:git:git://github.com/emorynlp/text_analysis.git</connection>
+    <developerConnection>scm:git:git@github.com:emorynlp/text_analysis.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
@@ -102,6 +102,11 @@
     <dependency>
       <groupId>edu.emory.mathcs.nlp</groupId>
       <artifactId>common</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>edu.emory.mathcs.nlp</groupId>
+      <artifactId>tokenizer</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
   </dependencies>

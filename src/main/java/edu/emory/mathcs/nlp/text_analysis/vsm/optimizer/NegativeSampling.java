@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.emory.mathcs.nlp.vsm.optimizer;
+package edu.emory.mathcs.nlp.text_analysis.vsm.optimizer;
 
 import java.util.Arrays;
 import java.util.Random;
 
 import edu.emory.mathcs.nlp.common.util.Sigmoid;
-import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
+import edu.emory.mathcs.nlp.text_analysis.vsm.util.Vocabulary;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 

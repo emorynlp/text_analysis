@@ -23,8 +23,8 @@ import java.util.Arrays;
 import org.junit.Test;
 
 import edu.emory.mathcs.nlp.common.constant.StringConst;
-import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
-import edu.emory.mathcs.nlp.vsm.util.Word;
+import edu.emory.mathcs.nlp.text_analysis.vsm.util.Vocabulary;
+import edu.emory.mathcs.nlp.text_analysis.vsm.util.Word;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
