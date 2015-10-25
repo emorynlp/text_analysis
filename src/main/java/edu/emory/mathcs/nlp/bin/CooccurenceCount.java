@@ -75,6 +75,14 @@ public class CooccurenceCount
 		PrintStream fout = IOUtils.createBufferedPrintStream(out);
 		String s;
 		
+		StringBuilder build = new StringBuilder();
+		build.append("central\tcontext\t");
+		int j, size = entries.get(0).getValue().length, window = (size-2)/2;
+		for (j=-window; j<0; j++) build.append(j+"\t");
+		for (j=1; j<=window; j++) build.append(j+"\t");
+		build.append("sentence\tdocument");
+		fout.println(build.toString());
+		
 		for (Entry<String,int[]> e : entries)
 		{
 			s = Arrays.stream(e.getValue()).mapToObj(i -> Integer.toString(i)).collect(Collectors.joining(DELIM));
