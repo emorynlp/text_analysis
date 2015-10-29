@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 
 import edu.emory.mathcs.nlp.common.util.DSUtils;
 import edu.emory.mathcs.nlp.common.util.IOUtils;
-import edu.emory.mathcs.nlp.tokenizer.EnglishTokenizer;
-import edu.emory.mathcs.nlp.tokenizer.Tokenizer;
+import edu.emory.mathcs.nlp.tokenization.EnglishTokenizer;
+import edu.emory.mathcs.nlp.tokenization.Tokenizer;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
