@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.emory.mathcs.nlp.text_analysis.vsm;
+package edu.emory.mathcs.nlp.text_analysis.word2vec;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,11 +35,11 @@ import edu.emory.mathcs.nlp.common.util.FileUtils;
 import edu.emory.mathcs.nlp.common.util.IOUtils;
 import edu.emory.mathcs.nlp.common.util.MathUtils;
 import edu.emory.mathcs.nlp.common.util.Sigmoid;
-import edu.emory.mathcs.nlp.text_analysis.vsm.optimizer.HierarchicalSoftmax;
-import edu.emory.mathcs.nlp.text_analysis.vsm.optimizer.NegativeSampling;
-import edu.emory.mathcs.nlp.text_analysis.vsm.optimizer.Optimizer;
-import edu.emory.mathcs.nlp.text_analysis.vsm.reader.SentenceReader;
-import edu.emory.mathcs.nlp.text_analysis.vsm.util.Vocabulary;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.HierarchicalSoftmax;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.NegativeSampling;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.Optimizer;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.SentenceReader;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
@@ -73,6 +74,8 @@ public class Word2Vec
 	boolean binary = false;
 	@Option(name="-cbow", usage="If set, use the continuous bag-of-words model instead of the skip-gram model.", required=false, metaVar="<boolean>")
 	boolean cbow = false;
+	@Option(name="-normalize", usage="If set, normalize each vector.", required=false, metaVar="<boolean>")
+	boolean normalize = true;
 	
 	final float ALPHA_MIN_RATE  = 0.0001f;      
 	final int   MAX_CODE_LENGTH = 40;
@@ -133,7 +136,7 @@ public class Word2Vec
 		catch (InterruptedException e) {e.printStackTrace();}
 		
 		BinUtils.LOG.info("Saving word vectors.\n");
-		saveModel();
+		save();
 	}
 	
 	class TrainTask implements Runnable
@@ -278,30 +281,52 @@ public class Word2Vec
 		return (j == 0) ? next(reader, rand) : (j == words.length) ? next : Arrays.copyOf(next, j);
 	}
 	
-	void saveModel() throws IOException
+	void save() throws IOException
 	{
-		PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(output_file)));
-		save(out, binary);
-		out.close();
+		save(IOUtils.createFileOutputStream(output_file));
 	}
 	
-	public void save(PrintStream out, boolean binary)
+	public Map<String,float[]> toMap(boolean normalize)
 	{
-		out.printf("%d %d\n", vocab.size(), vector_size);
-		int i, j, l;
+		Map<String,float[]> map = new HashMap<>();
+		float[] vector;
+		String key;
+		int i, l;
 		
 		for (i=0; i<vocab.size(); i++)
 		{
-			out.print(vocab.get(i).form);
 			l = i * vector_size;
-			
-			for (j=0; j<vector_size; j++)
-			{
-				if (binary)	out.print(" "+Long.toBinaryString(Double.doubleToRawLongBits(W[j+l])));
-				else		out.print(" "+W[j+l]);
-			}
-			
-			out.println();
+			key = vocab.get(i).form;
+			vector = Arrays.copyOfRange(W, l, l+vector_size);
+			if (normalize) normalize(vector);
+			map.put(key, vector);
 		}
+		
+		return map;
+	}
+	
+	public void normalize(float[] vector)
+	{
+		float z = 0;
+		
+		for (int i=0; i<vector.length; i++)
+			z += MathUtils.sq(vector[i]);
+		
+		z = (float)Math.sqrt(z);
+		
+		for (int i=0; i<vector.length; i++)
+			vector[i] /= z;
+	}
+	
+	public void save(OutputStream out) throws IOException
+	{
+		ObjectOutputStream oout = IOUtils.createObjectXZBufferedOutputStream(out);
+		oout.writeObject(toMap(normalize));
+		oout.close();
+	}
+	
+	static public void main(String[] args)
+	{
+		new Word2Vec(args);
 	}
 }

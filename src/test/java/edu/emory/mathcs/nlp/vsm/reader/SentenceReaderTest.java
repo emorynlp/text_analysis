@@ -22,8 +22,8 @@ import java.util.List;
 import org.junit.Test;
 
 import edu.emory.mathcs.nlp.common.util.DSUtils;
-import edu.emory.mathcs.nlp.text_analysis.vsm.reader.SentenceReader;
-import edu.emory.mathcs.nlp.text_analysis.vsm.util.Vocabulary;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.SentenceReader;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})

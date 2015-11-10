@@ -30,6 +30,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.kohsuke.args4j.Option;
+
+import edu.emory.mathcs.nlp.common.util.BinUtils;
 import edu.emory.mathcs.nlp.common.util.DSUtils;
 import edu.emory.mathcs.nlp.common.util.IOUtils;
 import edu.emory.mathcs.nlp.tokenization.EnglishTokenizer;
@@ -40,7 +43,26 @@ import edu.emory.mathcs.nlp.tokenization.Tokenizer;
  */
 public class CooccurenceCount
 {
+	@Option(name="-i", usage="input file (required)", required=true, metaVar="<filename>")
+	private String input_file;
+	@Option(name="-o", usage="output file (required)", required=true, metaVar="<filename>")
+	private String output_file;
+	@Option(name="-w", usage="window size (default: 5)", required=false, metaVar="<integer>")
+	protected int window = 5;
+	@Option(name="-p", usage="include punctuation (default: false)", required=false, metaVar="<boolean>")
+	protected boolean include_punctuation = false;
+	@Option(name="-c", usage="uncapitalize (default: false)", required=false, metaVar="<boolean>")
+	protected boolean uncapitalize = false;
+	
 	public final String DELIM = "\t";
+	
+	public CooccurenceCount(String[] args) throws Exception
+	{
+		BinUtils.initArgs(args, this);
+		
+		Map<String,int[]> map = wordCount(IOUtils.createFileInputStream(input_file), window);
+		print(IOUtils.createFileOutputStream(output_file), map);
+	}
 	
 	public Map<String,int[]> wordCount(InputStream in, int window) throws Exception
 	{
@@ -148,13 +170,7 @@ public class CooccurenceCount
 	{
 		try
 		{
-			final String INPUT_FILE  = args[0];
-			final String OUTPUT_FILE = args[1];
-			final int WINDOW = Integer.parseInt(args[2]);
-					
-			CooccurenceCount cc = new CooccurenceCount();
-			Map<String,int[]> map = cc.wordCount(IOUtils.createFileInputStream(INPUT_FILE), WINDOW);
-			cc.print(IOUtils.createFileOutputStream(OUTPUT_FILE), map);
+			new CooccurenceCount(args);
 		}
 		catch (Exception e) {e.printStackTrace();}
 	}

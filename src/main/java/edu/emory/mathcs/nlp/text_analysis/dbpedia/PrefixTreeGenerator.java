@@ -56,7 +56,7 @@ public class PrefixTreeGenerator implements DBPediaXML
 		return map;
 	}
 	
-	public PrefixTree<String,Set<String>> getPrefixTree(Tokenizer tokenizer, boolean lower)
+	public PrefixTree<String,Set<String>> getPrefixTree(Tokenizer tokenizer, FormType type, boolean uncapitalize)
 	{
 		PrefixTree<String,Set<String>> tree = new PrefixTree<>();
 		Set<String> list;
@@ -66,7 +66,7 @@ public class PrefixTreeGenerator implements DBPediaXML
 		{
 			info = e.getValue();
 			list = getNERInfoSet(e.getKey(), info.getTypes());
-			if (list != null) addAliases(tokenizer, tree, info.getAliases(), list, lower);
+			if (list != null) addAliases(tokenizer, tree, info.getAliases(), list, type, uncapitalize);
 		}
 		
 		return tree;
@@ -89,7 +89,7 @@ public class PrefixTreeGenerator implements DBPediaXML
 		return list;
 	}
 	
-	private void addAliases(Tokenizer tokenizer, PrefixTree<String,Set<String>> tree, Set<String> aliases, Set<String> set, boolean lower)
+	private void addAliases(Tokenizer tokenizer, PrefixTree<String,Set<String>> tree, Set<String> aliases, Set<String> set, FormType type, boolean uncapitalize)
 	{
 		PrefixNode<String,Set<String>> node;
 		List<String> tokens;
@@ -98,7 +98,7 @@ public class PrefixTreeGenerator implements DBPediaXML
 		for (String alias : aliases)
 		{
 			tokens = tokenizer.tokenize(alias);
-			t = trimTokens(tokens, lower);
+			t = trimTokens(tokens, type, uncapitalize);
 			
 			if (t.length > 0)
 			{
@@ -109,7 +109,7 @@ public class PrefixTreeGenerator implements DBPediaXML
 		}
 	}
 	
-	private String[] trimTokens(List<String> tokens, boolean lower)
+	private String[] trimTokens(List<String> tokens, FormType type, boolean uncapitalize)
 	{
 		int i, size, bIdx = -1;
 		
@@ -139,12 +139,30 @@ public class PrefixTreeGenerator implements DBPediaXML
 		
 		int len = tokens.size();
 		String[] t = new String[len];
+		String s;
+		
 		for (i=0; i<len; i++)
 		{
-			t[i] = StringUtils.toSimplifiedForm(tokens.get(i));
-			if (lower) t[i] = StringUtils.toLowerCase(t[i]);
+			s = tokens.get(i);
+			
+			switch (type)
+			{
+			case undigitalized: s = StringUtils.toUndigitalizedForm(s, uncapitalize); break;
+			case simplified   : s = StringUtils.toSimplifiedForm   (s, uncapitalize); break;
+			default: break;
+			}
+			
+			t[i] = s;
+			if (uncapitalize) t[i] = StringUtils.toLowerCase(t[i]);
 		}
 		return t;
+	}
+	
+	enum FormType
+	{
+		undigitalized,
+		simplified,
+		raw;
 	}
 	
 	static public void main(String[] args) throws Exception
@@ -157,16 +175,17 @@ public class PrefixTreeGenerator implements DBPediaXML
 		DBPediaTypeMap typeMap = gson.fromJson(new InputStreamReader(IOUtils.createXZBufferedInputStream(typeMapFile)), DBPediaTypeMap.class);
 		DBPediaInfoMap infoMap = gson.fromJson(new InputStreamReader(IOUtils.createXZBufferedInputStream(infoMapFile)), DBPediaInfoMap.class);
 		Tokenizer tokenizer = new EnglishTokenizer();
-		boolean lower = true;
+		FormType type = FormType.undigitalized;
+		boolean uncapitalize = false;
 		
 		PrefixTreeGenerator ptg = new PrefixTreeGenerator(typeMap, infoMap, DBPediaType.DBPediaTypeSet);
-		PrefixTree<String,Set<String>> prefixTree = ptg.getPrefixTree(tokenizer, lower);
+		PrefixTree<String,Set<String>> prefixTree = ptg.getPrefixTree(tokenizer, type, uncapitalize);
 		ObjectOutputStream out = new ObjectOutputStream(IOUtils.createXZBufferedOutputStream(prefixTreeFile));
 		out.writeObject(prefixTree);
 		out.close();
 		
 		String s = "John Emory Democratic Party London Bridge Emory University South Korea Rocky Mountains M16 New Years Eve The Catcher in the Rye Korean Ming Dynasty Euro";
-		if (lower) s = StringUtils.toLowerCase(s);
+		if (uncapitalize) s = StringUtils.toLowerCase(s);
 		String[] array = s.split(" ");
 		
 		for (ObjectIntIntTriple<Set<String>> t : prefixTree.getAll(array, 0, String::toString, true, true))

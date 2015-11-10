@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.emory.mathcs.nlp.text_analysis.vsm.optimizer;
+package edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer;
 
 import java.util.Random;
 
 import edu.emory.mathcs.nlp.common.util.Sigmoid;
-import edu.emory.mathcs.nlp.text_analysis.vsm.util.Vocabulary;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
