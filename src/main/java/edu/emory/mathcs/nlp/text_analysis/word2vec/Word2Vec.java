@@ -109,20 +109,9 @@ public class Word2Vec
 	
 	public void train(List<String> filenames) throws Exception
 	{
-		List<File> files = new List<File>();
-		for(String filename : filenames)
-			files.add(new File(filename));
-		Reader<?> reader = new SentenceReader(files);
-		Reader<?>[] r = evaluate ? reader.trainingAndTest() : null;
-		
-		Reader<?> training_reader = evaluate ? r[0] : reader;
-		Reader<?> test_reader = evaluate ? r[1] : null;
-		
-		
 		BinUtils.LOG.info("Reading vocabulary:\n");
 		vocab = new Vocabulary();
-		vocab.learn(training_reader, min_count);
-		word_count_train = vocab.totalWords();
+		word_count_train = new SentenceReader().learn(filenames, vocab, min_count);
 		BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", vocab.size(), word_count_train));
 		
 		BinUtils.LOG.info("Initializing neural network.\n");
@@ -135,54 +124,36 @@ public class Word2Vec
 		word_count_global = 0;
 		alpha_global      = alpha_init;
 		subsample_size    = subsample_threshold * word_count_train;
+		ExecutorService executor = Executors.newFixedThreadPool(thread_size);
 		
-		startThreads(training_reader, false);
+		for (String filename : filenames)
+			executor.execute(new TrainTask(filename));
 		
-		if(evaluate){
-			startThreads(test_reader, true);
-			System.out.println("Evaluated Error: " + optimizer.getError());
+		executor.shutdown();
+		
+		try
+		{
+			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 		}
+		catch (InterruptedException e) {e.printStackTrace();}
 		
 		BinUtils.LOG.info("Saving word vectors.\n");
 		save();
 	}
 	
-	void startThreads(Reader<?> reader, boolean evaluate) throws IOException
-	{
-		Reader<?>[] readers = reader.split(threads);
-		reader.close();
-		ExecutorService executor = Executors.newFixedThreadPool(threads);
-		for (int i = 0; i < threads; i++)
-			executor.execute(new TrainTask(readers[i], i, evaluate));
-			
-		executor.shutdown();			
-		try {
-			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-			
-		for (int i = 0; i < threads; i++)
-			readers[i].close();
-	}
-	
 	class TrainTask implements Runnable
 	{
-		private Reader<?> reader;
-		private final int id;
-		private boolean evaluate;
+		private String filename;
 		
-		public TrainTask(Reader<?> reader, int id, boolean evaluate)
+		public TrainTask(String filename)
 		{
-			this.reader = reader;
-			this.random = random;
-			this.id = id;
-			this.evaluate = evaluate;
+			this.filename = filename;
 		}
 		
 		@Override
 		public void run()
 		{
+			SentenceReader reader = new SentenceReader(IOUtils.createFileInputStream(filename));
 			Random  rand  = new XORShiftRandom(filename.hashCode());
 			float[] neu1  = cbow ? new float[vector_size] : null;
 			float[] neu1e = new float[vector_size];
@@ -196,10 +167,10 @@ public class Word2Vec
 				
 				if (words == null)
 				{
-					BinUtils.LOG.info(String.format("Thread %d: %d\n", id, iter));
+					BinUtils.LOG.info(String.format("%s: %d\n", FileUtils.getBaseName(filename), iter));
 					if (++iter == train_iteration) break;
 					adjustLearningRate();
-					reader.startOver();
+					reader.close(); reader.open(IOUtils.createFileInputStream(filename));
 					continue;
 				}
 				
@@ -209,8 +180,8 @@ public class Word2Vec
 					if (cbow) Arrays.fill(neu1, 0);
 					Arrays.fill(neu1e, 0);
 					
-					if (cbow) bagOfWords(words, index, window, rand, neu1e, neu1, evaluate);
-					else      skipGram  (words, index, window, rand, neu1e, evaluate);
+					if (cbow) bagOfWords(words, index, window, rand, neu1e, neu1);
+					else      skipGram  (words, index, window, rand, neu1e);
 				}
 			}
 		}
@@ -222,7 +193,7 @@ public class Word2Vec
 		alpha_global = alpha_init * rate;
 	}
 	
-	void bagOfWords(int[] words, int index, int window, Random rand, float[] neu1e, float[] neu1, boolean evaluate)
+	void bagOfWords(int[] words, int index, int window, Random rand, float[] neu1e, float[] neu1)
 	{
 		int i, j, k, l, wc = 0, word = words[index];
 
@@ -237,12 +208,6 @@ public class Word2Vec
 		
 		if (wc == 0) return;
 		for (k=0; k<vector_size; k++) neu1[k] /= wc;
-		
-		if(evaluate){
-			optimizer.testBagOfWords(rand, word, V, neu1, neu1e, alpha_global);
-			return;
-		}
-		
 		optimizer.learnBagOfWords(rand, word, V, neu1, neu1e, alpha_global);
 		
 		// hidden -> input
@@ -254,7 +219,7 @@ public class Word2Vec
 		}
 	}
 	
-	void skipGram(int[] words, int index, int window, Random rand, float[] neu1e, boolean evaluate)
+	void skipGram(int[] words, int index, int window, Random rand, float[] neu1e)
 	{
 		int i, j, k, l1, word = words[index];
 		
@@ -263,13 +228,6 @@ public class Word2Vec
 			if (i == 0 || words.length <= j || j < 0) continue;
 			l1 = words[j] * vector_size;
 			Arrays.fill(neu1e, 0);
-			
-			
-			if(evaluate){
-				optimizer.learnSkipGram(rand, word, W, V, neu1e, alpha_global, l1);
-				continue;
-			}
-			
 			optimizer.learnSkipGram(rand, word, W, V, neu1e, alpha_global, l1);
 			
 			// hidden -> input
@@ -297,9 +255,9 @@ public class Word2Vec
 			W[i] = (float)((rand.nextDouble() - 0.5) / vector_size);
 	}
 	
-	int[] next(Reader<?> reader, Random rand)
+	int[] next(SentenceReader reader, Random rand)
 	{
-		Object[] words = reader.next();
+		String[] words = reader.next();
 		if (words == null) return null;
 		int[] next = new int[words.length];
 		int i, j, index, count = 0;
@@ -307,7 +265,7 @@ public class Word2Vec
 		
 		for (i=0,j=0; i<words.length; i++)
 		{
-			index = vocab.indexOf(words[i].toString());
+			index = vocab.indexOf(words[i]);
 			if (index < 0) continue;
 			count++;
 			
