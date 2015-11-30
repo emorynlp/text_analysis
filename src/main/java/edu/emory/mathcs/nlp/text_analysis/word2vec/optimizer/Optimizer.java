@@ -29,10 +29,6 @@ public abstract class Optimizer
 	protected Vocabulary vocab;
 	protected int vector_size;
 	
-	double error = 0.0;
-	long normalizer = 0;
-	
-	
 	public Optimizer(Vocabulary vocab, Sigmoid sigmoid, int vectorSize)
 	{
 		this.vocab   = vocab;
@@ -42,9 +38,6 @@ public abstract class Optimizer
 	
 	public abstract void learnBagOfWords(Random rand, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha);
 	public abstract void learnSkipGram  (Random rand, int word, float[] syn0, float[] syn1, float[] neu1e, float alpha, int l1);
-	
-	public abstract void testBagOfWords(Random rand, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha);
-	public abstract void testSkipGram  (Random rand, int word, float[] syn0, float[] syn1, float[] neu1e, float alpha, int l1);
 	
 	protected void learnBagOfWords(int label, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha)
 	{
@@ -80,35 +73,5 @@ public abstract class Optimizer
 			// input -> output
 			for (k=0; k<vector_size; k++) syn1[k+l2] += syn0[k+l1] * gradient;
 		}
-	}
-	
-	protected void testBagOfWords(int label, int word, float[] syn1, float[] neu1)
-	{
-		int l = word * vector_size, k;
-		float score = 0, gradient;
-		
-		// hidden -> output
-		for (k=0; k<vector_size; k++) score += neu1[k] * syn1[k+l];
-		
-		double squared_error = (label - sigmoid.get(score));
-	        squared_error = squared_error * squared_error;
-	
-	        this.error += squared_error;
-	        this.normalizer++;
-	}
-	
-	protected void testSkipGram(int label, int word, float[] syn0, float[] syn1, int l1)
-	{
-		int l2 = word * vector_size, k;
-		float score = 0, gradient;
-		
-		// input -> output
-		for (k=0; k<vector_size; k++) score += syn0[k+l1] * syn1[k+l2];
-		
-	        double squared_error = (label - sigmoid.get(score));
-	        squared_error = squared_error * squared_error;
-	
-	        this.error += squared_error;
-	        this.normalizer++;
 	}
 }
