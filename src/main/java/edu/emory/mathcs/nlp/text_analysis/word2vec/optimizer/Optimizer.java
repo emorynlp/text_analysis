@@ -111,8 +111,4 @@ public abstract class Optimizer
 	        this.error += squared_error;
 	        this.normalizer++;
 	}
-	
-	public double getError(){
-		return this.error/this.normalizer;
-	}
 }
