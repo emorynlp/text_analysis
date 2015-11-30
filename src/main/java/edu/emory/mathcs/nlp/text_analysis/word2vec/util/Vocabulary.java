@@ -53,6 +53,7 @@ public class Vocabulary implements Serializable
 			for(Object word : words)
 				add(word.toString());
 		}
+		reader.startOver();
 		sort(min_word_count);
 	}
 	
