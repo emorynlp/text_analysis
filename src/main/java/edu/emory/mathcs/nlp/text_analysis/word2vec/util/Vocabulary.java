@@ -45,6 +45,18 @@ public class Vocabulary implements Serializable
 	}
 	
 	/**
+	 * Iterates through each word in reader and adds it to the vocabulary.
+	 */
+	public void learn(Reader<?> reader, int min_word_count) throws IOException{
+		Object[] words;
+		while((words = reader.next())!=null){
+			for(Object word : words)
+				add(word.toString());
+		}
+		sort(min_word_count);
+	}
+	
+	/**
 	 * Adds the word to the vocabulary if absent, and increments its count by 1. 
 	 * @return the word object either already existing or newly introduced.
 	 */
