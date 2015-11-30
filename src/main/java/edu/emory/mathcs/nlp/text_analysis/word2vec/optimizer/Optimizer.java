@@ -82,7 +82,7 @@ public abstract class Optimizer
 		}
 	}
 	
-	protected void testBagOfWords(int label, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha)
+	protected void testBagOfWords(int label, int word, float[] syn1, float[] neu1)
 	{
 		int l = word * vector_size, k;
 		float score = 0, gradient;
@@ -97,7 +97,7 @@ public abstract class Optimizer
 	        this.normalizer++;
 	}
 	
-	protected void testSkipGram(int label, int word, float[] syn0, float[] syn1, float[] neu1e, float alpha, int l1)
+	protected void testSkipGram(int label, int word, float[] syn0, float[] syn1, int l1)
 	{
 		int l2 = word * vector_size, k;
 		float score = 0, gradient;
