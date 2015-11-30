@@ -80,6 +80,25 @@ public class NegativeSampling extends Optimizer
 			learnSkipGram(0, sample, syn0, syn1, neu1e, alpha, l1);
 	}
 	
+	@Override
+	public void testBagOfWords(Random rand, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha) {
+
+		testBagOfWords(1, word, syn1, neu1, neu1e, alpha);
+
+		for (int neg_sample : getNegativeSamples(rand, word)) 
+		  	testBagOfWords(0, neg_sample, syn1, neu1, neu1e, alpha);
+			
+	}
+	
+	@Override
+	public void testSkipGram(Random rand, int word, float[] syn0, float[] syn1, float[] neu1e, float alpha, int l1) {
+		
+		testSkipGram(1, word, syn0, syn1, neu1e, alpha, l1);
+	
+		for (int neg_sample : getNegativeSamples(word))
+		  	testSkipGram(0, neg_sample, syn0, syn1, neu1e, alpha, l1);
+	}
+	
 	private int[] getNegativeSamples(Random rand, int word)
 	{
 		IntSet set = new IntOpenHashSet();
