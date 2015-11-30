@@ -76,6 +76,8 @@ public class Word2Vec
 	boolean cbow = false;
 	@Option(name="-normalize", usage="If set, normalize each vector.", required=false, metaVar="<boolean>")
 	boolean normalize = true;
+	@Option(name="-evaluate", usage="If set, reserve section of input to evaluate vectors.", required=false, metaVar="<boolean>")
+	boolean evaluate = false;
 	
 	final float ALPHA_MIN_RATE  = 0.0001f;      
 	final int   MAX_CODE_LENGTH = 40;
