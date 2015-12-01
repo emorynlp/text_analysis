@@ -15,9 +15,11 @@
  */
 package edu.emory.mathcs.nlp.text_analysis.word2vec.util;
 
+import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.Reader;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,18 +38,20 @@ public class Vocabulary implements Serializable
 	private Object2IntMap<String> index_map;
 	private List<Word>            word_list;
 	private int                   min_reduce;
+	private long				  total_words;
 	
 	public Vocabulary()
 	{
 		index_map  = new Object2IntOpenHashMap<>();
 		word_list  = new ArrayList<>();
 		min_reduce = 1;
+		total_words = 0;
 	}
 	
 	/**
 	 * Iterates through each word in reader and adds it to the vocabulary.
 	 */
-	public void learn(Reader<?> reader, int min_word_count) throws IOException{
+	public void learn(Reader<?> reader, int min_word_count) throws IOException {
 		Object[] words;
 		while((words = reader.next())!=null){
 			for(Object word : words)
@@ -70,11 +74,13 @@ public class Vocabulary implements Serializable
 		{
 			w = get(index);
 			w.increment(1);
+			total_words++;
 		}
 		else
 		{
 			w = new Word(word, 1);
 			word_list.add(w);
+			total_words++;
 		}
 		
 		return w;
@@ -90,7 +96,9 @@ public class Vocabulary implements Serializable
 	{
 		return index_map.getOrDefault(word, -1);
 	}
-	
+
+	public boolean contains(String word){return indexOf(word) != -1;}
+
 	public int size()
 	{
 		return word_list.size();
@@ -100,6 +108,8 @@ public class Vocabulary implements Serializable
 	{
 		return word_list;
 	}
+
+	public long totalWords() {return total_words;}
 	
 	/**
 	 * Sorts {@link #word_list} by count in descending order.  

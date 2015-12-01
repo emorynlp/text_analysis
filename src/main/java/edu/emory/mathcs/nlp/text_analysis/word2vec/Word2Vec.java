@@ -15,14 +15,8 @@
  */
 package edu.emory.mathcs.nlp.text_analysis.word2vec;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +32,7 @@ import edu.emory.mathcs.nlp.common.util.Sigmoid;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.HierarchicalSoftmax;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.NegativeSampling;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.Optimizer;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.Reader;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.SentenceReader;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
 
@@ -52,6 +47,8 @@ public class Word2Vec
 	String train_path = null;
 	@Option(name="-output", usage="output file to save the resulting word vectors.", required=true, metaVar="<filename>")
 	String output_file = null;
+	@Option(name="-triad-file", usage="triad word similarity file for (external) vector evaluation.", required=false, metaVar="<filename>")
+	String triad_file = null;
 	@Option(name="-ext", usage="extension of the training files (default: \"*\").", required=false, metaVar="<string>")
 	String train_ext = "*";
 	@Option(name="-size", usage="size of word vectors (default: 100).", required=false, metaVar="<int>")
@@ -60,7 +57,7 @@ public class Word2Vec
 	int max_skip_window = 5;
 	@Option(name="-sample", usage="threshold for occurrence of words (default: 1e-3). Those that appear with higher frequency in the training data will be randomly down-sampled.", required=false, metaVar="<float>")
 	float subsample_threshold = 0.001f;
-	@Option(name="-negative", usage="number of negative examples (default: 5; common values are 3 - 10). If negative = 0, use Hierarchical Softmax instead of Negative Sampling.", required=false, metaVar="<int>")
+	@Option(name="-negative", usage="number of negative examples (common values are 3 - 10). If negative = 0, use Hierarchical Softmax instead of Negative Sampling.", required=false, metaVar="<int>")
 	int negative_size = 5;
 	@Option(name="-threads", usage="number of threads (default: 12).", required=false, metaVar="<int>")
 	int thread_size = 12;
@@ -70,20 +67,21 @@ public class Word2Vec
 	int min_count = 5;
 	@Option(name="-alpha", usage="initial learning rate (default: 0.025 for skip-gram; use 0.05 for CBOW).", required=false, metaVar="<float>")
 	float alpha_init = 0.025f;
-	@Option(name="-binary", usage="If set, save the resulting vectors in binary moded.", required=false, metaVar="<boolean>")
-	boolean binary = false;
 	@Option(name="-cbow", usage="If set, use the continuous bag-of-words model instead of the skip-gram model.", required=false, metaVar="<boolean>")
 	boolean cbow = false;
 	@Option(name="-normalize", usage="If set, normalize each vector.", required=false, metaVar="<boolean>")
-	boolean normalize = true;
-	@Option(name="-evaluate", usage="If set, reserve section of input to evaluate vectors.", required=false, metaVar="<boolean>")
+	boolean normalize = false;
+	@Option(name="-lowercase", usage="If set, all words will be set to lowercase.", required=false, metaVar="<boolean>")
+	boolean lowercase = false;
+	@Option(name="-sentence_border", usage="If set, use symbols <s> and </s> for start and end of sentence.", required=false, metaVar="<boolean>")
+	boolean sentence_border = false;
+	@Option(name="-evaluate", usage="If set, reserve section of input to evaluate vectors for squared error.", required=false, metaVar="<boolean>")
 	boolean evaluate = false;
 	
-	final float ALPHA_MIN_RATE  = 0.0001f;      
-	final int   MAX_CODE_LENGTH = 40;
+	final float ALPHA_MIN_RATE  = 0.0001f;
 	
 	Sigmoid sigmoid;
-	Vocabulary vocab;
+	public Vocabulary vocab;
 	long word_count_train;
 	float subsample_size;
 	Optimizer optimizer;
@@ -100,7 +98,7 @@ public class Word2Vec
 
 		try
 		{
-			train(FileUtils.getFileList(train_path, "*", false));
+			train(FileUtils.getFileList(train_path, train_ext, false));
 		}
 		catch (Exception e) {e.printStackTrace();}
 	}
@@ -109,10 +107,10 @@ public class Word2Vec
 	
 	public void train(List<String> filenames) throws Exception
 	{
-		List<File> files = new List<File>();
+		List<File> files = new ArrayList<File>();
 		for(String filename : filenames)
 			files.add(new File(filename));
-		Reader<?> reader = new SentenceReader(files);
+		Reader<?> reader = new SentenceReader(files, lowercase, sentence_border);
 		Reader<?>[] r = evaluate ? reader.trainingAndTest() : null;
 		
 		Reader<?> training_reader = evaluate ? r[0] : reader;
@@ -142,17 +140,19 @@ public class Word2Vec
 			startThreads(test_reader, true);
 			System.out.println("Evaluated Error: " + optimizer.getError());
 		}
-		
+		if(triad_file != null)
+			evaluateVectors(new File(triad_file));
+
 		BinUtils.LOG.info("Saving word vectors.\n");
 		save();
 	}
 	
 	void startThreads(Reader<?> reader, boolean evaluate) throws IOException
 	{
-		Reader<?>[] readers = reader.split(threads);
+		Reader<?>[] readers = reader.split(thread_size);
 		reader.close();
-		ExecutorService executor = Executors.newFixedThreadPool(threads);
-		for (int i = 0; i < threads; i++)
+		ExecutorService executor = Executors.newFixedThreadPool(thread_size);
+		for (int i = 0; i < thread_size; i++)
 			executor.execute(new TrainTask(readers[i], i, evaluate));
 			
 		executor.shutdown();			
@@ -162,7 +162,7 @@ public class Word2Vec
 			e.printStackTrace();
 		}
 			
-		for (int i = 0; i < threads; i++)
+		for (int i = 0; i < thread_size; i++)
 			readers[i].close();
 	}
 	
@@ -175,7 +175,6 @@ public class Word2Vec
 		public TrainTask(Reader<?> reader, int id, boolean evaluate)
 		{
 			this.reader = reader;
-			this.random = random;
 			this.id = id;
 			this.evaluate = evaluate;
 		}
@@ -183,23 +182,31 @@ public class Word2Vec
 		@Override
 		public void run()
 		{
-			Random  rand  = new XORShiftRandom(filename.hashCode());
+			Random  rand  = new XORShiftRandom(reader.hashCode());
 			float[] neu1  = cbow ? new float[vector_size] : null;
 			float[] neu1e = new float[vector_size];
 			int     iter  = 0;
 			int     index, window;
-			int[]   words;
+			int[]   words = null;
 			
 			while (true)
 			{
-				words = next(reader, rand);
-				
+				try {
+					words = next(reader, rand);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
 				if (words == null)
 				{
 					BinUtils.LOG.info(String.format("Thread %d: %d\n", id, iter));
 					if (++iter == train_iteration) break;
 					adjustLearningRate();
-					reader.startOver();
+					try {
+						reader.startOver();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 					continue;
 				}
 				
@@ -297,7 +304,7 @@ public class Word2Vec
 			W[i] = (float)((rand.nextDouble() - 0.5) / vector_size);
 	}
 	
-	int[] next(Reader<?> reader, Random rand)
+	int[] next(Reader<?> reader, Random rand) throws IOException
 	{
 		Object[] words = reader.next();
 		if (words == null) return null;
@@ -361,7 +368,70 @@ public class Word2Vec
 		for (int i=0; i<vector.length; i++)
 			vector[i] /= z;
 	}
-	
+
+
+	void evaluateVectors(File triad_file) throws IOException
+	{
+		double unweighted_eval = 0.0;
+		int unweighted_count = 0;
+
+		double weighted_eval = 0.0;
+		int weighted_count = 0;
+
+
+		BufferedReader br = new BufferedReader(new FileReader(triad_file));
+
+		String line;
+		while((line = br.readLine()) != null){
+			String[] triad = line.split(",");
+			if(triad.length != 5)
+				throw new IOException("Could not read triad file. Incorrect format.");
+			if(!(vocab.contains(triad[0]) && vocab.contains(triad[1]) && vocab.contains(triad[2])))
+				continue;
+
+			int word_count1 = Integer.parseInt(triad[3]);
+			int word_count2 = Integer.parseInt(triad[4]);
+
+			if((word_count1 > word_count2) == (similarity(triad[1],triad[0]) > similarity(triad[2],triad[0]))) {
+				unweighted_eval++;
+			}
+			unweighted_count++;
+			for(int i=0; i<Math.abs(word_count1-word_count2); i++){
+				weighted_eval++;
+				weighted_count++;
+			}
+
+		}
+		br.close();
+
+		if(unweighted_count>0)
+			unweighted_eval /= unweighted_count;
+		if(weighted_count>0)
+			weighted_eval /= weighted_count;
+
+		System.out.println("Weighted Triad Evaluation: "+weighted_eval);
+		System.out.println("Unweighted Triad Evaluation: "+unweighted_eval);
+	}
+
+	double similarity(String word1, String word2)
+	{
+		int l1 = vocab.indexOf(word1)*vector_size;
+		int l2 = vocab.indexOf(word2)*vector_size;
+
+		double norm1 = 0.0, norm2 = 0.0;
+
+		double dot_product = 0.0;
+		for(int c=0; c<vector_size; c++){
+			dot_product += W[l1+c]*W[l2+c];
+			norm1 += W[l1+c]*W[l1+c];
+			norm2 += W[l2+c]*W[l2+c];
+		}
+		norm1 = Math.sqrt(norm1);
+		norm2 = Math.sqrt(norm2);
+
+		return dot_product/(norm1*norm2);
+	}
+
 	public void save(OutputStream out) throws IOException
 	{
 		ObjectOutputStream oout = IOUtils.createObjectXZBufferedOutputStream(out);

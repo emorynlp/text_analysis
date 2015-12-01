@@ -1,4 +1,4 @@
-package reader;
+package edu.emory.mathcs.nlp.text_analysis.word2vec.reader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-public abstract class Reader<T> extends InputStream {
+public abstract class Reader<T> {
 	
 	protected final static float TRAINING_PORTION = 0.9f;
 	
@@ -79,7 +79,7 @@ public abstract class Reader<T> extends InputStream {
 		gotoLine(start_index);
 	}
 	
-	public int read() throws IOException {
+	protected int read() throws IOException {
 		if(line_index >= end_index)
 			return -1;
 		

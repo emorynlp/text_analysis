@@ -26,13 +26,13 @@ import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
  */
-public class SentenceReader extends Reader<String>
+public class Old_SentenceReader extends Old_Reader<String>
 {
 	private BufferedReader reader;
 	
-	public SentenceReader() {}
+	public Old_SentenceReader() {}
 	
-	public SentenceReader(InputStream in)
+	public Old_SentenceReader(InputStream in)
 	{
 		open(in);
 	}

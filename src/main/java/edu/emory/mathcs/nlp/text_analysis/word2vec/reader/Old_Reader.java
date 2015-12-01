@@ -26,7 +26,7 @@ import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
  */
-public abstract class Reader<N>
+public abstract class Old_Reader<N>
 {
 	static public final int VOCAB_REDUCE_SIZE = 21000000;
 	public abstract void add(Vocabulary vocab, N[] nodes);

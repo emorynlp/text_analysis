@@ -1,4 +1,4 @@
-package io;
+package edu.emory.mathcs.nlp.text_analysis.word2vec.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,21 +6,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import io.DependencyReader.DependencyWord;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.DependencyReader.DependencyWord;
 
 public class DependencyReader extends Reader<DependencyWord> {
 	
-	
-	public DependencyReader(File file) {
+	public static final int LEMMA_MODE = 0;
+	public static final int DEPEND_MODE = 1;
+	public static final int POS_MODE = 2;
+
+	private int mode;
+
+	public DependencyReader(File file, int mode) {
 		super(file);
+		this.mode = mode;
 	}
 	
-	public DependencyReader(List<File> files) {
+	public DependencyReader(List<File> files, int mode) {
 		super(files);
+		this.mode = mode;
 	}
 	
-	public DependencyReader(List<File> files, int start_index, int end_index) {
+	public DependencyReader(List<File> files, int start_index, int end_index, int mode) {
 		super(files, start_index, end_index);
+		this.mode = mode;
 	}
 	
 	public DependencyWord[] next() throws IOException {
@@ -69,7 +77,7 @@ public class DependencyReader extends Reader<DependencyWord> {
 		int size = (end_index - start_index)/count;
 		int start = start_index;
 		for(int i=0; i<count; i++){
-			split[i] = new DependencyReader(Arrays.asList(files), start, start+size);
+			split[i] = new DependencyReader(Arrays.asList(files), start, start+size, mode);
 			start += size;
 		}
 		split[split.length-1].end_index = end_index;
@@ -81,12 +89,12 @@ public class DependencyReader extends Reader<DependencyWord> {
 		DependencyReader[] split = new DependencyReader[2];
 		
 		int size = (int) ((end_index - start_index)*TRAINING_PORTION);
-		split[0] = new DependencyReader(Arrays.asList(files), start_index, start_index+size);
-		split[1] = new DependencyReader(Arrays.asList(files), start_index+size, end_index);
+		split[0] = new DependencyReader(Arrays.asList(files), start_index, start_index+size, mode);
+		split[1] = new DependencyReader(Arrays.asList(files), start_index+size, end_index, mode);
 		return split;
 	}
 	
-	public static class DependencyWord {
+	public class DependencyWord {
 		
 		/* Constants for positions in .srl data format */
 		final static int INDEX = 0;
@@ -118,7 +126,12 @@ public class DependencyReader extends Reader<DependencyWord> {
 		
 		@Override
 		public String toString(){
-			return depend+"_"+lemma;
+			switch(mode){
+				case LEMMA_MODE: return lemma;
+				case DEPEND_MODE: return depend+"_"+lemma;
+				case POS_MODE: return pos+"_"+lemma;
+				default: return depend+"_"+lemma;
+			}
 		}
 	}
 }

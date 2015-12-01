@@ -1,4 +1,4 @@
-package reader;
+package edu.emory.mathcs.nlp.text_analysis.word2vec.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,20 +20,32 @@ public class SentenceReader extends Reader<String> {
 	private static final int MAX_SENTENCE_LENGTH = 1000;
 	
 	boolean lowercase = false;
-	
-	public SentenceReader(File file, boolean lowercase) {
+	boolean mark_sentence_border = false;
+
+	public SentenceReader(File file) {
+		super(file);
+	}
+
+	public SentenceReader(List<File> files) {
+		super(files);
+	}
+
+	public SentenceReader(File file, boolean lowercase, boolean mark_sentence_border) {
 		super(file);
 		this.lowercase = lowercase;
+		this.mark_sentence_border = mark_sentence_border;
 	}
 	
-	public SentenceReader(List<File> files, boolean lowercase) {
+	public SentenceReader(List<File> files, boolean lowercase, boolean mark_sentence_border) {
 		super(files);
 		this.lowercase = lowercase;
+		this.mark_sentence_border = mark_sentence_border;
 	}
 	
-	public SentenceReader(List<File> files, int start_index, int end_index, boolean lowercase) {
+	public SentenceReader(List<File> files, int start_index, int end_index, boolean lowercase, boolean mark_sentence_border) {
 		super(files, start_index, end_index);
 		this.lowercase = lowercase;
+		this.mark_sentence_border = mark_sentence_border;
 	}
 	
 	private boolean new_line = true;
@@ -100,7 +112,8 @@ public class SentenceReader extends Reader<String> {
 		int sentence_length = 0;
 		
 		// add "<s>" (start of sentence)
-		sentence[sentence_length++] = "<s>";
+		if(mark_sentence_border)
+			sentence[sentence_length++] = "<s>";
 		
 		String word;
 		while ((word = nextWord()) != null){
@@ -122,7 +135,8 @@ public class SentenceReader extends Reader<String> {
 			return null;
 		
 		// add "</s>" (end of sentence)
-		sentence[sentence_length++] = "</s>";
+		if(mark_sentence_border)
+			sentence[sentence_length++] = "</s>";
 				
 		// to save space, save sentence in smaller array
 		String[] small_sentence = new String[sentence_length];
@@ -139,7 +153,7 @@ public class SentenceReader extends Reader<String> {
 		int size = (end_index - start_index)/count;
 		int start = start_index;
 		for(int i=0; i<count; i++){
-			split[i] = new SentenceReader(Arrays.asList(files), start, start+size, lowercase);
+			split[i] = new SentenceReader(Arrays.asList(files), start, start+size, lowercase, mark_sentence_border);
 			start += size;
 		}
 		split[split.length-1].end_index = end_index;
@@ -151,8 +165,8 @@ public class SentenceReader extends Reader<String> {
 		SentenceReader[] split = new SentenceReader[2];
 		
 		int size = (int) ((end_index - start_index)*TRAINING_PORTION);
-		split[0] = new SentenceReader(Arrays.asList(files), start_index, start_index+size, lowercase);
-		split[1] = new SentenceReader(Arrays.asList(files), start_index+size, end_index, lowercase);
+		split[0] = new SentenceReader(Arrays.asList(files), start_index, start_index+size, lowercase, mark_sentence_border);
+		split[1] = new SentenceReader(Arrays.asList(files), start_index+size, end_index, lowercase, mark_sentence_border);
 		return split;
 	}
 }

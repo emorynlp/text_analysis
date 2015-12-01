@@ -95,7 +95,7 @@ public class NegativeSampling extends Optimizer
 		
 		testSkipGram(1, word, syn0, syn1, neu1e, alpha, l1);
 	
-		for (int neg_sample : getNegativeSamples(word))
+		for (int neg_sample : getNegativeSamples(rand, word))
 		  	testSkipGram(0, neg_sample, syn0, syn1, neu1e, alpha, l1);
 	}
 	

@@ -29,8 +29,8 @@ public abstract class Optimizer
 	protected Vocabulary vocab;
 	protected int vector_size;
 	
-	double error = 0.0;
-	long normalizer = 0;
+	volatile double error = 0.0;
+	volatile long normalizer = 0;
 	
 	
 	public Optimizer(Vocabulary vocab, Sigmoid sigmoid, int vectorSize)
@@ -85,7 +85,7 @@ public abstract class Optimizer
 	protected void testBagOfWords(int label, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha)
 	{
 		int l = word * vector_size, k;
-		float score = 0, gradient;
+		float score = 0;
 		
 		// hidden -> output
 		for (k=0; k<vector_size; k++) score += neu1[k] * syn1[k+l];
@@ -100,7 +100,7 @@ public abstract class Optimizer
 	protected void testSkipGram(int label, int word, float[] syn0, float[] syn1, float[] neu1e, float alpha, int l1)
 	{
 		int l2 = word * vector_size, k;
-		float score = 0, gradient;
+		float score = 0;
 		
 		// input -> output
 		for (k=0; k<vector_size; k++) score += syn0[k+l1] * syn1[k+l2];
