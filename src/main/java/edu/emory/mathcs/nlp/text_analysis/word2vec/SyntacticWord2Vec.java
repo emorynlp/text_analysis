@@ -42,6 +42,9 @@ public class SyntacticWord2Vec extends Word2Vec {
         Reader<?> depend_training_reader = evaluate ? r[0] : depend_reader;
         Reader<?> depend_test_reader = evaluate ? r[1] : null;
 
+        System.out.println("Syntactic Word2Vec");
+        System.out.println((cbow ? "Continuous Bag of Words" : "Skipgrams") + ", " + (isNegativeSampling() ? "Hierarchical Softmax" : "Negative Sampling"));
+        System.out.println("Reading vocabulary:");
 
         BinUtils.LOG.info("Reading vocabulary:\n");
         vocab = new Vocabulary();
@@ -55,10 +58,12 @@ public class SyntacticWord2Vec extends Word2Vec {
         for(int i=0; i<depend_vocab.size(); i++)
             dependToLemma.put(i, vocab.indexOf(depend_vocab.get(i).form.split("_")[1]));
 
-
-
         BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", vocab.size(), word_count_train));
 
+
+        System.out.println("Vocab size "+vocab.size()+", Total Word Count "+word_count_train+"\n");
+        System.out.println("Starting training: "+train_path);
+        System.out.println("Files "+files.size()+", threads "+thread_size+", iterations "+train_iteration);
 
         BinUtils.LOG.info("Initializing neural network.\n");
         initNeuralNetwork();
@@ -74,11 +79,17 @@ public class SyntacticWord2Vec extends Word2Vec {
         startThreads(depend_training_reader, false);
 
         if(evaluate){
+            System.out.println("Starting Evaluation:");
+            word_count_global = 0;
+            word_count_train = (long) (1-Reader.TRAINING_PORTION)*word_count_train;
             startThreads(depend_test_reader, true);
             System.out.println("Evaluated Error: " + optimizer.getError());
+            outputProgress(System.currentTimeMillis());
         }
-        if(triad_file != null)
+        if(triad_file != null) {
+            System.out.println("Triad Evaluation:");
             evaluateVectors(new File(triad_file));
+        }
 
         BinUtils.LOG.info("Saving word vectors.\n");
         save();

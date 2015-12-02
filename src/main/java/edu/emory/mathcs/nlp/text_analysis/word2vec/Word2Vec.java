@@ -73,7 +73,7 @@ public class Word2Vec
 	boolean normalize = false;
 	@Option(name="-lowercase", usage="If set, all words will be set to lowercase.", required=false, metaVar="<boolean>")
 	boolean lowercase = false;
-	@Option(name="-sentence_border", usage="If set, use symbols <s> and </s> for start and end of sentence.", required=false, metaVar="<boolean>")
+	@Option(name="-sentence-border", usage="If set, use symbols <s> and </s> for start and end of sentence.", required=false, metaVar="<boolean>")
 	boolean sentence_border = false;
 	@Option(name="-evaluate", usage="If set, reserve section of input to evaluate vectors for squared error.", required=false, metaVar="<boolean>")
 	boolean evaluate = false;
@@ -90,7 +90,9 @@ public class Word2Vec
 	volatile float alpha_global;		// learning rate dynamically updated by all threads
 	volatile public float[] W;			// weights between the input and the hidden layers
 	volatile public float[] V;			// weights between the hidden and the output layers
-	
+
+	long start_time;
+
 	public Word2Vec(String[] args)
 	{
 		BinUtils.initArgs(args, this);
@@ -115,14 +117,21 @@ public class Word2Vec
 		
 		Reader<?> training_reader = evaluate ? r[0] : reader;
 		Reader<?> test_reader = evaluate ? r[1] : null;
-		
-		
+
+		System.out.println("Word2Vec");
+		System.out.println((cbow ? "Continuous Bag of Words" : "Skipgrams") + ", " + (isNegativeSampling() ? "Hierarchical Softmax" : "Negative Sampling"));
+		System.out.println("Reading vocabulary:");
+
 		BinUtils.LOG.info("Reading vocabulary:\n");
 		vocab = new Vocabulary();
 		vocab.learn(training_reader, min_count);
 		word_count_train = vocab.totalWords();
 		BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", vocab.size(), word_count_train));
-		
+
+		System.out.println("Vocab size "+vocab.size()+", Total Word Count "+word_count_train+"\n");
+		System.out.println("Starting training: "+train_path);
+		System.out.println("Files "+files.size()+", threads "+thread_size+", iterations "+train_iteration);
+
 		BinUtils.LOG.info("Initializing neural network.\n");
 		initNeuralNetwork();
 		
@@ -135,13 +144,20 @@ public class Word2Vec
 		subsample_size    = subsample_threshold * word_count_train;
 		
 		startThreads(training_reader, false);
+		outputProgress(System.currentTimeMillis());
 		
 		if(evaluate){
+			System.out.println("Starting Evaluation:");
+			word_count_global = 0;
+			word_count_train = (long) (1-Reader.TRAINING_PORTION)*word_count_train;
 			startThreads(test_reader, true);
 			System.out.println("Evaluated Error: " + optimizer.getError());
+			outputProgress(System.currentTimeMillis());
 		}
-		if(triad_file != null)
+		if(triad_file != null) {
+			System.out.println("Triad Evaluation:");
 			evaluateVectors(new File(triad_file));
+		}
 
 		BinUtils.LOG.info("Saving word vectors.\n");
 		save();
@@ -152,6 +168,8 @@ public class Word2Vec
 		Reader<?>[] readers = reader.split(thread_size);
 		reader.close();
 		ExecutorService executor = Executors.newFixedThreadPool(thread_size);
+		start_time = System.currentTimeMillis();
+
 		for (int i = 0; i < thread_size; i++)
 			executor.execute(new TrainTask(readers[i], i, evaluate));
 			
@@ -171,6 +189,8 @@ public class Word2Vec
 		private Reader<?> reader;
 		private final int id;
 		private boolean evaluate;
+
+		private long last_time = 0;
 		
 		public TrainTask(Reader<?> reader, int id, boolean evaluate)
 		{
@@ -200,6 +220,7 @@ public class Word2Vec
 				if (words == null)
 				{
 					BinUtils.LOG.info(String.format("Thread %d: %d\n", id, iter));
+					System.out.println(String.format("Thread %d: %d\n", id, iter));
 					if (++iter == train_iteration) break;
 					adjustLearningRate();
 					try {
@@ -218,6 +239,15 @@ public class Word2Vec
 					
 					if (cbow) bagOfWords(words, index, window, rand, neu1e, neu1, evaluate);
 					else      skipGram  (words, index, window, rand, neu1e, evaluate);
+				}
+
+				// output progress every 15 minutes
+				if(id == 0){
+					long now = System.currentTimeMillis();
+					if(now-last_time > 15*1000*60){
+						last_time = now;
+						outputProgress(now);
+					}
 				}
 			}
 		}
@@ -331,7 +361,21 @@ public class Word2Vec
 		word_count_global += count;
 		return (j == 0) ? next(reader, rand) : (j == words.length) ? next : Arrays.copyOf(next, j);
 	}
-	
+
+	void outputProgress(long now)
+	{
+		long time_seconds = (now - start_time)/1000;
+		float progress = word_count_global / (float)(train_iteration * word_count_train);
+
+		int time_left_hours = (int) ((1-progress)*(now - start_time)/(1000*60*60));
+		int time_left_remainder =  ((int) ((1-progress)*(now - start_time)/(1000*60)))% 60;
+
+		System.out.print("Alpha: "+ String.format("%1$,.6f",alpha_global+" "));
+		System.out.print("Progress: "+ String.format("%1$,.2f", progress * 100) + "% ");
+		System.out.print("Words/thread/sec: " + String.format("%1$,.4f", word_count_global / ((double) thread_size * time_seconds))+" ");
+		System.out.print("Estimated Time Left: " +time_left_hours +":"+time_left_remainder +"\n");
+	}
+
 	void save() throws IOException
 	{
 		save(IOUtils.createFileOutputStream(output_file));

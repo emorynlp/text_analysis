@@ -9,7 +9,7 @@ import java.util.List;
 
 public abstract class Reader<T> {
 	
-	protected final static float TRAINING_PORTION = 0.9f;
+	public final static float TRAINING_PORTION = 0.9f;
 	
 	protected File[] files;
 	protected int[] file_sizes; // cumulative number of lines

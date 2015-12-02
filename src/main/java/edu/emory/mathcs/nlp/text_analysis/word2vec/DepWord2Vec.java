@@ -24,6 +24,7 @@ public class DepWord2Vec extends Word2Vec {
 
 //	=================================== Training ===================================
 
+    // change SentenceReader to DependencyReader
     public void train(List<String> filenames) throws Exception
     {
         List<File> files = new ArrayList<>();
@@ -35,12 +36,19 @@ public class DepWord2Vec extends Word2Vec {
         Reader<?> training_reader = evaluate ? r[0] : reader;
         Reader<?> test_reader = evaluate ? r[1] : null;
 
+        System.out.println("Word2Vec");
+        System.out.println((cbow ? "Continuous Bag of Words" : "Skipgrams") + ", " + (isNegativeSampling() ? "Hierarchical Softmax" : "Negative Sampling"));
+        System.out.println("Reading vocabulary:");
 
         BinUtils.LOG.info("Reading vocabulary:\n");
         vocab = new Vocabulary();
         vocab.learn(training_reader, min_count);
         word_count_train = vocab.totalWords();
         BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", vocab.size(), word_count_train));
+
+        System.out.println("Vocab size "+vocab.size()+", Total Word Count "+word_count_train+"\n");
+        System.out.println("Starting training: "+train_path);
+        System.out.println("Files "+files.size()+", threads "+thread_size+", iterations "+train_iteration);
 
         BinUtils.LOG.info("Initializing neural network.\n");
         initNeuralNetwork();
@@ -54,13 +62,20 @@ public class DepWord2Vec extends Word2Vec {
         subsample_size    = subsample_threshold * word_count_train;
 
         startThreads(training_reader, false);
+        outputProgress(System.currentTimeMillis());
 
         if(evaluate){
+            System.out.println("Starting Evaluation:");
+            word_count_global = 0;
+            word_count_train = (long) (1-Reader.TRAINING_PORTION)*word_count_train;
             startThreads(test_reader, true);
             System.out.println("Evaluated Error: " + optimizer.getError());
+            outputProgress(System.currentTimeMillis());
         }
-        if(triad_file != null)
+        if(triad_file != null) {
+            System.out.println("Triad Evaluation:");
             evaluateVectors(new File(triad_file));
+        }
 
         BinUtils.LOG.info("Saving word vectors.\n");
         save();

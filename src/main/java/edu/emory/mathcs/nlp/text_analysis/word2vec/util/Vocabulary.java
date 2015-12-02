@@ -54,8 +54,11 @@ public class Vocabulary implements Serializable
 	public void learn(Reader<?> reader, int min_word_count) throws IOException {
 		Object[] words;
 		while((words = reader.next())!=null){
-			for(Object word : words)
+			for(Object word : words) {
 				add(word.toString());
+				if(total_words % 1000000 == 0)
+					System.out.println(""+total_words+" words");
+			}
 		}
 		reader.startOver();
 		sort(min_word_count);
