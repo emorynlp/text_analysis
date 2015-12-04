@@ -104,7 +104,7 @@ public class SentenceReader extends Reader<String> {
 			return null;
 		return word;
 	}
-	
+
 	private String[] sentence = new String[MAX_SENTENCE_LENGTH];
 	public String[] next() throws IOException{
 		/* This function reads one sentence (assuming one sentence per line) 
@@ -125,9 +125,15 @@ public class SentenceReader extends Reader<String> {
 			
 			if(lowercase) sentence[sentence_length++] = word.toLowerCase();
 			else 		  sentence[sentence_length++] = word;
-			
-			if (sentence_length == MAX_SENTENCE_LENGTH)
-				break;
+
+			if (mark_sentence_border) {
+				if (sentence_length == MAX_SENTENCE_LENGTH - 1)
+					break;
+			}
+			else {
+				if (sentence_length == MAX_SENTENCE_LENGTH)
+					break;
+			}
 		}
 		
 		// end of file
