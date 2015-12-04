@@ -28,7 +28,7 @@ public class Word2VecTest {
                 "-threads",  "2",
                 "-min-count","1",
                 "-cbow",
-                "-evaluate"};
+                "-evaluate","src/test/resources/dat/test_files/test3.txt"};
         test(params);
     }
 
@@ -39,7 +39,7 @@ public class Word2VecTest {
                 "-threads",  "2",
                 "-min-count","1",
                 "-cbow",
-                "-evaluate"};
+                "-evaluate","src/test/resources/dat/test_files/test3.txt"};
         test(params);
     }
 

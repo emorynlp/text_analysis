@@ -1,10 +1,12 @@
 package edu.emory.mathcs.nlp.text_analysis.word2vec;
 
 import edu.emory.mathcs.nlp.common.util.BinUtils;
+import edu.emory.mathcs.nlp.common.util.FileUtils;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.HierarchicalSoftmax;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.NegativeSampling;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.DependencyReader;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.Reader;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.SentenceReader;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
 import org.kohsuke.args4j.Option;
 
@@ -24,17 +26,13 @@ public class DepWord2Vec extends Word2Vec {
 
 //	=================================== Training ===================================
 
-    // change SentenceReader to DependencyReader
+
     public void train(List<String> filenames) throws Exception
     {
-        List<File> files = new ArrayList<>();
-        for(String filename : filenames)
-            files.add(new File(filename));
-        Reader<?> reader = new DependencyReader(files, mode);
-        Reader<?>[] r = evaluate ? reader.trainingAndTest() : null;
-
-        Reader<?> training_reader = evaluate ? r[0] : reader;
-        Reader<?> test_reader = evaluate ? r[1] : null;
+        List<File> files = new ArrayList<File>();
+        for(String f : filenames)
+            files.add(new File(f));
+        Reader<?> training_reader = new DependencyReader(files, mode);
 
         System.out.println("Word2Vec");
         System.out.println((cbow ? "Continuous Bag of Words" : "Skipgrams") + ", " + (isNegativeSampling() ? "Hierarchical Softmax" : "Negative Sampling"));
@@ -64,13 +62,15 @@ public class DepWord2Vec extends Word2Vec {
         startThreads(training_reader, false);
         outputProgress(System.currentTimeMillis());
 
-        if(evaluate){
+        if(eval_path != null){
             System.out.println("Starting Evaluation:");
-            word_count_global = 0;
-            word_count_train = (long) (1-Reader.TRAINING_PORTION)*word_count_train;
+            List<File> test_files = new ArrayList<File>();
+            for(String f : FileUtils.getFileList(eval_path, train_ext, false))
+                test_files.add(new File(f));
+
+            Reader<?> test_reader = new DependencyReader(test_files, mode);
             startThreads(test_reader, true);
             System.out.println("Evaluated Error: " + optimizer.getError());
-            outputProgress(System.currentTimeMillis());
         }
         if(triad_file != null) {
             System.out.println("Triad Evaluation:");

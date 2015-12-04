@@ -42,8 +42,8 @@ public class SentenceReader extends Reader<String> {
 		this.mark_sentence_border = mark_sentence_border;
 	}
 	
-	public SentenceReader(List<File> files, int start_index, int end_index, boolean lowercase, boolean mark_sentence_border) {
-		super(files, start_index, end_index);
+	public SentenceReader(SentenceReader r, long start_index, long end_index, boolean lowercase, boolean mark_sentence_border) {
+		super(r, start_index, end_index);
 		this.lowercase = lowercase;
 		this.mark_sentence_border = mark_sentence_border;
 	}
@@ -148,25 +148,16 @@ public class SentenceReader extends Reader<String> {
 	
 	@Override
 	public SentenceReader[] split(int count){
+		if(!finished) generateFileSizes();
 		SentenceReader[] split = new SentenceReader[count];
 		
-		int size = (end_index - start_index)/count;
-		int start = start_index;
+		long size = (end_index - start_index)/count;
+		long start = start_index;
 		for(int i=0; i<count; i++){
-			split[i] = new SentenceReader(Arrays.asList(files), start, start+size, lowercase, mark_sentence_border);
+			split[i] = new SentenceReader(this, start, start+size, lowercase, mark_sentence_border);
 			start += size;
 		}
 		split[split.length-1].end_index = end_index;
-		return split;
-	}
-
-	@Override
-	public SentenceReader[] trainingAndTest() {
-		SentenceReader[] split = new SentenceReader[2];
-		
-		int size = (int) ((end_index - start_index)*TRAINING_PORTION);
-		split[0] = new SentenceReader(Arrays.asList(files), start_index, start_index+size, lowercase, mark_sentence_border);
-		split[1] = new SentenceReader(Arrays.asList(files), start_index+size, end_index, lowercase, mark_sentence_border);
 		return split;
 	}
 }

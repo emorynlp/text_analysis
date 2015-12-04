@@ -47,6 +47,8 @@ public class Word2Vec
 	String train_path = null;
 	@Option(name="-output", usage="output file to save the resulting word vectors.", required=true, metaVar="<filename>")
 	String output_file = null;
+	@Option(name="-evaluate", usage="path to file or directory to evaluate vectors for squared error.", required=false, metaVar="<filename>")
+	String eval_path = null;
 	@Option(name="-triad-file", usage="triad word similarity file for (external) vector evaluation.", required=false, metaVar="<filename>")
 	String triad_file = null;
 	@Option(name="-ext", usage="extension of the training files (default: \"*\").", required=false, metaVar="<string>")
@@ -75,8 +77,6 @@ public class Word2Vec
 	boolean lowercase = false;
 	@Option(name="-sentence-border", usage="If set, use symbols <s> and </s> for start and end of sentence.", required=false, metaVar="<boolean>")
 	boolean sentence_border = false;
-	@Option(name="-evaluate", usage="If set, reserve section of input to evaluate vectors for squared error.", required=false, metaVar="<boolean>")
-	boolean evaluate = false;
 	
 	final float ALPHA_MIN_RATE  = 0.0001f;
 	
@@ -112,11 +112,7 @@ public class Word2Vec
 		List<File> files = new ArrayList<File>();
 		for(String filename : filenames)
 			files.add(new File(filename));
-		Reader<?> reader = new SentenceReader(files, lowercase, sentence_border);
-		Reader<?>[] r = evaluate ? reader.trainingAndTest() : null;
-		
-		Reader<?> training_reader = evaluate ? r[0] : reader;
-		Reader<?> test_reader = evaluate ? r[1] : null;
+		Reader<?> training_reader = new SentenceReader(files, lowercase, sentence_border);
 
 		System.out.println("Word2Vec");
 		System.out.println((cbow ? "Continuous Bag of Words" : "Skipgrams") + ", " + (isNegativeSampling() ? "Hierarchical Softmax" : "Negative Sampling"));
@@ -142,17 +138,19 @@ public class Word2Vec
 		word_count_global = 0;
 		alpha_global      = alpha_init;
 		subsample_size    = subsample_threshold * word_count_train;
-		
+
 		startThreads(training_reader, false);
 		outputProgress(System.currentTimeMillis());
 		
-		if(evaluate){
+		if(eval_path != null){
 			System.out.println("Starting Evaluation:");
-			word_count_global = 0;
-			word_count_train = (long) (1-Reader.TRAINING_PORTION)*word_count_train;
+			List<File> test_files = new ArrayList<File>();
+			for(String f : FileUtils.getFileList(eval_path, train_ext, false))
+				test_files.add(new File(f));
+
+			Reader<?> test_reader = new SentenceReader(test_files, lowercase, sentence_border);
 			startThreads(test_reader, true);
 			System.out.println("Evaluated Error: " + optimizer.getError());
-			outputProgress(System.currentTimeMillis());
 		}
 		if(triad_file != null) {
 			System.out.println("Triad Evaluation:");
@@ -220,7 +218,6 @@ public class Word2Vec
 				if (words == null)
 				{
 					BinUtils.LOG.info(String.format("Thread %d: %d\n", id, iter));
-					System.out.println(String.format("Thread %d: %d\n", id, iter));
 					if (++iter == train_iteration) break;
 					adjustLearningRate();
 					try {
@@ -370,7 +367,7 @@ public class Word2Vec
 		int time_left_hours = (int) ((1-progress)*(now - start_time)/(1000*60*60));
 		int time_left_remainder =  ((int) ((1-progress)*(now - start_time)/(1000*60)))% 60;
 
-		System.out.print("Alpha: "+ String.format("%1$,.6f",alpha_global+" "));
+		System.out.print("Alpha: "+ String.format("%1$,.6f",alpha_global)+" ");
 		System.out.print("Progress: "+ String.format("%1$,.2f", progress * 100) + "% ");
 		System.out.print("Words/thread/sec: " + String.format("%1$,.4f", word_count_global / ((double) thread_size * time_seconds))+" ");
 		System.out.print("Estimated Time Left: " +time_left_hours +":"+time_left_remainder +"\n");

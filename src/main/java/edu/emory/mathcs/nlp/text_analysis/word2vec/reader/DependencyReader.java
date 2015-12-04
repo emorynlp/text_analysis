@@ -20,14 +20,14 @@ public class DependencyReader extends Reader<DependencyWord> {
 		super(file);
 		this.mode = mode;
 	}
-	
+
 	public DependencyReader(List<File> files, int mode) {
 		super(files);
 		this.mode = mode;
 	}
 	
-	public DependencyReader(List<File> files, int start_index, int end_index, int mode) {
-		super(files, start_index, end_index);
+	public DependencyReader(DependencyReader r, long start_index, long end_index, int mode) {
+		super(r, start_index, end_index);
 		this.mode = mode;
 	}
 	
@@ -72,25 +72,16 @@ public class DependencyReader extends Reader<DependencyWord> {
 	
 	@Override
 	public DependencyReader[] split(int count){
+		if(!finished) generateFileSizes();
 		DependencyReader[] split = new DependencyReader[count];
 		
-		int size = (end_index - start_index)/count;
-		int start = start_index;
+		long size = (end_index - start_index)/count;
+		long start = start_index;
 		for(int i=0; i<count; i++){
-			split[i] = new DependencyReader(Arrays.asList(files), start, start+size, mode);
+			split[i] = new DependencyReader(this, start, start+size, mode);
 			start += size;
 		}
 		split[split.length-1].end_index = end_index;
-		return split;
-	}
-	
-	@Override
-	public DependencyReader[] trainingAndTest() {
-		DependencyReader[] split = new DependencyReader[2];
-		
-		int size = (int) ((end_index - start_index)*TRAINING_PORTION);
-		split[0] = new DependencyReader(Arrays.asList(files), start_index, start_index+size, mode);
-		split[1] = new DependencyReader(Arrays.asList(files), start_index+size, end_index, mode);
 		return split;
 	}
 	

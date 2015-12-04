@@ -2,11 +2,13 @@ package edu.emory.mathcs.nlp.text_analysis.word2vec;
 
 import edu.emory.mathcs.nlp.common.random.XORShiftRandom;
 import edu.emory.mathcs.nlp.common.util.BinUtils;
+import edu.emory.mathcs.nlp.common.util.FileUtils;
 import edu.emory.mathcs.nlp.common.util.MathUtils;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.HierarchicalSoftmax;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.NegativeSampling;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.DependencyReader;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.Reader;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.SentenceReader;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Word;
 
@@ -34,14 +36,6 @@ public class SyntacticWord2Vec extends Word2Vec {
         Reader<?> lemma_reader = new DependencyReader(files, DependencyReader.LEMMA_MODE);
         Reader<?> depend_reader = new DependencyReader(files, DependencyReader.DEPEND_MODE);
 
-        Reader<?>[] r = evaluate ? lemma_reader.trainingAndTest() : null;
-        Reader<?> lemma_training_reader = evaluate ? r[0] : lemma_reader;
-        Reader<?> lemma_test_reader = evaluate ? r[1] : null;
-
-        r = evaluate ? depend_reader.trainingAndTest() : null;
-        Reader<?> depend_training_reader = evaluate ? r[0] : depend_reader;
-        Reader<?> depend_test_reader = evaluate ? r[1] : null;
-
         System.out.println("Syntactic Word2Vec");
         System.out.println((cbow ? "Continuous Bag of Words" : "Skipgrams") + ", " + (isNegativeSampling() ? "Hierarchical Softmax" : "Negative Sampling"));
         System.out.println("Reading vocabulary:");
@@ -49,8 +43,8 @@ public class SyntacticWord2Vec extends Word2Vec {
         BinUtils.LOG.info("Reading vocabulary:\n");
         vocab = new Vocabulary();
         depend_vocab = new Vocabulary();
-        vocab.learn(lemma_training_reader, min_count);
-        depend_vocab.learn(depend_training_reader, min_count);
+        vocab.learn(lemma_reader, min_count);
+        depend_vocab.learn(depend_reader, min_count);
         word_count_train = vocab.totalWords();
         dependToLemma = new HashMap<Integer, Integer>();
 
@@ -76,16 +70,19 @@ public class SyntacticWord2Vec extends Word2Vec {
         alpha_global      = alpha_init;
         subsample_size    = subsample_threshold * word_count_train;
 
-        startThreads(depend_training_reader, false);
+        startThreads(depend_reader, false);
 
-        if(evaluate){
+        if(eval_path != null){
             System.out.println("Starting Evaluation:");
-            word_count_global = 0;
-            word_count_train = (long) (1-Reader.TRAINING_PORTION)*word_count_train;
+            List<File> test_files = new ArrayList<File>();
+            for(String f : FileUtils.getFileList(eval_path, train_ext, false))
+                test_files.add(new File(f));
+
+            Reader<?> depend_test_reader = new SentenceReader(test_files, lowercase, sentence_border);
             startThreads(depend_test_reader, true);
             System.out.println("Evaluated Error: " + optimizer.getError());
-            outputProgress(System.currentTimeMillis());
         }
+
         if(triad_file != null) {
             System.out.println("Triad Evaluation:");
             evaluateVectors(new File(triad_file));
