@@ -188,13 +188,15 @@ public class Word2Vec
 		private final int id;
 		private boolean evaluate;
 
-		private long last_time = 0;
+		private long last_time;
 		
 		public TrainTask(Reader<?> reader, int id, boolean evaluate)
 		{
 			this.reader = reader;
 			this.id = id;
 			this.evaluate = evaluate;
+
+			last_time = start_time;
 		}
 		
 		@Override
@@ -364,20 +366,23 @@ public class Word2Vec
 		long time_seconds = (now - start_time)/1000;
 		float progress = word_count_global / (float)(train_iteration * word_count_train);
 
-		int time_left_hours = (int) ((1-progress)*(now - start_time)/(1000*60*60));
-		int time_left_remainder =  ((int) ((1-progress)*(now - start_time)/(1000*60)))% 60;
+		int time_left_hours = (int) (((1-progress)/progress)*(now - start_time)/(1000*60*60));
+		int time_left_remainder =  (int) (((1-progress)/progress)*(now - start_time)/(1000*60)) % 60;
 
 		System.out.print("Alpha: "+ String.format("%1$,.6f",alpha_global)+" ");
 		System.out.print("Progress: "+ String.format("%1$,.2f", progress * 100) + "% ");
-		System.out.print("Words/thread/sec: " + String.format("%1$,.4f", word_count_global / ((double) thread_size * time_seconds))+" ");
-		System.out.print("Estimated Time Left: " +time_left_hours +":"+time_left_remainder +"\n");
+		System.out.print("Words/thread/sec: " + (word_count_global / (thread_size * time_seconds))+" ");
+		System.out.print("Estimated Time Left: " +time_left_hours +":"+time_left_remainder +" ");
+
+		Runtime runtime = Runtime.getRuntime();
+		System.out.print("Memory Usage: " + (int)((runtime.totalMemory()-runtime.freeMemory())/(1024*1024)) +"M\n");
 	}
 
 	void save() throws IOException
 	{
 		save(IOUtils.createFileOutputStream(output_file));
 	}
-	
+
 	public Map<String,float[]> toMap(boolean normalize)
 	{
 		Map<String,float[]> map = new HashMap<>();

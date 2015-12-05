@@ -78,7 +78,7 @@ public abstract class Reader<T> {
 	abstract public T[] next() throws IOException;
 	
 	abstract public Reader<T>[] split(int count);
-	
+
 	public void close() throws IOException{
 		in.close();
 	}

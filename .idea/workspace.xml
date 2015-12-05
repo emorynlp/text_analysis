@@ -7,7 +7,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="939b0bb9-6662-4522-b47e-3ab90e4362a8" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/SentenceReader.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/SentenceReader.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/SimpleReader.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/resources/dat/cbow_vectors" afterPath="$PROJECT_DIR$/src/test/resources/dat/cbow_vectors" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/resources/dat/skip_vectors" afterPath="$PROJECT_DIR$/src/test/resources/dat/skip_vectors" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec$TrainTask.class" afterPath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec$TrainTask.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.class" afterPath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/SentenceReader.class" afterPath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/SentenceReader.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/test-classes/dat/cbow_vectors" afterPath="$PROJECT_DIR$/target/test-classes/dat/cbow_vectors" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/test-classes/dat/skip_vectors" afterPath="$PROJECT_DIR$/target/test-classes/dat/skip_vectors" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Reader.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Reader.java" />
     </list>
     <ignored path="text_analysis.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -29,22 +39,15 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="SyntacticWord2Vec.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="77" column="78" selection-start-line="77" selection-start-column="78" selection-end-line="77" selection-end-column="78" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="SentenceReaderTest.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/SentenceReaderTest.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="68" column="0" selection-start-line="68" selection-start-column="0" selection-end-line="68" selection-end-column="0" />
-              <folding />
+              <folding>
+                <element signature="n#!!doc" expanded="false" />
+                <element signature="imports" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -59,11 +62,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SentenceReader.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="SentenceReader.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/SentenceReader.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.7670251">
-              <caret line="133" column="58" selection-start-line="133" selection-start-column="58" selection-end-line="133" selection-end-column="58" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="7" column="27" selection-start-line="7" selection-start-column="27" selection-end-line="169" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -86,9 +89,7 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="41" column="73" selection-start-line="41" selection-start-column="73" selection-end-line="41" selection-end-column="73" />
-              <folding>
-                <element signature="imports" expanded="false" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -97,7 +98,27 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="140" column="0" selection-start-line="140" selection-start-column="0" selection-end-line="140" selection-end-column="0" />
+              <caret line="51" column="4" selection-start-line="49" selection-start-column="4" selection-end-line="51" selection-end-column="4" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Old_SentenceReader.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Old_SentenceReader.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.23247863">
+              <caret line="28" column="13" selection-start-line="28" selection-start-column="13" selection-end-line="28" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DepWord2Vec.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/DepWord2Vec.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="87" column="5" selection-start-line="23" selection-start-column="0" selection-end-line="87" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -107,7 +128,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Reader.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="108" column="33" selection-start-line="108" selection-start-column="33" selection-end-line="108" selection-end-column="33" />
+              <caret line="79" column="49" selection-start-line="79" selection-start-column="49" selection-end-line="79" selection-end-column="49" />
               <folding />
             </state>
           </provider>
@@ -146,10 +167,12 @@
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/DependencyReader.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/DepWord2Vec.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec.java" />
-        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Reader.java" />
         <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java" />
-        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/SentenceReader.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Reader.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/SimpleReader.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Evaluator.java" />
       </list>
     </option>
   </component>
@@ -201,6 +224,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -280,6 +306,66 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="test" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="text_analysis" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="text_analysis" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="test" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="vsm" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="word2vec" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="text_analysis" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="text_analysis" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="test" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="vsm" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -449,9 +535,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -472,7 +555,7 @@
       <recent name="C:\Users\austin\Desktop\text_analysis\src\test\resources\dat\test_files" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.Word2VecTest">
+  <component name="RunManager" selected="JUnit.Word2VecTest.test">
     <configuration default="false" name="SentenceReaderTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -901,8 +984,8 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="JUnit.Word2VecTest" />
-        <item index="1" class="java.lang.String" itemvalue="JUnit.Word2VecTest.test" />
+        <item index="0" class="java.lang.String" itemvalue="JUnit.Word2VecTest.test" />
+        <item index="1" class="java.lang.String" itemvalue="JUnit.Word2VecTest" />
         <item index="2" class="java.lang.String" itemvalue="JUnit.DependencyReaderTest.testRead" />
         <item index="3" class="java.lang.String" itemvalue="JUnit.SentenceReaderTest.testLearn" />
         <item index="4" class="java.lang.String" itemvalue="JUnit.SentenceReaderTest" />
@@ -928,12 +1011,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="DependencyReaderTest_testRead - 2015.12.04 at 12h 12m 24s.xml">
-      <configuration name="DependencyReaderTest.testRead" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="SentenceReaderTest - 2015.12.04 at 12h 11m 55s.xml">
-      <configuration name="SentenceReaderTest" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="SentenceReaderTest_testLearn - 2015.12.04 at 12h 07m 11s.xml">
       <configuration name="SentenceReaderTest.testLearn" configurationId="JUnit" />
     </history-entry>
@@ -955,6 +1032,12 @@
     <history-entry file="Word2VecTest_test - 2015.12.04 at 12h 12m 51s.xml">
       <configuration name="Word2VecTest.test" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="Word2VecTest_test - 2015.12.04 at 14h 17m 36s.xml">
+      <configuration name="Word2VecTest.test" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="Word2VecTest_test - 2015.12.04 at 14h 21m 55s.xml">
+      <configuration name="Word2VecTest.test" configurationId="JUnit" />
+    </history-entry>
     <history-entry file="Word2VecTest_testRead - 2015.11.30 at 17h 09m 55s.xml">
       <configuration name="Word2VecTest.testRead" configurationId="JUnit" />
     </history-entry>
@@ -967,11 +1050,11 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.098335855" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.10590015" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24281392" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26626325" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2496112" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -1009,11 +1092,18 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="124" column="0" selection-start-line="124" selection-start-column="0" selection-end-line="124" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/DepWord2Vec.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="28" column="5" selection-start-line="28" selection-start-column="5" selection-end-line="28" selection-end-column="5" />
-          <folding />
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -1037,31 +1127,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="59" column="38" selection-start-line="59" selection-start-column="38" selection-end-line="59" selection-end-column="38" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="124" column="0" selection-start-line="124" selection-start-column="0" selection-end-line="124" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/DepWord2Vec.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1106,7 +1171,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1151,7 +1215,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1196,7 +1259,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1226,13 +1288,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.25757575">
           <caret line="28" column="22" selection-start-line="28" selection-start-column="22" selection-end-line="28" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Old_SentenceReader.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.03219697">
-          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="59" />
         </state>
       </provider>
     </entry>
@@ -1313,14 +1368,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/DepWord2Vec.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="70" column="67" selection-start-line="70" selection-start-column="67" selection-end-line="70" selection-end-column="67" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1336,14 +1383,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Reader.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="108" column="33" selection-start-line="108" selection-start-column="33" selection-end-line="108" selection-end-column="33" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/DependencyReaderTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1354,29 +1393,14 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="41" column="73" selection-start-line="41" selection-start-column="73" selection-end-line="41" selection-end-column="73" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="140" column="0" selection-start-line="140" selection-start-column="0" selection-end-line="140" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/SentenceReaderTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="68" column="0" selection-start-line="68" selection-start-column="0" selection-end-line="68" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#!!doc" expanded="false" />
+            <element signature="imports" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1388,10 +1412,50 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="41" column="73" selection-start-line="41" selection-start-column="73" selection-end-line="41" selection-end-column="73" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Reader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="79" column="49" selection-start-line="79" selection-start-column="49" selection-end-line="79" selection-end-column="49" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/DepWord2Vec.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="87" column="5" selection-start-line="23" selection-start-column="0" selection-end-line="87" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="51" column="4" selection-start-line="49" selection-start-column="4" selection-end-line="51" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/SentenceReader.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7670251">
-          <caret line="133" column="58" selection-start-line="133" selection-start-column="58" selection-end-line="133" selection-end-column="58" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="7" column="27" selection-start-line="7" selection-start-column="27" selection-end-line="169" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Old_SentenceReader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.23247863">
+          <caret line="28" column="13" selection-start-line="28" selection-start-column="13" selection-end-line="28" selection-end-column="13" />
           <folding />
         </state>
       </provider>
