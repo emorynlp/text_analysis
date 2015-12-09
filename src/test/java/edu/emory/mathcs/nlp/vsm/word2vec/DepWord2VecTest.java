@@ -27,9 +27,7 @@ public class DepWord2VecTest {
                 "-output","src/test/resources/dat/skip_vectors",
                 "-size",""+vector_size,
                 "-threads",  "2",
-                "-min-count","1",
-                "-cbow",
-                "-evaluate"};
+                "-min-count","1"};
         test(params);
     }
 
@@ -39,8 +37,7 @@ public class DepWord2VecTest {
                 "-size",""+vector_size,
                 "-threads",  "2",
                 "-min-count","1",
-                "-cbow",
-                "-evaluate"};
+                "-cbow"};
         test(params);
     }
 

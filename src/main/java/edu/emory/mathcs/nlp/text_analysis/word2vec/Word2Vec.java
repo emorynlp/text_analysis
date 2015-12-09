@@ -20,7 +20,9 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import edu.emory.mathcs.nlp.tokenization.EnglishTokenizer;
 import org.kohsuke.args4j.Option;
 
 import edu.emory.mathcs.nlp.common.random.XORShiftRandom;
@@ -41,16 +43,16 @@ import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
  * http://arxiv.org/pdf/1301.3781.pdf
  * http://www-personal.umich.edu/~ronxin/pdf/w2vexp.pdf
  */
-public class Word2Vec
+public class Word2Vec implements Serializable
 {
+	private static final long serialVersionUID = -7561800341345075367L;
+
 	@Option(name="-train", usage="path to the training file or the directory containig the training files.", required=true, metaVar="<filepath>")
 	String train_path = null;
 	@Option(name="-output", usage="output file to save the resulting word vectors.", required=true, metaVar="<filename>")
 	String output_file = null;
-	@Option(name="-evaluate", usage="path to file or directory to evaluate vectors for squared error.", required=false, metaVar="<filename>")
-	String eval_path = null;
-	@Option(name="-triad-file", usage="triad word similarity file for (external) vector evaluation.", required=false, metaVar="<filename>")
-	String triad_file = null;
+	@Option(name="-save-model", usage="output file to save Word2Vec model.", required=false, metaVar="<filename>")
+	String model_file = null;
 	@Option(name="-ext", usage="extension of the training files (default: \"*\").", required=false, metaVar="<string>")
 	String train_ext = "*";
 	@Option(name="-size", usage="size of word vectors (default: 100).", required=false, metaVar="<int>")
@@ -77,21 +79,29 @@ public class Word2Vec
 	boolean lowercase = false;
 	@Option(name="-sentence-border", usage="If set, use symbols <s> and </s> for start and end of sentence.", required=false, metaVar="<boolean>")
 	boolean sentence_border = false;
-	
+	@Option(name="-tokenize", usage="If set, tokenize sentence, otherwise split words by whitespace.", required=false, metaVar="<boolean>")
+	boolean tokenize = false;
+	@Option(name="-evaluate", usage="path to file or directory to evaluate vectors.", required=false, metaVar="<filename>")
+	String eval_path = null;
+
 	final float ALPHA_MIN_RATE  = 0.0001f;
-	
-	Sigmoid sigmoid;
+
+	public volatile float[] W;			// weights between the input and the hidden layers
+	public volatile float[] V;			// weights between the hidden and the output layers
+
 	public Vocabulary vocab;
+	Sigmoid sigmoid;
+	Optimizer optimizer;
+	Evaluator evaluator;
+
 	long word_count_train;
 	float subsample_size;
-	Optimizer optimizer;
-	
+
 	volatile long word_count_global;	// word count dynamically updated by all threads
 	volatile float alpha_global;		// learning rate dynamically updated by all threads
-	volatile public float[] W;			// weights between the input and the hidden layers
-	volatile public float[] V;			// weights between the hidden and the output layers
 
-	long start_time;
+	long start_time, end_time;
+	long max_memory;
 
 	public Word2Vec(String[] args)
 	{
@@ -103,73 +113,68 @@ public class Word2Vec
 			train(FileUtils.getFileList(train_path, train_ext, false));
 		}
 		catch (Exception e) {e.printStackTrace();}
+
+		if(eval_path != null)
+			evaluator = new Evaluator(this, eval_path, null);
 	}
 	
 //	=================================== Training ===================================
-	
-	public void train(List<String> filenames) throws Exception
+
+	Reader<?> initReader(List<File> files) {
+		return new SentenceReader(files, tokenize ? new EnglishTokenizer() : null, lowercase, sentence_border);
+	}
+
+	void train(List<String> filenames) throws Exception
 	{
-		List<File> files = new ArrayList<File>();
-		for(String filename : filenames)
-			files.add(new File(filename));
-		Reader<?> training_reader = new SentenceReader(files, lowercase, sentence_border);
+		List<File> files = filenames.stream().map(File::new).collect(Collectors.toList());
+		Reader<?> training_reader = initReader(files);
 
-		System.out.println("Word2Vec");
-		System.out.println((cbow ? "Continuous Bag of Words" : "Skipgrams") + ", " + (isNegativeSampling() ? "Hierarchical Softmax" : "Negative Sampling"));
-		System.out.println("Reading vocabulary:");
+		BinUtils.LOG.info("\nWord2Vec\n");
+		BinUtils.LOG.info("Reading vocabulary:");
 
-		BinUtils.LOG.info("Reading vocabulary:\n");
 		vocab = new Vocabulary();
 		vocab.learn(training_reader, min_count);
 		word_count_train = vocab.totalWords();
-		BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", vocab.size(), word_count_train));
+		BinUtils.LOG.info("Vocab size "+vocab.size()+", Total Word Count "+word_count_train+"\n");
 
-		System.out.println("Vocab size "+vocab.size()+", Total Word Count "+word_count_train+"\n");
-		System.out.println("Starting training: "+train_path);
-		System.out.println("Files "+files.size()+", threads "+thread_size+", iterations "+train_iteration);
-
-		BinUtils.LOG.info("Initializing neural network.\n");
 		initNeuralNetwork();
-		
-		BinUtils.LOG.info("Initializing optimizer.\n");
+
 		optimizer = isNegativeSampling() ? new NegativeSampling(vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(vocab, sigmoid, vector_size);
 
-		BinUtils.LOG.info("Training vectors:");
+		BinUtils.LOG.info("Training vectors "+train_path);
+		BinUtils.LOG.info((cbow ? "Continuous Bag of Words" : "Skipgrams") + ", " + (isNegativeSampling() ? "Negative Sampling" : "Hierarchical Softmax"));
+		BinUtils.LOG.info("Files "+files.size()+", threads "+thread_size+", iterations "+train_iteration+"\n");
+
 		word_count_global = 0;
 		alpha_global      = alpha_init;
 		subsample_size    = subsample_threshold * word_count_train;
 
-		startThreads(training_reader, false);
-		outputProgress(System.currentTimeMillis());
-		
-		if(eval_path != null){
-			System.out.println("Starting Evaluation:");
-			List<File> test_files = new ArrayList<File>();
-			for(String f : FileUtils.getFileList(eval_path, train_ext, false))
-				test_files.add(new File(f));
+		start_time = System.currentTimeMillis();
 
-			Reader<?> test_reader = new SentenceReader(test_files, lowercase, sentence_border);
-			startThreads(test_reader, true);
-			System.out.println("Evaluated Error: " + optimizer.getError());
-		}
-		if(triad_file != null) {
-			System.out.println("Triad Evaluation:");
-			evaluateVectors(new File(triad_file));
-		}
+		startThreads(training_reader);
 
-		BinUtils.LOG.info("Saving word vectors.\n");
-		save();
+		end_time = System.currentTimeMillis();
+
+		outputProgress(end_time);
+		BinUtils.LOG.info("\nTotal time: "+((end_time - start_time)/1000/60/60f)+" hours");
+
+		BinUtils.LOG.info("Saving word vectors.");
+		saveVectors();
+
+		if(model_file != null){
+			BinUtils.LOG.info("Saving Word2Vec model.");
+			saveModel();
+		}
 	}
 	
-	void startThreads(Reader<?> reader, boolean evaluate) throws IOException
+	void startThreads(Reader<?> reader) throws IOException
 	{
 		Reader<?>[] readers = reader.split(thread_size);
 		reader.close();
 		ExecutorService executor = Executors.newFixedThreadPool(thread_size);
-		start_time = System.currentTimeMillis();
 
 		for (int i = 0; i < thread_size; i++)
-			executor.execute(new TrainTask(readers[i], i, evaluate));
+			executor.execute(new TrainTask(readers[i], i));
 			
 		executor.shutdown();			
 		try {
@@ -186,15 +191,13 @@ public class Word2Vec
 	{
 		private Reader<?> reader;
 		private final int id;
-		private boolean evaluate;
 
 		private long last_time;
 		
-		public TrainTask(Reader<?> reader, int id, boolean evaluate)
+		TrainTask(Reader<?> reader, int id)
 		{
 			this.reader = reader;
 			this.id = id;
-			this.evaluate = evaluate;
 
 			last_time = start_time;
 		}
@@ -219,7 +222,6 @@ public class Word2Vec
 
 				if (words == null)
 				{
-					BinUtils.LOG.info(String.format("Thread %d: %d\n", id, iter));
 					if (++iter == train_iteration) break;
 					adjustLearningRate();
 					try {
@@ -236,16 +238,16 @@ public class Word2Vec
 					if (cbow) Arrays.fill(neu1, 0);
 					Arrays.fill(neu1e, 0);
 					
-					if (cbow) bagOfWords(words, index, window, rand, neu1e, neu1, evaluate);
-					else      skipGram  (words, index, window, rand, neu1e, evaluate);
+					if (cbow) bagOfWords(words, index, window, rand, neu1e, neu1);
+					else      skipGram  (words, index, window, rand, neu1e);
 				}
 
 				// output progress every 15 minutes
 				if(id == 0){
 					long now = System.currentTimeMillis();
 					if(now-last_time > 15*1000*60){
-						last_time = now;
 						outputProgress(now);
+						last_time = now;
 					}
 				}
 			}
@@ -258,7 +260,7 @@ public class Word2Vec
 		alpha_global = alpha_init * rate;
 	}
 	
-	void bagOfWords(int[] words, int index, int window, Random rand, float[] neu1e, float[] neu1, boolean evaluate)
+	void bagOfWords(int[] words, int index, int window, Random rand, float[] neu1e, float[] neu1)
 	{
 		int i, j, k, l, wc = 0, word = words[index];
 
@@ -274,11 +276,6 @@ public class Word2Vec
 		if (wc == 0) return;
 		for (k=0; k<vector_size; k++) neu1[k] /= wc;
 		
-		if(evaluate){
-			optimizer.testBagOfWords(rand, word, V, neu1, neu1e, alpha_global);
-			return;
-		}
-		
 		optimizer.learnBagOfWords(rand, word, V, neu1, neu1e, alpha_global);
 		
 		// hidden -> input
@@ -290,7 +287,7 @@ public class Word2Vec
 		}
 	}
 	
-	void skipGram(int[] words, int index, int window, Random rand, float[] neu1e, boolean evaluate)
+	void skipGram(int[] words, int index, int window, Random rand, float[] neu1e)
 	{
 		int i, j, k, l1, word = words[index];
 		
@@ -299,12 +296,6 @@ public class Word2Vec
 			if (i == 0 || words.length <= j || j < 0) continue;
 			l1 = words[j] * vector_size;
 			Arrays.fill(neu1e, 0);
-			
-			
-			if(evaluate){
-				optimizer.learnSkipGram(rand, word, W, V, neu1e, alpha_global, l1);
-				continue;
-			}
 			
 			optimizer.learnSkipGram(rand, word, W, V, neu1e, alpha_global, l1);
 			
@@ -363,27 +354,25 @@ public class Word2Vec
 
 	void outputProgress(long now)
 	{
-		long time_seconds = (now - start_time)/1000;
+		float time_seconds = (now - start_time)/1000f;
 		float progress = word_count_global / (float)(train_iteration * word_count_train);
 
-		int time_left_hours = (int) (((1-progress)/progress)*(now - start_time)/(1000*60*60));
-		int time_left_remainder =  (int) (((1-progress)/progress)*(now - start_time)/(1000*60)) % 60;
-
-		System.out.print("Alpha: "+ String.format("%1$,.6f",alpha_global)+" ");
-		System.out.print("Progress: "+ String.format("%1$,.2f", progress * 100) + "% ");
-		System.out.print("Words/thread/sec: " + (word_count_global / (thread_size * time_seconds))+" ");
-		System.out.print("Estimated Time Left: " +time_left_hours +":"+time_left_remainder +" ");
+		int time_left_hours = (int) (((1-progress)/progress)*time_seconds/(60*60));
+		int time_left_remainder =  (int) (((1-progress)/progress)*time_seconds/60) % 60;
 
 		Runtime runtime = Runtime.getRuntime();
-		System.out.print("Memory Usage: " + (int)((runtime.totalMemory()-runtime.freeMemory())/(1024*1024)) +"M\n");
+		long memory_usage = runtime.totalMemory()-runtime.freeMemory();
+		if(memory_usage > max_memory)
+			max_memory = memory_usage;
+
+		BinUtils.LOG.info("Alpha: "+ String.format("%1$,.6f",alpha_global)+" "+
+				          "Progress: "+ String.format("%1$,.2f", progress * 100) + "% "+
+				          "Words/thread/sec: " + (int)(word_count_global / thread_size / time_seconds) +" "+
+						  "Estimated Time Left: " +time_left_hours +":"+time_left_remainder +" "+
+						  "Memory Usage: " + (int)(memory_usage/(1024*1024)) +"M");
 	}
 
-	void save() throws IOException
-	{
-		save(IOUtils.createFileOutputStream(output_file));
-	}
-
-	public Map<String,float[]> toMap(boolean normalize)
+	Map<String,float[]> toMap(boolean normalize)
 	{
 		Map<String,float[]> map = new HashMap<>();
 		float[] vector;
@@ -402,12 +391,12 @@ public class Word2Vec
 		return map;
 	}
 	
-	public void normalize(float[] vector)
+	void normalize(float[] vector)
 	{
 		float z = 0;
-		
-		for (int i=0; i<vector.length; i++)
-			z += MathUtils.sq(vector[i]);
+
+		for (float component : vector)
+			z += MathUtils.sq(component);
 		
 		z = (float)Math.sqrt(z);
 		
@@ -415,76 +404,30 @@ public class Word2Vec
 			vector[i] /= z;
 	}
 
-
-	void evaluateVectors(File triad_file) throws IOException
+	void saveVectors() throws IOException
 	{
-		double unweighted_eval = 0.0;
-		int unweighted_count = 0;
-
-		double weighted_eval = 0.0;
-		int weighted_count = 0;
-
-
-		BufferedReader br = new BufferedReader(new FileReader(triad_file));
-
-		String line;
-		while((line = br.readLine()) != null){
-			String[] triad = line.split(",");
-			if(triad.length != 5)
-				throw new IOException("Could not read triad file. Incorrect format.");
-			if(!(vocab.contains(triad[0]) && vocab.contains(triad[1]) && vocab.contains(triad[2])))
-				continue;
-
-			int word_count1 = Integer.parseInt(triad[3]);
-			int word_count2 = Integer.parseInt(triad[4]);
-
-			if((word_count1 > word_count2) == (similarity(triad[1],triad[0]) > similarity(triad[2],triad[0]))) {
-				unweighted_eval++;
-			}
-			unweighted_count++;
-			for(int i=0; i<Math.abs(word_count1-word_count2); i++){
-				weighted_eval++;
-				weighted_count++;
-			}
-
-		}
-		br.close();
-
-		if(unweighted_count>0)
-			unweighted_eval /= unweighted_count;
-		if(weighted_count>0)
-			weighted_eval /= weighted_count;
-
-		System.out.println("Weighted Triad Evaluation: "+weighted_eval);
-		System.out.println("Unweighted Triad Evaluation: "+unweighted_eval);
+		saveVectors(IOUtils.createFileOutputStream(output_file));
 	}
 
-	double similarity(String word1, String word2)
+	void saveModel() throws IOException
 	{
-		int l1 = vocab.indexOf(word1)*vector_size;
-		int l2 = vocab.indexOf(word2)*vector_size;
-
-		double norm1 = 0.0, norm2 = 0.0;
-
-		double dot_product = 0.0;
-		for(int c=0; c<vector_size; c++){
-			dot_product += W[l1+c]*W[l2+c];
-			norm1 += W[l1+c]*W[l1+c];
-			norm2 += W[l2+c]*W[l2+c];
-		}
-		norm1 = Math.sqrt(norm1);
-		norm2 = Math.sqrt(norm2);
-
-		return dot_product/(norm1*norm2);
+		saveModel(IOUtils.createFileOutputStream(model_file));
 	}
 
-	public void save(OutputStream out) throws IOException
+	void saveVectors(OutputStream out) throws IOException
 	{
 		ObjectOutputStream oout = IOUtils.createObjectXZBufferedOutputStream(out);
 		oout.writeObject(toMap(normalize));
 		oout.close();
 	}
-	
+
+	void saveModel(OutputStream out) throws IOException
+	{
+		ObjectOutputStream oout = IOUtils.createObjectXZBufferedOutputStream(out);
+		oout.writeObject(this);
+		oout.close();
+	}
+
 	static public void main(String[] args)
 	{
 		new Word2Vec(args);

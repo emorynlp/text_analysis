@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.emory.mathcs.nlp.common.util.FileUtils;
+import edu.emory.mathcs.nlp.tokenization.EnglishTokenizer;
 import org.junit.Test;
 
 import edu.emory.mathcs.nlp.common.util.DSUtils;
@@ -42,7 +43,7 @@ public class SentenceReaderTest
 			files.add(new File(filename));
 
 		Vocabulary vocab = new Vocabulary();
-		SentenceReader in = new SentenceReader(files, false, false);
+		SentenceReader in = new SentenceReader(files, null, false, false);
 		vocab.learn(in, 0);
 		
 		long count = vocab.totalWords();
@@ -64,7 +65,7 @@ public class SentenceReaderTest
 		for(String f : filenames)
 			files.add(new File(f));
 
-		SentenceReader sr = new SentenceReader(files,false,true);
+		SentenceReader sr = new SentenceReader(files, new EnglishTokenizer(), false, true);
 
 		SentenceReader[] readers = sr.split(2);
 
