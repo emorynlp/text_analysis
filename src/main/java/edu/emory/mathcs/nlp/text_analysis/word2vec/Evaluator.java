@@ -30,17 +30,23 @@ public class Evaluator {
     @Option(name="-ext", usage="extension of the training files (default: \"*\").", required=false, metaVar="<string>")
     String train_ext = "*";
     @Option(name="-triad-file", usage="triad word similarity file for (external) vector evaluation.", required=false, metaVar="<filename>")
-    String triad_path = default_triad_file;
+    String triad_path = null;
 
     Word2Vec word2vec;
 
     static final String default_triad_file = "src/main/resources/Triads_1202.csv";
+    static final String default_output_file = "word2vec_evaluation.txt";
 
-    public Evaluator(Word2Vec word2vec, String eval_path, String output_filename)
+    boolean polysemous;
+    int senses;
+
+    public Evaluator(Word2Vec word2vec, String eval_path)
     {
         this.word2vec = word2vec;
         this.eval_path = eval_path;
-        this.output_path = output_filename;
+
+        polysemous = word2vec instanceof PolysemousWord2Vec;
+        if (polysemous) senses = ((PolysemousWord2Vec)word2vec).senses;
 
         try
         {
@@ -58,6 +64,9 @@ public class Evaluator {
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+
+        polysemous = word2vec instanceof PolysemousWord2Vec;
+        if (polysemous) senses = ((PolysemousWord2Vec)word2vec).senses;
 
         try
         {
@@ -78,7 +87,12 @@ public class Evaluator {
         Reader<?> test_reader = word2vec.initReader(test_files);
         startThreads(test_reader);
 
-        float[] triad_eval = triadEvaluation(new File(triad_path));
+        BufferedReader in;
+        if (triad_path == null) in = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(default_triad_file)));
+        else                    in = new BufferedReader(new FileReader(triad_path));
+        float[] triad_eval = triadEvaluation(in);
+        in.close();
+
         float time_seconds = (word2vec.end_time - word2vec.start_time) / 1000f;
 
 
@@ -87,32 +101,33 @@ public class Evaluator {
         System.out.println("Unweighted Triad Evaluation: " + triad_eval[1]);
         System.out.println("Words/thread/sec: " + (int)(word2vec.word_count_global / (word2vec.thread_size * time_seconds)));
         System.out.println("Total time: " + String.format("%1$,.2f", time_seconds / 60 / 60.0));
-        System.out.println("Max Memory Usage: " + word2vec.max_memory+"\n");
+        System.out.println("Max Memory Usage: " + (word2vec.max_memory/(1024*1024)) +"M\n");
 
-        if (output_path != null) {
-            File output_file = new File(output_path);
-            if (!output_file.exists())
-                output_file.createNewFile();
+        File output_file;
+        if (output_path == null) output_file = new File(default_output_file);
+        else                     output_file = new File(output_path);
+        if (!output_file.exists())
+            output_file.createNewFile();
 
-            FileWriter out = new FileWriter(output_file, true);
-            out.write(word2vec.getClass() + " " + (word2vec.cbow ? "CBOW" : "Skip-grams") +", " + ( word2vec.isNegativeSampling() ? "Negative" : "Hierarchical")+"\n");
-            if(word2vec.tokenize)
-                out.write("Tokenized ");
-            if(word2vec.lowercase)
-                out.write("Lowercase ");
-            if (word2vec.sentence_border)
-                out.write("Sentence Border");
-            out.write("\nVector Size: " + word2vec.vector_size+"\n");
-            out.write("Iterations: " + word2vec.train_iteration+"\n");
-            out.write("Evaluated Error: " + word2vec.optimizer.getError() + "\n");
-            out.write("Weighted Triad Evaluation: " + triad_eval[0] + "\n");
-            out.write("Unweighted Triad Evaluation: " + triad_eval[1] + "\n");
-            out.write("Total time: " + String.format("%1$,.2f", time_seconds / 60 / 60.0) + "\n");
-            out.write("Words/thread/sec: " + (int)(word2vec.word_count_global / (word2vec.thread_size * time_seconds)) + "\n");
-            out.write("Max Memory Usage: " + word2vec.max_memory+"\n\n");
+        FileWriter out = new FileWriter(output_file, true);
+        out.write(word2vec.getClass() + " " + (word2vec.cbow ? "CBOW" : "Skip-grams") +", " + ( word2vec.isNegativeSampling() ? "Negative" : "Hierarchical")+"\n");
+        if(word2vec.tokenize)
+            out.write("Tokenized ");
+        if(word2vec.lowercase)
+            out.write("Lowercase ");
+        if (word2vec.sentence_border)
+            out.write("Sentence Border");
+        out.write("\nVector Size: " + word2vec.vector_size+"\n");
+        out.write("Iterations: " + word2vec.train_iteration+"\n");
+        out.write("Evaluated Error: " + String.format("%1$,.6f",word2vec.optimizer.getError()) + "\n");
+        out.write("Weighted Triad Evaluation: " + triad_eval[0] + "\n");
+        out.write("Unweighted Triad Evaluation: " + triad_eval[1] + "\n");
+        out.write("Total time: " + String.format("%1$,.2f", time_seconds / 60 / 60.0) + "\n");
+        out.write("Words/thread/sec: " + (int)(word2vec.word_count_global / (word2vec.thread_size * time_seconds)) + "\n");
+        out.write("Max Memory Usage: " + (word2vec.max_memory/(1024*1024)) +"M\n\n");
 
-            out.close();
-        }
+        out.close();
+
     }
 
     void startThreads(Reader<?> reader) throws IOException
@@ -150,7 +165,8 @@ public class Evaluator {
         public void run()
         {
             Random  rand  = new XORShiftRandom(reader.hashCode());
-            float[] neu1  = word2vec.cbow ? new float[word2vec.vector_size] : null;
+            float[] neu1  = word2vec.cbow && !polysemous ? new float[word2vec.vector_size] : null;
+            float[][] neu1p  = word2vec.cbow && polysemous ? new float[senses][word2vec.vector_size] : null;
             int     iter  = 0;
             int     index, window;
             int[]   words = null;
@@ -177,10 +193,18 @@ public class Evaluator {
                 for (index=0; index<words.length; index++)
                 {
                     window = 1 + rand.nextInt() % word2vec.max_skip_window;	// dynamic window size
-                    if (word2vec.cbow) Arrays.fill(neu1, 0);
+                    if (word2vec.cbow && !polysemous) Arrays.fill(neu1, 0);
+                    if (word2vec.cbow && polysemous) for(int s=0; s<senses; s++) Arrays.fill(neu1p[s], 0);
 
-                    if (word2vec.cbow) evalBagOfWords(words, index, window, rand, neu1);
-                    else      evalSkipGram  (words, index, window, rand);
+
+                    if(polysemous){
+                        if (word2vec.cbow) evalPolysemousBagOfWords(words, index, window, rand, neu1p);
+                        else evalPolysemousSkipGram(words, index, window, rand);
+                    }
+                    else {
+                        if (word2vec.cbow) evalBagOfWords(words, index, window, rand, neu1);
+                        else evalSkipGram(words, index, window, rand);
+                    }
                 }
             }
         }
@@ -188,14 +212,14 @@ public class Evaluator {
 
     void evalBagOfWords(int[] words, int index, int window, Random rand, float[] neu1)
     {
-        int i, j, k, l, wc = 0, word = words[index];
+        int i, j, k, wc = 0, context, word = words[index];
 
         // input -> hidden
         for (i=-window,j=index+i; i<=window; i++,j++)
         {
             if (i == 0 || words.length <= j || j < 0) continue;
-            l = words[j] * word2vec.vector_size;
-            for (k=0; k<word2vec.vector_size; k++) neu1[k] += word2vec.W[k+l];
+            context = words[j];
+            for (k=0; k<word2vec.vector_size; k++) neu1[k] += word2vec.W[context][k];
             wc++;
         }
 
@@ -207,18 +231,56 @@ public class Evaluator {
 
     void evalSkipGram(int[] words, int index, int window, Random rand)
     {
-        int i, j, l1, word = words[index];
+        int i, j, context, word = words[index];
 
         for (i=-window,j=index+i; i<=window; i++,j++)
         {
             if (i == 0 || words.length <= j || j < 0) continue;
-            l1 = words[j] * word2vec.vector_size;
+            context = words[j];
 
-            word2vec.optimizer.testSkipGram(rand, word, word2vec.W, word2vec.V, l1);
+            word2vec.optimizer.testSkipGram(rand, word, word2vec.W, word2vec.V, context);
         }
     }
 
-    public float[] triadEvaluation(File triad_file) throws IOException
+    void evalPolysemousBagOfWords(int[] words, int index, int window, Random rand, float[][] neu1)
+    {
+        int i, j, s, k, wc = 0, context, word = words[index];
+
+        // input -> hidden
+        for (i=-window,j=index+i; i<=window; i++,j++)
+        {
+            if (i == 0 || words.length <= j || j < 0) continue;
+            context = words[j];
+
+            for (s=0; s<senses; s++)
+                for (k=0; k<word2vec.vector_size; k++)
+                    neu1[s][k] += ((PolysemousWord2Vec)word2vec).W[s][context][k];
+            wc++;
+        }
+
+        if (wc == 0) return;
+
+        for (s=0; s<senses; s++)
+            for (k=0; k<word2vec.vector_size; k++)
+                neu1[s][k] /= wc;
+
+        word2vec.optimizer.testPolysemousBagOfWords(rand, word, ((PolysemousWord2Vec)word2vec).V, neu1, senses);
+    }
+
+    void evalPolysemousSkipGram(int[] words, int index, int window, Random rand)
+    {
+        int i, j, context, word = words[index];
+
+        for (i=-window,j=index+i; i<=window; i++,j++)
+        {
+            if (i == 0 || words.length <= j || j < 0) continue;
+            context = words[j];
+
+            word2vec.optimizer.testPolysemousSkipGram(rand, word, ((PolysemousWord2Vec)word2vec).W, ((PolysemousWord2Vec)word2vec).V, context, senses);
+        }
+    }
+
+    public float[] triadEvaluation(BufferedReader br) throws IOException
     {
         float unweighted_eval = 0;
         int unweighted_count = 0;
@@ -226,8 +288,6 @@ public class Evaluator {
         float weighted_eval = 0;
         int weighted_count = 0;
 
-
-        BufferedReader br = new BufferedReader(new FileReader(triad_file));
 
         String line;
         while((line = br.readLine()) != null){
@@ -250,7 +310,6 @@ public class Evaluator {
                 weighted_count++;
             unweighted_count++;
         }
-        br.close();
 
         if(unweighted_count != 0)
             unweighted_eval /= unweighted_count;
@@ -262,16 +321,36 @@ public class Evaluator {
 
     double similarity(String word1, String word2)
     {
-        int l1 = word2vec.vocab.indexOf(word1)*word2vec.vector_size;
-        int l2 = word2vec.vocab.indexOf(word2)*word2vec.vector_size;
+        if(polysemous)
+            return similarity(((PolysemousWord2Vec)word2vec).W, word1, word2);
+        else
+            return similarity(word2vec.W, word1, word2);
+    }
+
+    double similarity(float[][][] syn0, String word1, String word2)
+    {
+        double similarity, max_similarity = 0;
+
+        for(int s=0; s<senses; s++){
+            similarity = similarity(syn0[s], word1, word2);
+            if (similarity > max_similarity)
+                max_similarity = similarity;
+        }
+        return max_similarity;
+    }
+
+    double similarity(float[][] syn0, String word1, String word2)
+    {
+        int w1 = word2vec.vocab.indexOf(word1);
+        int w2 = word2vec.vocab.indexOf(word2);
 
         double norm1 = 0.0, norm2 = 0.0;
 
         double dot_product = 0.0;
-        for(int c=0; c<word2vec.vector_size; c++){
-            dot_product += word2vec.W[l1+c]*word2vec.W[l2+c];
-            norm1 += word2vec.W[l1+c]*word2vec.W[l1+c];
-            norm2 += word2vec.W[l2+c]*word2vec.W[l2+c];
+        for(int k=0; k<word2vec.vector_size; k++){
+            dot_product += syn0[w1][k]*syn0[w2][k];
+            norm1       += syn0[w1][k]*syn0[w1][k];
+            norm2       += syn0[w2][k]*syn0[w2][k];
         }
         norm1 = Math.sqrt(norm1);
         norm2 = Math.sqrt(norm2);

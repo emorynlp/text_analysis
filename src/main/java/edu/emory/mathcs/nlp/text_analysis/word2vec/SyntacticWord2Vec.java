@@ -83,21 +83,21 @@ public class SyntacticWord2Vec extends Word2Vec {
             BinUtils.LOG.info("Saving Word2Vec model.");
             saveModel();
         }
+        BinUtils.LOG.info("");
     }
 
     /** Initializes weights between the input layer to the hidden layer using random numbers between [-0.5, 0.5]. */
     @Override
     void initNeuralNetwork()
     {
-        int lemma_size = vocab.size() * vector_size;
-        int depend_size = depend_vocab.size() * vector_size;
         Random rand = new XORShiftRandom(1);
 
-        W = new float[lemma_size];
-        V = new float[depend_size];
+        W = new float[vocab.size()][vector_size];
+        V = new float[depend_vocab.size()][vector_size];
 
-        for (int i=0; i<lemma_size; i++)
-            W[i] = (float)((rand.nextDouble() - 0.5) / vector_size);
+        for (int i=0; i<vocab.size(); i++)
+            for (int j=0; j<vector_size; j++)
+                W[i][j] = (float)((rand.nextDouble() - 0.5) / vector_size);
     }
 
     // next returns indices in depend_vocab which can be mapped to lemmas later
@@ -119,8 +119,7 @@ public class SyntacticWord2Vec extends Word2Vec {
             // sub-sampling: randomly discards frequent words
             if (subsample_threshold > 0)
             {
-                long c = depend_vocab.get(index).count;
-                d = (Math.sqrt(MathUtils.divide(c, subsample_size) + 1) * (subsample_size / c));
+                d = (Math.sqrt(MathUtils.divide(depend_vocab.get(index).count, subsample_size)) + 1) * (subsample_size / depend_vocab.get(index).count);
                 if (d < rand.nextDouble()) continue;
             }
 
@@ -130,20 +129,21 @@ public class SyntacticWord2Vec extends Word2Vec {
         word_count_global += count;
         return (j == 0) ? next(reader, rand) : (j == words.length) ? next : Arrays.copyOf(next, j);
     }
+
     // bagOfWords should map words[j] to lemma
     @Override
     void bagOfWords(int[] words, int index, int window, Random rand, float[] neu1e, float[] neu1)
     {
-        int i, j, k, l, wc = 0, word = words[index];
+        int i, j, k, wc = 0, context, word = words[index];
 
         // input -> hidden
         for (i=-window,j=index+i; i<=window; i++,j++)
         {
             if (i == 0 || words.length <= j || j < 0) continue;
-            int lemma = dependToLemma.get(words[j]);
-            if (lemma < 0) continue;
-            l = lemma * vector_size;
-            for (k=0; k<vector_size; k++) neu1[k] += W[k+l];
+            context = dependToLemma.get(words[j]);
+            if (context < 0) continue;
+
+            for (k=0; k<vector_size; k++) neu1[k] += W[context][k];
             wc++;
         }
 
@@ -156,10 +156,10 @@ public class SyntacticWord2Vec extends Word2Vec {
         for (i=-window,j=index+i; i<=window; i++,j++)
         {
             if (i == 0 || words.length <= j || j < 0) continue;
-            int lemma = dependToLemma.get(words[j]);
-            if (lemma < 0) continue;
-            l = lemma * vector_size;
-            for (k=0; k<vector_size; k++) W[k+l] += neu1e[k];
+            context = dependToLemma.get(words[j]);
+            if (context < 0) continue;
+
+            for (k=0; k<vector_size; k++) W[context][k] += neu1e[k];
         }
     }
 
@@ -168,20 +168,19 @@ public class SyntacticWord2Vec extends Word2Vec {
     @Override
     void skipGram(int[] words, int index, int window, Random rand, float[] neu1e)
     {
-        int i, j, k, l1, word = words[index];
+        int i, j, k, context, word = words[index];
 
         for (i=-window,j=index+i; i<=window; i++,j++)
         {
             if (i == 0 || words.length <= j || j < 0) continue;
-            int lemma = dependToLemma.get(words[j]);
-            if (lemma < 0) continue;
-            l1 = lemma * vector_size;
+            context = dependToLemma.get(words[j]);
+            if (context < 0) continue;
             Arrays.fill(neu1e, 0);
 
-            optimizer.learnSkipGram(rand, word, W, V, neu1e, alpha_global, l1);
+            optimizer.learnSkipGram(rand, word, W, V, neu1e, alpha_global, context);
 
             // hidden -> input
-            for (k=0; k<vector_size; k++) W[l1+k] += neu1e[k];
+            for (k=0; k<vector_size; k++) W[context][k] += neu1e[k];
         }
     }
 

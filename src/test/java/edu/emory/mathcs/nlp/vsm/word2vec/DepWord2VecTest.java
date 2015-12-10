@@ -45,9 +45,9 @@ public class DepWord2VecTest {
         Word2Vec word2vec = new DepWord2Vec(params);
 
         for(int i=0; i<word2vec.vocab.size(); i++){
-            System.out.print(word2vec.vocab.get(i)+" ");
+            System.out.print(word2vec.vocab.get(i).form+" ");
             for(int j=0; j<vector_size; j++)
-                System.out.print(String.format("%1$,.6f",word2vec.W[i*vector_size+j])+" ");
+                System.out.print(String.format("%1$,.6f",word2vec.W[i][j])+" ");
             System.out.println();
         }
     }

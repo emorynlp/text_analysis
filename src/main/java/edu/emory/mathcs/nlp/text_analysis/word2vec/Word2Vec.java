@@ -86,8 +86,8 @@ public class Word2Vec implements Serializable
 
 	final float ALPHA_MIN_RATE  = 0.0001f;
 
-	public volatile float[] W;			// weights between the input and the hidden layers
-	public volatile float[] V;			// weights between the hidden and the output layers
+	public volatile float[][] W;			// weights between the input and the hidden layers (W[word][component])
+	public volatile float[][] V;			// weights between the hidden and the output layers (V[word][component])
 
 	public Vocabulary vocab;
 	Sigmoid sigmoid;
@@ -115,7 +115,7 @@ public class Word2Vec implements Serializable
 		catch (Exception e) {e.printStackTrace();}
 
 		if(eval_path != null)
-			evaluator = new Evaluator(this, eval_path, null);
+			evaluator = new Evaluator(this, eval_path);
 	}
 	
 //	=================================== Training ===================================
@@ -165,6 +165,7 @@ public class Word2Vec implements Serializable
 			BinUtils.LOG.info("Saving Word2Vec model.");
 			saveModel();
 		}
+		BinUtils.LOG.info("");
 	}
 	
 	void startThreads(Reader<?> reader) throws IOException
@@ -199,7 +200,8 @@ public class Word2Vec implements Serializable
 			this.reader = reader;
 			this.id = id;
 
-			last_time = start_time;
+			// output after 10 seconds
+			last_time = start_time + 10000;
 		}
 		
 		@Override
@@ -262,14 +264,14 @@ public class Word2Vec implements Serializable
 	
 	void bagOfWords(int[] words, int index, int window, Random rand, float[] neu1e, float[] neu1)
 	{
-		int i, j, k, l, wc = 0, word = words[index];
+		int i, j, k, wc = 0, context, word = words[index];
 
 		// input -> hidden
 		for (i=-window,j=index+i; i<=window; i++,j++)
 		{
 			if (i == 0 || words.length <= j || j < 0) continue;
-			l = words[j] * vector_size;
-			for (k=0; k<vector_size; k++) neu1[k] += W[k+l];
+			context = words[j];
+			for (k=0; k<vector_size; k++) neu1[k] += W[context][k];
 			wc++;
 		}
 		
@@ -282,25 +284,25 @@ public class Word2Vec implements Serializable
 		for (i=-window,j=index+i; i<=window; i++,j++)
 		{
 			if (i == 0 || words.length <= j || j < 0) continue;
-			l = words[j] * vector_size;
-			for (k=0; k<vector_size; k++) W[k+l] += neu1e[k];
+			context = words[j];
+			for (k=0; k<vector_size; k++) W[context][k] += neu1e[k];
 		}
 	}
 	
 	void skipGram(int[] words, int index, int window, Random rand, float[] neu1e)
 	{
-		int i, j, k, l1, word = words[index];
+		int i, j, k, context, word = words[index];
 		
 		for (i=-window,j=index+i; i<=window; i++,j++)
 		{
 			if (i == 0 || words.length <= j || j < 0) continue;
-			l1 = words[j] * vector_size;
+			context = words[j];
 			Arrays.fill(neu1e, 0);
 			
-			optimizer.learnSkipGram(rand, word, W, V, neu1e, alpha_global, l1);
+			optimizer.learnSkipGram(rand, word, W, V, neu1e, alpha_global, context);
 			
 			// hidden -> input
-			for (k=0; k<vector_size; k++) W[l1+k] += neu1e[k];
+			for (k=0; k<vector_size; k++) W[context][k] += neu1e[k];
 		}
 	}
 	
@@ -314,14 +316,14 @@ public class Word2Vec implements Serializable
 	/** Initializes weights between the input layer to the hidden layer using random numbers between [-0.5, 0.5]. */
 	void initNeuralNetwork()
 	{
-		int size = vocab.size() * vector_size;
 		Random rand = new XORShiftRandom(1);
 
-		W = new float[size];
-		V = new float[size];
+		W = new float[vocab.size()][vector_size];
+		V = new float[vocab.size()][vector_size];
 		
-		for (int i=0; i<size; i++)
-			W[i] = (float)((rand.nextDouble() - 0.5) / vector_size);
+		for (int i=0; i<vocab.size(); i++)
+			for (int j=0; j<vector_size; j++)
+				W[i][j] = (float)((rand.nextDouble() - 0.5) / vector_size);
 	}
 	
 	int[] next(Reader<?> reader, Random rand) throws IOException
@@ -355,7 +357,7 @@ public class Word2Vec implements Serializable
 	void outputProgress(long now)
 	{
 		float time_seconds = (now - start_time)/1000f;
-		float progress = word_count_global / (float)(train_iteration * word_count_train);
+		float progress = word_count_global / (float)(train_iteration * word_count_train + 1);
 
 		int time_left_hours = (int) (((1-progress)/progress)*time_seconds/(60*60));
 		int time_left_remainder =  (int) (((1-progress)/progress)*time_seconds/60) % 60;
@@ -381,9 +383,8 @@ public class Word2Vec implements Serializable
 		
 		for (i=0; i<vocab.size(); i++)
 		{
-			l = i * vector_size;
 			key = vocab.get(i).form;
-			vector = Arrays.copyOfRange(W, l, l+vector_size);
+			vector = W[i];
 			if (normalize) normalize(vector);
 			map.put(key, vector);
 		}
@@ -406,19 +407,21 @@ public class Word2Vec implements Serializable
 
 	void saveVectors() throws IOException
 	{
-		saveVectors(IOUtils.createFileOutputStream(output_file));
+		Map<String,float[]> map = toMap(normalize);
+
+		FileWriter out = new FileWriter(new File(output_file));
+		for(String word : map.keySet()) {
+			out.write(word + "\t");
+			for(float f : map.get(word))
+				out.write(f + "\t");
+			out.write("\n");
+		}
+		out.close();
 	}
 
 	void saveModel() throws IOException
 	{
 		saveModel(IOUtils.createFileOutputStream(model_file));
-	}
-
-	void saveVectors(OutputStream out) throws IOException
-	{
-		ObjectOutputStream oout = IOUtils.createObjectXZBufferedOutputStream(out);
-		oout.writeObject(toMap(normalize));
-		oout.close();
 	}
 
 	void saveModel(OutputStream out) throws IOException
