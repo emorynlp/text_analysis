@@ -16,26 +16,28 @@
 package edu.emory.mathcs.nlp.text_analysis.word2vec;
 
 import java.io.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import edu.emory.mathcs.nlp.tokenization.EnglishTokenizer;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.Reader;
 import org.kohsuke.args4j.Option;
 
 import edu.emory.mathcs.nlp.common.random.XORShiftRandom;
 import edu.emory.mathcs.nlp.common.util.BinUtils;
 import edu.emory.mathcs.nlp.common.util.FileUtils;
-import edu.emory.mathcs.nlp.common.util.IOUtils;
 import edu.emory.mathcs.nlp.common.util.MathUtils;
 import edu.emory.mathcs.nlp.common.util.Sigmoid;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.HierarchicalSoftmax;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.NegativeSampling;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.Optimizer;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.Reader;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.SentenceReader;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.*;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
 
 /**
@@ -43,16 +45,12 @@ import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
  * http://arxiv.org/pdf/1301.3781.pdf
  * http://www-personal.umich.edu/~ronxin/pdf/w2vexp.pdf
  */
-public class Word2Vec implements Serializable
+public class Word2Vec
 {
-	private static final long serialVersionUID = -7561800341345075367L;
-
 	@Option(name="-train", usage="path to the training file or the directory containig the training files.", required=true, metaVar="<filepath>")
 	String train_path = null;
 	@Option(name="-output", usage="output file to save the resulting word vectors.", required=true, metaVar="<filename>")
 	String output_file = null;
-	@Option(name="-save-model", usage="output file to save Word2Vec model.", required=false, metaVar="<filename>")
-	String model_file = null;
 	@Option(name="-ext", usage="extension of the training files (default: \"*\").", required=false, metaVar="<string>")
 	String train_ext = "*";
 	@Option(name="-size", usage="size of word vectors (default: 100).", required=false, metaVar="<int>")
@@ -61,7 +59,7 @@ public class Word2Vec implements Serializable
 	int max_skip_window = 5;
 	@Option(name="-sample", usage="threshold for occurrence of words (default: 1e-3). Those that appear with higher frequency in the training data will be randomly down-sampled.", required=false, metaVar="<float>")
 	float subsample_threshold = 0.001f;
-	@Option(name="-negative", usage="number of negative examples (common values are 3 - 10). If negative = 0, use Hierarchical Softmax instead of Negative Sampling.", required=false, metaVar="<int>")
+	@Option(name="-negative", usage="number of negative examples (default: 5; common values are 3 - 10). If negative = 0, use Hierarchical Softmax instead of Negative Sampling.", required=false, metaVar="<int>")
 	int negative_size = 5;
 	@Option(name="-threads", usage="number of threads (default: 12).", required=false, metaVar="<int>")
 	int thread_size = 12;
@@ -74,34 +72,34 @@ public class Word2Vec implements Serializable
 	@Option(name="-cbow", usage="If set, use the continuous bag-of-words model instead of the skip-gram model.", required=false, metaVar="<boolean>")
 	boolean cbow = false;
 	@Option(name="-normalize", usage="If set, normalize each vector.", required=false, metaVar="<boolean>")
-	boolean normalize = false;
-	@Option(name="-lowercase", usage="If set, all words will be set to lowercase.", required=false, metaVar="<boolean>")
-	boolean lowercase = false;
-	@Option(name="-sentence-border", usage="If set, use symbols <s> and </s> for start and end of sentence.", required=false, metaVar="<boolean>")
-	boolean sentence_border = false;
-	@Option(name="-tokenize", usage="If set, tokenize sentence, otherwise split words by whitespace.", required=false, metaVar="<boolean>")
-	boolean tokenize = false;
-	@Option(name="-evaluate", usage="path to file or directory to evaluate vectors.", required=false, metaVar="<filename>")
-	String eval_path = null;
+	boolean normalize = true;
+
+	/* TODO Austin
+	 * Add cmd line options
+	 * tokenize, lowercase, border, evaluate
+	 */
 
 	final float ALPHA_MIN_RATE  = 0.0001f;
 
-	public volatile float[][] W;			// weights between the input and the hidden layers (W[word][component])
-	public volatile float[][] V;			// weights between the hidden and the output layers (V[word][component])
+	/* Note that in regular word2vec, the input and output layers
+	 * are the same. In cases where we want to allow asymmetry between
+	 * these layers (like in syntactic word2vec), we have to distinguish
+	 * between input and output vocabularies.
+	 */
+	public Vocabulary in_vocab;
+	public Vocabulary out_vocab;
 
-	public Vocabulary vocab;
 	Sigmoid sigmoid;
-	Optimizer optimizer;
-	Evaluator evaluator;
-
 	long word_count_train;
 	float subsample_size;
-
+	Optimizer optimizer;
+	
 	volatile long word_count_global;	// word count dynamically updated by all threads
 	volatile float alpha_global;		// learning rate dynamically updated by all threads
+	volatile public float[] W;			// weights between the input and the hidden layers
+	volatile public float[] V;			// weights between the hidden and the output layers
 
-	long start_time, end_time;
-	long max_memory;
+	long start_time;
 
 	public Word2Vec(String[] args)
 	{
@@ -113,97 +111,74 @@ public class Word2Vec implements Serializable
 			train(FileUtils.getFileList(train_path, train_ext, false));
 		}
 		catch (Exception e) {e.printStackTrace();}
-
-		if(eval_path != null)
-			evaluator = new Evaluator(this, eval_path);
 	}
 	
 //	=================================== Training ===================================
-
-	Reader<?> initReader(List<File> files) {
-		return new SentenceReader(files, tokenize ? new EnglishTokenizer() : null, lowercase, sentence_border);
-	}
-
-	void train(List<String> filenames) throws Exception
+	
+	public void train(List<String> filenames) throws Exception
 	{
-		List<File> files = filenames.stream().map(File::new).collect(Collectors.toList());
-		Reader<?> training_reader = initReader(files);
+		BinUtils.LOG.info("Reading vocabulary:\n");
 
-		BinUtils.LOG.info("\nWord2Vec\n");
-		BinUtils.LOG.info("Reading vocabulary:");
+		// ------- Austin's code -------------------------------------
+		in_vocab = (out_vocab = new Vocabulary());
 
-		vocab = new Vocabulary();
-		vocab.learn(training_reader, min_count);
-		word_count_train = vocab.totalWords();
-		BinUtils.LOG.info("Vocab size "+vocab.size()+", Total Word Count "+word_count_train+"\n");
+		List<Reader<String>> readers = (new SentenceReader(filenames.stream().map(File::new).collect(Collectors.toList())))
+												.splitParallel(thread_size);
+		in_vocab.learnParallel(readers, min_count);
+		word_count_train = in_vocab.totalCount();
+		// -----------------------------------------------------------
 
+		BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
+		
+		BinUtils.LOG.info("Initializing neural network.\n");
 		initNeuralNetwork();
+		
+		BinUtils.LOG.info("Initializing optimizer.\n");
+		optimizer = isNegativeSampling() ? new NegativeSampling(in_vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(in_vocab, sigmoid, vector_size);
 
-		optimizer = isNegativeSampling() ? new NegativeSampling(vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(vocab, sigmoid, vector_size);
-
-		BinUtils.LOG.info("Training vectors "+train_path);
-		BinUtils.LOG.info((cbow ? "Continuous Bag of Words" : "Skipgrams") + ", " + (isNegativeSampling() ? "Negative Sampling" : "Hierarchical Softmax"));
-		BinUtils.LOG.info("Files "+files.size()+", threads "+thread_size+", iterations "+train_iteration+"\n");
-
+		BinUtils.LOG.info("Training vectors:");
 		word_count_global = 0;
 		alpha_global      = alpha_init;
 		subsample_size    = subsample_threshold * word_count_train;
-
-		start_time = System.currentTimeMillis();
-
-		startThreads(training_reader);
-
-		end_time = System.currentTimeMillis();
-
-		outputProgress(end_time);
-		BinUtils.LOG.info("\nTotal time: "+((end_time - start_time)/1000/60/60f)+" hours");
-
-		BinUtils.LOG.info("Saving word vectors.");
-		saveVectors();
-
-		if(model_file != null){
-			BinUtils.LOG.info("Saving Word2Vec model.");
-			saveModel();
-		}
-		BinUtils.LOG.info("");
-	}
-	
-	void startThreads(Reader<?> reader) throws IOException
-	{
-		Reader<?>[] readers = reader.split(thread_size);
-		reader.close();
 		ExecutorService executor = Executors.newFixedThreadPool(thread_size);
 
-		for (int i = 0; i < thread_size; i++)
-			executor.execute(new TrainTask(readers[i], i));
-			
-		executor.shutdown();			
-		try {
-			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		// ------- Austin's code -------------------------------------
+		start_time = System.currentTimeMillis();
+
+		int id = 0;
+		for (Reader<String> r: readers)
+		{
+			executor.execute(new TrainTask(r,id));
+			id++;
 		}
-			
-		for (int i = 0; i < thread_size; i++)
-			readers[i].close();
+		// -----------------------------------------------------------
+
+		executor.shutdown();
+		
+		try { executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
+		catch (InterruptedException e) {e.printStackTrace();}
+
+
+		BinUtils.LOG.info("Saving word vectors.\n");
+		save(new File(output_file));
 	}
 	
 	class TrainTask implements Runnable
 	{
-		private Reader<?> reader;
-		private final int id;
+		// ------- Austin ----------------------
+		private Reader<String> reader;
+		private int id;
+		private long last_time = System.currentTimeMillis() - 14*60*100; // set back 14 minutes (first output after 60 seconds)
 
-		private long last_time;
-		
-		TrainTask(Reader<?> reader, int id)
+		/* Tasks are each parameterized by a reader which is dedicated to a section of the corpus
+		 * (not necesarily one file). The corpus is split to divide it evenly between Tasks without breaking up sentences. */
+		public TrainTask(Reader<String> reader, int id)
 		{
 			this.reader = reader;
 			this.id = id;
-
-			// output after 10 seconds
-			last_time = start_time + 10000;
 		}
-		
+		// -------------------------------------
+
 		@Override
 		public void run()
 		{
@@ -212,25 +187,18 @@ public class Word2Vec implements Serializable
 			float[] neu1e = new float[vector_size];
 			int     iter  = 0;
 			int     index, window;
-			int[]   words = null;
+			int[]   words;
 			
 			while (true)
 			{
-				try {
-					words = next(reader, rand);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				words = next(reader, rand, true);
 
 				if (words == null)
 				{
 					if (++iter == train_iteration) break;
 					adjustLearningRate();
-					try {
-						reader.startOver();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					// readers have a built in restart button - Austin
+					try { reader.restart(); } catch (IOException e) { e.printStackTrace(); }
 					continue;
 				}
 				
@@ -252,9 +220,32 @@ public class Word2Vec implements Serializable
 						last_time = now;
 					}
 				}
+
 			}
 		}
 	}
+
+	// -------------- Austin's code ------------------------------------------------------
+
+	void outputProgress(long now)
+	{
+		float time_seconds = (now - start_time)/1000f;
+		float progress = word_count_global / (float)(train_iteration * word_count_train + 1);
+
+		int time_left_hours = (int) (((1-progress)/progress)*time_seconds/(60*60));
+		int time_left_remainder =  (int) (((1-progress)/progress)*time_seconds/60) % 60;
+
+		Runtime runtime = Runtime.getRuntime();
+		long memory_usage = runtime.totalMemory()-runtime.freeMemory();
+
+		System.out.println("Alpha: "+ String.format("%1$,.4f",alpha_global)+" "+
+				"Progress: "+ String.format("%1$,.2f", progress * 100) + "% "+
+				"Words/thread/sec: " + (int)(word_count_global / thread_size / time_seconds) +" "+
+				"Estimated Time Left: " +time_left_hours +":"+String.format("%02d",time_left_remainder) +" "+
+				"Memory Usage: " + (int)(memory_usage/(1024*1024)) +"M");
+	}
+
+	// -----------------------------------------------------------------------------------
 	
 	void adjustLearningRate()
 	{
@@ -264,45 +255,43 @@ public class Word2Vec implements Serializable
 	
 	void bagOfWords(int[] words, int index, int window, Random rand, float[] neu1e, float[] neu1)
 	{
-		int i, j, k, wc = 0, context, word = words[index];
+		int i, j, k, l, wc = 0, word = words[index];
 
 		// input -> hidden
 		for (i=-window,j=index+i; i<=window; i++,j++)
 		{
 			if (i == 0 || words.length <= j || j < 0) continue;
-			context = words[j];
-			for (k=0; k<vector_size; k++) neu1[k] += W[context][k];
+			l = words[j] * vector_size;
+			for (k=0; k<vector_size; k++) neu1[k] += W[k+l];
 			wc++;
 		}
 		
 		if (wc == 0) return;
 		for (k=0; k<vector_size; k++) neu1[k] /= wc;
-		
 		optimizer.learnBagOfWords(rand, word, V, neu1, neu1e, alpha_global);
 		
 		// hidden -> input
 		for (i=-window,j=index+i; i<=window; i++,j++)
 		{
 			if (i == 0 || words.length <= j || j < 0) continue;
-			context = words[j];
-			for (k=0; k<vector_size; k++) W[context][k] += neu1e[k];
+			l = words[j] * vector_size;
+			for (k=0; k<vector_size; k++) W[k+l] += neu1e[k];
 		}
 	}
 	
 	void skipGram(int[] words, int index, int window, Random rand, float[] neu1e)
 	{
-		int i, j, k, context, word = words[index];
+		int i, j, k, l1, word = words[index];
 		
 		for (i=-window,j=index+i; i<=window; i++,j++)
 		{
 			if (i == 0 || words.length <= j || j < 0) continue;
-			context = words[j];
+			l1 = words[j] * vector_size;
 			Arrays.fill(neu1e, 0);
-			
-			optimizer.learnSkipGram(rand, word, W, V, neu1e, alpha_global, context);
+			optimizer.learnSkipGram(rand, word, W, V, neu1e, alpha_global, l1);
 			
 			// hidden -> input
-			for (k=0; k<vector_size; k++) W[context][k] += neu1e[k];
+			for (k=0; k<vector_size; k++) W[l1+k] += neu1e[k];
 		}
 	}
 	
@@ -316,27 +305,43 @@ public class Word2Vec implements Serializable
 	/** Initializes weights between the input layer to the hidden layer using random numbers between [-0.5, 0.5]. */
 	void initNeuralNetwork()
 	{
+		int size1 = in_vocab.size() * vector_size;
+		int size2 = out_vocab.size() * vector_size;
 		Random rand = new XORShiftRandom(1);
 
-		W = new float[vocab.size()][vector_size];
-		V = new float[vocab.size()][vector_size];
+		W = new float[size1];
+		V = new float[size2];
 		
-		for (int i=0; i<vocab.size(); i++)
-			for (int j=0; j<vector_size; j++)
-				W[i][j] = (float)((rand.nextDouble() - 0.5) / vector_size);
+		for (int i=0; i<size1; i++)
+			W[i] = (float)((rand.nextDouble() - 0.5) / vector_size);
 	}
-	
-	int[] next(Reader<?> reader, Random rand) throws IOException
+
+	/* If input layer and output layer are asymmetrical, param in_layer
+	 * determines if you want to return input layer indices or output
+	 * layer indices.
+     */
+	int[] next(Reader<String> reader, Random rand, boolean in_layer)
 	{
-		Object[] words = reader.next();
+		// minor changes in this method - Austin
+		Vocabulary vocab = in_layer ? in_vocab : out_vocab;
+
+		List<String> words = null;
+		try { words = reader.next(); }
+		catch (IOException e)
+		{
+			System.err.println("Reader failure: progress "+reader.progress());
+			e.printStackTrace();
+			System.exit(1);
+		}
+
 		if (words == null) return null;
-		int[] next = new int[words.length];
+		int[] next = new int[words.size()];
 		int i, j, index, count = 0;
 		double d;
 		
-		for (i=0,j=0; i<words.length; i++)
+		for (i=0,j=0; i<words.size(); i++)
 		{
-			index = vocab.indexOf(words[i].toString());
+			index = vocab.indexOf(words.get(i));
 			if (index < 0) continue;
 			count++;
 			
@@ -351,40 +356,21 @@ public class Word2Vec implements Serializable
 		}
 		
 		word_count_global += count;
-		return (j == 0) ? next(reader, rand) : (j == words.length) ? next : Arrays.copyOf(next, j);
+		return (j == 0) ? next(reader, rand, in_layer) : (j == words.size()) ? next : Arrays.copyOf(next, j);
 	}
 
-	void outputProgress(long now)
-	{
-		float time_seconds = (now - start_time)/1000f;
-		float progress = word_count_global / (float)(train_iteration * word_count_train + 1);
-
-		int time_left_hours = (int) (((1-progress)/progress)*time_seconds/(60*60));
-		int time_left_remainder =  (int) (((1-progress)/progress)*time_seconds/60) % 60;
-
-		Runtime runtime = Runtime.getRuntime();
-		long memory_usage = runtime.totalMemory()-runtime.freeMemory();
-		if(memory_usage > max_memory)
-			max_memory = memory_usage;
-
-		BinUtils.LOG.info("Alpha: "+ String.format("%1$,.6f",alpha_global)+" "+
-				          "Progress: "+ String.format("%1$,.2f", progress * 100) + "% "+
-				          "Words/thread/sec: " + (int)(word_count_global / thread_size / time_seconds) +" "+
-						  "Estimated Time Left: " +time_left_hours +":"+time_left_remainder +" "+
-						  "Memory Usage: " + (int)(memory_usage/(1024*1024)) +"M");
-	}
-
-	Map<String,float[]> toMap(boolean normalize)
+	public Map<String,float[]> toMap(boolean normalize)
 	{
 		Map<String,float[]> map = new HashMap<>();
 		float[] vector;
 		String key;
 		int i, l;
 		
-		for (i=0; i<vocab.size(); i++)
+		for (i=0; i<in_vocab.size(); i++)
 		{
-			key = vocab.get(i).form;
-			vector = W[i];
+			l = i * vector_size;
+			key = in_vocab.get(i).form;
+			vector = Arrays.copyOfRange(W, l, l+vector_size);
 			if (normalize) normalize(vector);
 			map.put(key, vector);
 		}
@@ -392,12 +378,12 @@ public class Word2Vec implements Serializable
 		return map;
 	}
 	
-	void normalize(float[] vector)
+	public void normalize(float[] vector)
 	{
 		float z = 0;
-
-		for (float component : vector)
-			z += MathUtils.sq(component);
+		
+		for (int i=0; i<vector.length; i++)
+			z += MathUtils.sq(vector[i]);
 		
 		z = (float)Math.sqrt(z);
 		
@@ -405,32 +391,27 @@ public class Word2Vec implements Serializable
 			vector[i] /= z;
 	}
 
-	void saveVectors() throws IOException
+	// ------ Austin's code --------------------------------
+
+	public void save(File save_file) throws IOException
 	{
 		Map<String,float[]> map = toMap(normalize);
 
-		FileWriter out = new FileWriter(new File(output_file));
-		for(String word : map.keySet()) {
-			out.write(word + "\t");
-			for(float f : map.get(word))
-				out.write(f + "\t");
-			out.write("\n");
+		StringBuilder sb = new StringBuilder();
+		for (String word : map.keySet())
+		{
+			sb.append(word).append("\t");
+			for (float f : map.get(word))
+				sb.append(f).append("\t");
+			sb.append("\n");
 		}
+
+		BufferedWriter out = new BufferedWriter(new FileWriter(save_file));
+		out.write(sb.toString());
 		out.close();
 	}
-
-	void saveModel() throws IOException
-	{
-		saveModel(IOUtils.createFileOutputStream(model_file));
-	}
-
-	void saveModel(OutputStream out) throws IOException
-	{
-		ObjectOutputStream oout = IOUtils.createObjectXZBufferedOutputStream(out);
-		oout.writeObject(this);
-		oout.close();
-	}
-
+	// -------------------------------------------------------
+	
 	static public void main(String[] args)
 	{
 		new Word2Vec(args);

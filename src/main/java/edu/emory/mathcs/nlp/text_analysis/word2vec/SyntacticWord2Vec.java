@@ -2,190 +2,219 @@ package edu.emory.mathcs.nlp.text_analysis.word2vec;
 
 import edu.emory.mathcs.nlp.common.random.XORShiftRandom;
 import edu.emory.mathcs.nlp.common.util.BinUtils;
-import edu.emory.mathcs.nlp.common.util.MathUtils;
+import edu.emory.mathcs.nlp.component.template.node.NLPNode;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.DependencyReader;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.HierarchicalSoftmax;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.NegativeSampling;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.DependencyReader;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.Reader;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
-import org.kohsuke.args4j.Option;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Created by austin on 12/1/2015.
+ * This is an extension of classical word2vec to include features of dependency syntax.
+ *
+ * @author Austin Blodgett
  */
-public class SyntacticWord2Vec extends Word2Vec {
-
-    @Option(name="-tree-window", usage="If set, use tree distance instead of word-order distance in window.", required=false, metaVar="<boolean>")
-    boolean tree_window = false;
-
-    Vocabulary depend_vocab;
-    HashMap<Integer, Integer> dependToLemma;
-
-    public SyntacticWord2Vec(String[] args) {super(args);}
-
-//	=================================== Training ===================================
-
-    DependencyReader initReader(List<File> files, int mode){
-        return new DependencyReader(files, mode);
+public class SyntacticWord2Vec extends Word2Vec
+{
+    public SyntacticWord2Vec(String[] args) {
+        super(args);
     }
 
-    @Override
     public void train(List<String> filenames) throws Exception
     {
-        List<File> files = filenames.stream().map(File::new).collect(Collectors.toList());
+        BinUtils.LOG.info("Reading vocabulary:\n");
 
-        DependencyReader lemma_reader = initReader(files, DependencyReader.LEMMA_MODE);
-        DependencyReader depend_reader = initReader(files, DependencyReader.DEPEND_MODE);
+        // ------- Austin's code -------------------------------------
+        Vocabulary lemma_vocab  = new Vocabulary();
+        Vocabulary depend_vocab  = new Vocabulary();
 
-        BinUtils.LOG.info("\nSyntactic Word2Vec\n");
-        BinUtils.LOG.info("Reading vocabulary:");
+        DependencyReader reader = new DependencyReader(filenames.stream().map(File::new).collect(Collectors.toList()));
 
-        vocab = new Vocabulary();
-        depend_vocab = new Vocabulary();
-        vocab.learn(lemma_reader, min_count);
-        depend_vocab.learn(depend_reader, min_count);
-        word_count_train = vocab.totalWords();
-        dependToLemma = new HashMap<>();
+        // each word is a lemma, e.g., "go"
+        in_vocab.learnParallel(reader.addFeature(NLPNode::getLemma).splitParallel(thread_size), min_count);
+        // each word is a lemma with dependency, e.g., "root_go"
+        out_vocab.learnParallel(reader.addFeature(this::wordFeatures).splitParallel(thread_size), min_count);
+        word_count_train = in_vocab.totalCount();
 
-        // each string in depend_vocab is of the form [dependency]_[lemma]
-        for(int i=0; i<depend_vocab.size(); i++)
-            dependToLemma.put(i, vocab.indexOf(depend_vocab.get(i).form.split("_")[1]));
+        in_vocab = lemma_vocab;
+        out_vocab = depend_vocab;
+        // -----------------------------------------------------------
 
-        BinUtils.LOG.info("Vocab size "+vocab.size()+", Total Word Count "+word_count_train+"\n");
-        
+        BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
+
+        BinUtils.LOG.info("Initializing neural network.\n");
         initNeuralNetwork();
 
-        optimizer = isNegativeSampling() ? new NegativeSampling(vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(vocab, sigmoid, vector_size);
-        
-        BinUtils.LOG.info("Training vectors "+train_path);
-        BinUtils.LOG.info((cbow ? "Continuous Bag of Words" : "Skipgrams") + ", " + (isNegativeSampling() ? "Negative Sampling" : "Hierarchical Softmax"));
-        BinUtils.LOG.info("Files "+files.size()+", threads "+thread_size+", iterations "+train_iteration+"\n");
+        BinUtils.LOG.info("Initializing optimizer.\n");
+        optimizer = isNegativeSampling() ? new NegativeSampling(in_vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(in_vocab, sigmoid, vector_size);
 
+        BinUtils.LOG.info("Training vectors:");
         word_count_global = 0;
         alpha_global      = alpha_init;
         subsample_size    = subsample_threshold * word_count_train;
+        ExecutorService executor = Executors.newFixedThreadPool(thread_size);
 
-        startThreads(depend_reader);
+        // ------- Austin's code -------------------------------------
+        start_time = System.currentTimeMillis();
 
-        end_time = System.currentTimeMillis();
-        outputProgress(end_time);
-        BinUtils.LOG.info("\nTotal time: "+((end_time - start_time)/1000/60/60f)+" hours");
-
-        BinUtils.LOG.info("Saving word vectors.");
-        saveVectors();
-
-        if(model_file != null){
-            BinUtils.LOG.info("Saving Word2Vec model.");
-            saveModel();
-        }
-        BinUtils.LOG.info("");
-    }
-
-    /** Initializes weights between the input layer to the hidden layer using random numbers between [-0.5, 0.5]. */
-    @Override
-    void initNeuralNetwork()
-    {
-        Random rand = new XORShiftRandom(1);
-
-        W = new float[vocab.size()][vector_size];
-        V = new float[depend_vocab.size()][vector_size];
-
-        for (int i=0; i<vocab.size(); i++)
-            for (int j=0; j<vector_size; j++)
-                W[i][j] = (float)((rand.nextDouble() - 0.5) / vector_size);
-    }
-
-    // next returns indices in depend_vocab which can be mapped to lemmas later
-    @Override
-    int[] next(Reader<?> reader, Random rand) throws IOException
-    {
-        Object[] words = reader.next();
-        if (words == null) return null;
-        int[] next = new int[words.length];
-        int i, j, index, count = 0;
-        double d;
-
-        for (i=0,j=0; i<words.length; i++)
-        {
-            index = depend_vocab.indexOf(words[i].toString());
-            if (index < 0) continue;
-            count++;
-
-            // sub-sampling: randomly discards frequent words
-            if (subsample_threshold > 0)
+        int id = 0;
+        for (Reader<NLPNode> r: reader.splitParallel(thread_size))
             {
-                d = (Math.sqrt(MathUtils.divide(depend_vocab.get(index).count, subsample_size)) + 1) * (subsample_size / depend_vocab.get(index).count);
-                if (d < rand.nextDouble()) continue;
-            }
-
-            next[j++] = index;
+            executor.execute(new TrainTask(r,id));
+            id++;
         }
+        // -----------------------------------------------------------
 
-        word_count_global += count;
-        return (j == 0) ? next(reader, rand) : (j == words.length) ? next : Arrays.copyOf(next, j);
+        executor.shutdown();
+
+        try { executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
+        catch (InterruptedException e) {e.printStackTrace();}
+
+
+        BinUtils.LOG.info("Saving word vectors.\n");
+        save(new File(output_file));
     }
 
-    // bagOfWords should map words[j] to lemma
-    @Override
-    void bagOfWords(int[] words, int index, int window, Random rand, float[] neu1e, float[] neu1)
+    class TrainTask implements Runnable
     {
-        int i, j, k, wc = 0, context, word = words[index];
+        // ------- Austin ----------------------
+        private Reader<NLPNode> reader;
+        private int id;
+        private long last_time = System.currentTimeMillis() - 14*60*100; // set back 14 minutes (first output after 60 seconds)
+
+        /* Tasks are each parameterized by a reader which is dedicated to a section of the corpus
+         * (not necesarily one file). The corpus is split to divide it evenly between Tasks without breaking up sentences. */
+        public TrainTask(Reader<NLPNode> reader, int id)
+        {
+            this.reader = reader;
+            this.id = id;
+        }
+        // -------------------------------------
+
+        @Override
+        public void run()
+        {
+            Random rand  = new XORShiftRandom(reader.hashCode());
+            float[] neu1  = cbow ? new float[vector_size] : null;
+            float[] neu1e = new float[vector_size];
+            int     iter  = 0;
+            int     index;
+            List<NLPNode> words = null;
+
+            while (true)
+            {
+                try {
+                    words = reader.next();
+                } catch (IOException e) {
+                    System.err.println("Reader failure: progress "+reader.progress());
+                    e.printStackTrace();
+                    System.exit(1);
+                }
+
+                if (words == null)
+                {
+                    if (++iter == train_iteration) break;
+                    adjustLearningRate();
+                    // readers have a built in restart button - Austin
+                    try { reader.restart(); } catch (IOException e) { e.printStackTrace(); }
+                    continue;
+                }
+
+                for (index=0; index<words.size(); index++)
+                {
+                    if (cbow) Arrays.fill(neu1, 0);
+                    Arrays.fill(neu1e, 0);
+
+                    if (cbow) bagOfWords(words, index, rand, neu1e, neu1);
+                    else      skipGram  (words, index, rand, neu1e);
+                }
+
+                // output progress every 15 minutes
+                if(id == 0){
+                    long now = System.currentTimeMillis();
+                    if(now-last_time > 15*1000*60){
+                        outputProgress(now);
+                        last_time = now;
+                    }
+                }
+
+            }
+        }
+    }
+
+
+    void bagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1)
+    {
+        int k, l, wc = 0;
+        NLPNode word = words.get(index);
+        int word_index = out_vocab.indexOf(wordFeatures(word));
+
+        List<NLPNode> context_words = word.getDependentList(); // include dependents
+        context_words.add(word.getDependencyHead());           // include head
 
         // input -> hidden
-        for (i=-window,j=index+i; i<=window; i++,j++)
+        for (NLPNode context : context_words)
         {
-            if (i == 0 || words.length <= j || j < 0) continue;
-            context = dependToLemma.get(words[j]);
-            if (context < 0) continue;
-
-            for (k=0; k<vector_size; k++) neu1[k] += W[context][k];
+            int context_index = in_vocab.indexOf(context.getLemma());
+            l = context_index * vector_size;
+            for (k=0; k<vector_size; k++) neu1[k] += W[k+l];
             wc++;
         }
 
         if (wc == 0) return;
         for (k=0; k<vector_size; k++) neu1[k] /= wc;
-
-        optimizer.learnBagOfWords(rand, word, V, neu1, neu1e, alpha_global);
+        optimizer.learnBagOfWords(rand, word_index, V, neu1, neu1e, alpha_global);
 
         // hidden -> input
-        for (i=-window,j=index+i; i<=window; i++,j++)
+        for (NLPNode context : context_words)
         {
-            if (i == 0 || words.length <= j || j < 0) continue;
-            context = dependToLemma.get(words[j]);
-            if (context < 0) continue;
+            int context_index = in_vocab.indexOf(context.getLemma());
+            l = context_index * vector_size;
 
-            for (k=0; k<vector_size; k++) W[context][k] += neu1e[k];
+            for (k=0; k<vector_size; k++) W[k+l] += neu1e[k];
         }
     }
 
-
-    // skipGram should map words[j] to lemma
-    @Override
-    void skipGram(int[] words, int index, int window, Random rand, float[] neu1e)
+    void skipGram(List<NLPNode> words, int index, Random rand, float[] neu1e)
     {
-        int i, j, k, context, word = words[index];
+        int k, l1;
+        NLPNode word = words.get(index);
+        int word_index = out_vocab.indexOf(wordFeatures(word));
 
-        for (i=-window,j=index+i; i<=window; i++,j++)
+        List<NLPNode> context_words = word.getDependentList(); // include dependents
+        context_words.add(word.getDependencyHead());           // include head
+
+        for (NLPNode context : context_words)
         {
-            if (i == 0 || words.length <= j || j < 0) continue;
-            context = dependToLemma.get(words[j]);
-            if (context < 0) continue;
+            int context_index = in_vocab.indexOf(context.getLemma());
+            l1 = context_index * vector_size;
             Arrays.fill(neu1e, 0);
-
-            optimizer.learnSkipGram(rand, word, W, V, neu1e, alpha_global, context);
+            optimizer.learnSkipGram(rand, word_index, W, V, neu1e, alpha_global, l1);
 
             // hidden -> input
-            for (k=0; k<vector_size; k++) W[context][k] += neu1e[k];
+            for (k=0; k<vector_size; k++) W[l1+k] += neu1e[k];
         }
     }
+
+    public String wordFeatures(NLPNode word)
+    {
+        return word.getDependencyLabel()+"_"+word.getLemma();
+    }
+
+
 
     static public void main(String[] args)
     {
-        new SyntacticWord2Vec(args);
+        new Word2Vec(args);
     }
 }

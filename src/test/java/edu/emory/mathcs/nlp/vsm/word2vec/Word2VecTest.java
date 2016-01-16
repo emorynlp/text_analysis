@@ -26,8 +26,7 @@ public class Word2VecTest {
                 "-output","src/test/resources/dat/skip_vectors",
                 "-size",""+vector_size,
                 "-threads",  "2",
-                "-min-count","1",
-                "-evaluate","src/test/resources/dat/test_files/test3.txt"};
+                "-min-count","1"};
         test(params);
     }
 
@@ -37,18 +36,17 @@ public class Word2VecTest {
                 "-size",""+vector_size,
                 "-threads",  "2",
                 "-min-count","1",
-                "-cbow",
-                "-evaluate","src/test/resources/dat/test_files/test3.txt"};
+                "-cbow"};
         test(params);
     }
 
     public static void test(String[] params) throws IOException {
         Word2Vec word2vec = new Word2Vec(params);
 
-        for(int i=0; i<word2vec.vocab.size(); i++){
-            System.out.print(word2vec.vocab.get(i).form+" ");
+        for(int i=0; i<word2vec.in_vocab.size(); i++){
+            System.out.print(word2vec.in_vocab.get(i).form+" ");
             for(int j=0; j<vector_size; j++)
-                System.out.print(String.format("%1$,.6f",word2vec.W[i][j])+" ");
+                System.out.print(String.format("%1$,.6f",word2vec.W[i*vector_size+j])+" ");
             System.out.println();
         }
     }

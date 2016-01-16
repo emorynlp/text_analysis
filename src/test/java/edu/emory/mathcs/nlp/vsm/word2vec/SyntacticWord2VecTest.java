@@ -1,6 +1,5 @@
 package edu.emory.mathcs.nlp.vsm.word2vec;
 
-import edu.emory.mathcs.nlp.text_analysis.word2vec.DepWord2Vec;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.SyntacticWord2Vec;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.Word2Vec;
 import org.junit.Test;
@@ -44,10 +43,10 @@ public class SyntacticWord2VecTest {
     public static void test(String[] params) throws IOException {
         Word2Vec word2vec = new SyntacticWord2Vec(params);
 
-        for(int i=0; i<word2vec.vocab.size(); i++){
-            System.out.print(word2vec.vocab.get(i).form+" ");
+        for(int i=0; i<word2vec.in_vocab.size(); i++){
+            System.out.print(word2vec.in_vocab.get(i).form+" ");
             for(int j=0; j<vector_size; j++)
-                System.out.print(String.format("%1$,.6f",word2vec.W[i][j])+" ");
+                System.out.print(String.format("%1$,.6f",word2vec.W[i*vector_size+j])+" ");
             System.out.println();
         }
     }

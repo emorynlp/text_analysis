@@ -4,107 +4,63 @@ import edu.emory.mathcs.nlp.tokenization.Tokenizer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
+/**
+ * TODO
+ * @author Austin Blodgett
+ */
 public class SentenceReader extends Reader<String> {
-	
-	/* An instance of SentenceReader is constructed from a FileInputStream and
-	 * on next() returns the next word in the input stream one at a time. 
-	 * Tokenization includes basic separation of punctuation and keeps abbreviations
-	 * together. Sentences also include "<s>" and "</s>" to mark start and end of 
-	 * sentence respectively. Sentences are assumed to be separated by "\n" but multiple
-	 * new lines will be ignored.
-	 * 
-	 */
-	
-	private static final int MAX_STRING = 100;
-	private static final int MAX_SENTENCE_LENGTH = 1000;
-	
-	boolean lowercase = false;
-	boolean mark_sentence_border = false;
 
-	Tokenizer tokenizer;
+    private Tokenizer tokenizer;
 
-	public SentenceReader(File file, Tokenizer tokenizer) {
-		super(file);
-		this.tokenizer = tokenizer;
-	}
+    private static Pattern spaces = Pattern.compile("\\s+");
 
-	public SentenceReader(List<File> files, Tokenizer tokenizer) {
-		super(files);
-		this.tokenizer = tokenizer;
-	}
+    public SentenceReader(List<File> files)
+    {
+        super(files);
+        this.tokenizer = null;
+    }
 
-	public SentenceReader(File file, Tokenizer tokenizer, boolean lowercase, boolean mark_sentence_border) {
-		super(file);
-		this.tokenizer = tokenizer;
-		this.lowercase = lowercase;
-		this.mark_sentence_border = mark_sentence_border;
-	}
-	
-	public SentenceReader(List<File> files, Tokenizer tokenizer, boolean lowercase, boolean mark_sentence_border) {
-		super(files);
-		this.tokenizer = tokenizer;
-		this.lowercase = lowercase;
-		this.mark_sentence_border = mark_sentence_border;
-	}
-	
-	public SentenceReader(SentenceReader r, long start_index, long end_index) {
-		super(r, start_index, end_index);
-		this.tokenizer = r.tokenizer;
-		this.lowercase = r.lowercase;
-		this.mark_sentence_border = r.mark_sentence_border;
-	}
+    public SentenceReader(List<File> files, Tokenizer tokenizer)
+    {
+        super(files);
+        this.tokenizer = tokenizer;
+    }
 
-	public String[] next() throws IOException{
-		/* This function reads one sentence (assuming one sentence per line) 
+    protected SentenceReader(SentenceReader r, long start, long end)
+    {
+        super(r, start, end);
+        this.tokenizer = r.tokenizer;
+    }
+
+    public List<String> next() throws IOException {
+		/* This function reads one sentence (assuming one sentence per line)
 		 * and returns it as an array. */
 
-		String line = readLine();
+        String line = readLine();
 
-		if (line == null) return null;
-		if (line.isEmpty()) return next();
+        if (line == null) return null;
+        if (line.isEmpty()) return next();
 
-		List<String> words;
-		if (tokenizer == null) {
-			words = new ArrayList();
-			for(String word : line.split("\\s+"))
-			words.add(word);
-		}
-		else
-			words = tokenizer.tokenize(line);
+        List<String> words;
+        if (tokenizer == null)
+            words = Arrays.stream(spaces.split(line)).collect(Collectors.toList());
+        else
+            words = tokenizer.tokenize(line);
 
+        return words;
+    }
 
-		String[] sentence = new String[mark_sentence_border ? words.size()+2 : words.size()];
+    @Override
+    protected SentenceReader subReader(long start, long end)
+    {
+        return new SentenceReader(this,start,end);
+    }
 
-		if(mark_sentence_border) {
-			sentence[0] = "<s>";
-			sentence[1] = "</s>";
-			for (int i=0; i<words.size(); i++)
-				sentence[i+1] = lowercase? words.get(i).toLowerCase() : words.get(i);
-		}
-		else {
-			for (int i=0; i<words.size(); i++)
-				sentence[i] = lowercase? words.get(i).toLowerCase() : words.get(i);
-		}
-
-		return sentence;
-	}
-	
-	@Override
-	public SentenceReader[] split(int count){
-		if(!finished) generateFileSizes();
-		SentenceReader[] split = new SentenceReader[count];
-		
-		long size = (end_index - start_index)/count;
-		long start = start_index;
-		for(int i=0; i<count; i++){
-			split[i] = new SentenceReader(this, start, start+size);
-			start += size;
-		}
-		split[split.length-1].end_index = end_index;
-		return split;
-	}
 }

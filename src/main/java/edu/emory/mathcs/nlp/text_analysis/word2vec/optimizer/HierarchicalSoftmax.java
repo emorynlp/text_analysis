@@ -32,7 +32,7 @@ public class HierarchicalSoftmax extends Optimizer
 	}
 	
 	@Override
-	public void learnBagOfWords(Random rand, int word, float[][] syn1, float[] neu1, float[] neu1e, float alpha)
+	public void learnBagOfWords(Random rand, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha)
 	{
 		byte[] code  = vocab.get(word).code;
 		int [] point = vocab.get(word).point;
@@ -42,33 +42,12 @@ public class HierarchicalSoftmax extends Optimizer
 	}
 	
 	@Override
-	public void learnSkipGram(Random rand, int word, float[][] syn0, float[][] syn1, float[] neu1e, float alpha, int context)
+	public void learnSkipGram(Random rand, int word, float[] syn0, float[] syn1, float[] neu1e, float alpha, int l1)
 	{
 		byte[] code  = vocab.get(word).code;
 		int[]  point = vocab.get(word).point;
 		
 		for (int i=0; i<code.length; i++)
-			learnSkipGram(code[i], point[i], syn0, syn1, neu1e, alpha, context);
-	}
-
-
-	@Override
-	public void testBagOfWords(Random rand, int word, float[][] syn1, float[] neu1)
-	{
-		byte[] code  = vocab.get(word).code;
-		int [] point = vocab.get(word).point;
-		
-		for (int i=0; i<code.length; i++)
-			testBagOfWords(code[i], point[i], syn1, neu1);
-	}
-	
-	@Override
-	public void testSkipGram(Random rand, int word, float[][] syn0, float[][] syn1, int context)
-	{
-		byte[] code  = vocab.get(word).code;
-		int[]  point = vocab.get(word).point;
-		
-		for (int i=0; i<code.length; i++)
-			testSkipGram(code[i], point[i], syn0, syn1, context);
+			learnSkipGram(code[i], point[i], syn0, syn1, neu1e, alpha, l1);
 	}
 }
