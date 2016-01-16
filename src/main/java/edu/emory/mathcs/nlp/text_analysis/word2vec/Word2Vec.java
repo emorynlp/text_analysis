@@ -15,9 +15,7 @@
  */
 package edu.emory.mathcs.nlp.text_analysis.word2vec;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -26,19 +24,20 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.Reader;
 import org.kohsuke.args4j.Option;
 
 import edu.emory.mathcs.nlp.common.random.XORShiftRandom;
 import edu.emory.mathcs.nlp.common.util.BinUtils;
 import edu.emory.mathcs.nlp.common.util.FileUtils;
-import edu.emory.mathcs.nlp.common.util.IOUtils;
 import edu.emory.mathcs.nlp.common.util.MathUtils;
 import edu.emory.mathcs.nlp.common.util.Sigmoid;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.HierarchicalSoftmax;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.NegativeSampling;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.Optimizer;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.SentenceReader;
+import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.*;
 import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
 
 /**
@@ -70,18 +69,34 @@ public class Word2Vec
 	int min_count = 5;
 	@Option(name="-alpha", usage="initial learning rate (default: 0.025 for skip-gram; use 0.05 for CBOW).", required=false, metaVar="<float>")
 	float alpha_init = 0.025f;
-	@Option(name="-binary", usage="If set, save the resulting vectors in binary moded.", required=false, metaVar="<boolean>")
-	boolean binary = false;
 	@Option(name="-cbow", usage="If set, use the continuous bag-of-words model instead of the skip-gram model.", required=false, metaVar="<boolean>")
 	boolean cbow = false;
 	@Option(name="-normalize", usage="If set, normalize each vector.", required=false, metaVar="<boolean>")
 	boolean normalize = true;
+<<<<<<< HEAD
 	
 	final float ALPHA_MIN_RATE  = 0.0001f;      
 	final int   MAX_CODE_LENGTH = 40;
 	
+=======
+
+	/* TODO Austin
+	 * Add cmd line options
+	 * tokenize, lowercase, border, evaluate
+	 */
+
+	final float ALPHA_MIN_RATE  = 0.0001f;
+
+	/* Note that in regular word2vec, the input and output layers
+	 * are the same. In cases where we want to allow asymmetry between
+	 * these layers (like in syntactic word2vec), we have to distinguish
+	 * between input and output vocabularies.
+	 */
+	public Vocabulary in_vocab;
+	public Vocabulary out_vocab;
+
+>>>>>>> refs/remotes/origin/ablodge-branch
 	Sigmoid sigmoid;
-	Vocabulary vocab;
 	long word_count_train;
 	float subsample_size;
 	Optimizer optimizer;
@@ -90,7 +105,9 @@ public class Word2Vec
 	volatile float alpha_global;		// learning rate dynamically updated by all threads
 	volatile public float[] W;			// weights between the input and the hidden layers
 	volatile public float[] V;			// weights between the hidden and the output layers
-	
+
+	long start_time;
+
 	public Word2Vec(String[] args)
 	{
 		BinUtils.initArgs(args, this);
@@ -98,7 +115,7 @@ public class Word2Vec
 
 		try
 		{
-			train(FileUtils.getFileList(train_path, "*", false));
+			train(FileUtils.getFileList(train_path, train_ext, false));
 		}
 		catch (Exception e) {e.printStackTrace();}
 	}
@@ -108,21 +125,36 @@ public class Word2Vec
 	public void train(List<String> filenames) throws Exception
 	{
 		BinUtils.LOG.info("Reading vocabulary:\n");
+<<<<<<< HEAD
 		vocab = new Vocabulary();
 		word_count_train = new SentenceReader().learn(filenames, vocab, min_count);
 		BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", vocab.size(), word_count_train));
+=======
+
+		// ------- Austin's code -------------------------------------
+		in_vocab = (out_vocab = new Vocabulary());
+
+		List<Reader<String>> readers = (new SentenceReader(filenames.stream().map(File::new).collect(Collectors.toList())))
+												.splitParallel(thread_size);
+		in_vocab.learnParallel(readers, min_count);
+		word_count_train = in_vocab.totalCount();
+		// -----------------------------------------------------------
+
+		BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
+>>>>>>> refs/remotes/origin/ablodge-branch
 		
 		BinUtils.LOG.info("Initializing neural network.\n");
 		initNeuralNetwork();
 		
 		BinUtils.LOG.info("Initializing optimizer.\n");
-		optimizer = isNegativeSampling() ? new NegativeSampling(vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(vocab, sigmoid, vector_size);
+		optimizer = isNegativeSampling() ? new NegativeSampling(in_vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(in_vocab, sigmoid, vector_size);
 
 		BinUtils.LOG.info("Training vectors:");
 		word_count_global = 0;
 		alpha_global      = alpha_init;
 		subsample_size    = subsample_threshold * word_count_train;
 		ExecutorService executor = Executors.newFixedThreadPool(thread_size);
+<<<<<<< HEAD
 		
 		for (String filename : filenames)
 			executor.execute(new TrainTask(filename));
@@ -134,25 +166,67 @@ public class Word2Vec
 			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 		}
 		catch (InterruptedException e) {e.printStackTrace();}
+=======
+
+		// ------- Austin's code -------------------------------------
+		start_time = System.currentTimeMillis();
+
+		int id = 0;
+		for (Reader<String> r: readers)
+		{
+			executor.execute(new TrainTask(r,id));
+			id++;
+		}
+		// -----------------------------------------------------------
+
+		executor.shutdown();
+>>>>>>> refs/remotes/origin/ablodge-branch
 		
+		try { executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
+		catch (InterruptedException e) {e.printStackTrace();}
+
+
 		BinUtils.LOG.info("Saving word vectors.\n");
+<<<<<<< HEAD
 		save();
+=======
+		save(new File(output_file));
+>>>>>>> refs/remotes/origin/ablodge-branch
 	}
 	
 	class TrainTask implements Runnable
 	{
+<<<<<<< HEAD
 		private String filename;
 		
 		public TrainTask(String filename)
 		{
 			this.filename = filename;
+=======
+		// ------- Austin ----------------------
+		private Reader<String> reader;
+		private int id;
+		private long last_time = System.currentTimeMillis() - 14*60*100; // set back 14 minutes (first output after 60 seconds)
+
+		/* Tasks are each parameterized by a reader which is dedicated to a section of the corpus
+		 * (not necesarily one file). The corpus is split to divide it evenly between Tasks without breaking up sentences. */
+		public TrainTask(Reader<String> reader, int id)
+		{
+			this.reader = reader;
+			this.id = id;
+>>>>>>> refs/remotes/origin/ablodge-branch
 		}
-		
+		// -------------------------------------
+
 		@Override
 		public void run()
 		{
+<<<<<<< HEAD
 			SentenceReader reader = new SentenceReader(IOUtils.createFileInputStream(filename));
 			Random  rand  = new XORShiftRandom(filename.hashCode());
+=======
+			Random  rand  = new XORShiftRandom(reader.hashCode());
+>>>>>>> refs/remotes/origin/ablodge-branch
 			float[] neu1  = cbow ? new float[vector_size] : null;
 			float[] neu1e = new float[vector_size];
 			int     iter  = 0;
@@ -161,14 +235,21 @@ public class Word2Vec
 			
 			while (true)
 			{
-				words = next(reader, rand);
-				
+				words = next(reader, rand, true);
+
 				if (words == null)
 				{
+<<<<<<< HEAD
 					BinUtils.LOG.info(String.format("%s: %d\n", FileUtils.getBaseName(filename), iter));
 					if (++iter == train_iteration) break;
 					adjustLearningRate();
 					reader.close(); reader.open(IOUtils.createFileInputStream(filename));
+=======
+					if (++iter == train_iteration) break;
+					adjustLearningRate();
+					// readers have a built in restart button - Austin
+					try { reader.restart(); } catch (IOException e) { e.printStackTrace(); }
+>>>>>>> refs/remotes/origin/ablodge-branch
 					continue;
 				}
 				
@@ -181,9 +262,41 @@ public class Word2Vec
 					if (cbow) bagOfWords(words, index, window, rand, neu1e, neu1);
 					else      skipGram  (words, index, window, rand, neu1e);
 				}
+
+				// output progress every 15 minutes
+				if(id == 0){
+					long now = System.currentTimeMillis();
+					if(now-last_time > 15*1000*60){
+						outputProgress(now);
+						last_time = now;
+					}
+				}
+
 			}
 		}
 	}
+
+	// -------------- Austin's code ------------------------------------------------------
+
+	void outputProgress(long now)
+	{
+		float time_seconds = (now - start_time)/1000f;
+		float progress = word_count_global / (float)(train_iteration * word_count_train + 1);
+
+		int time_left_hours = (int) (((1-progress)/progress)*time_seconds/(60*60));
+		int time_left_remainder =  (int) (((1-progress)/progress)*time_seconds/60) % 60;
+
+		Runtime runtime = Runtime.getRuntime();
+		long memory_usage = runtime.totalMemory()-runtime.freeMemory();
+
+		System.out.println("Alpha: "+ String.format("%1$,.4f",alpha_global)+" "+
+				"Progress: "+ String.format("%1$,.2f", progress * 100) + "% "+
+				"Words/thread/sec: " + (int)(word_count_global / thread_size / time_seconds) +" "+
+				"Estimated Time Left: " +time_left_hours +":"+String.format("%02d",time_left_remainder) +" "+
+				"Memory Usage: " + (int)(memory_usage/(1024*1024)) +"M");
+	}
+
+	// -----------------------------------------------------------------------------------
 	
 	void adjustLearningRate()
 	{
@@ -243,27 +356,54 @@ public class Word2Vec
 	/** Initializes weights between the input layer to the hidden layer using random numbers between [-0.5, 0.5]. */
 	void initNeuralNetwork()
 	{
-		int size = vocab.size() * vector_size;
+		int size1 = in_vocab.size() * vector_size;
+		int size2 = out_vocab.size() * vector_size;
 		Random rand = new XORShiftRandom(1);
 
-		W = new float[size];
-		V = new float[size];
+		W = new float[size1];
+		V = new float[size2];
 		
-		for (int i=0; i<size; i++)
+		for (int i=0; i<size1; i++)
 			W[i] = (float)((rand.nextDouble() - 0.5) / vector_size);
 	}
+<<<<<<< HEAD
 	
 	int[] next(SentenceReader reader, Random rand)
 	{
 		String[] words = reader.next();
+=======
+
+	/* If input layer and output layer are asymmetrical, param in_layer
+	 * determines if you want to return input layer indices or output
+	 * layer indices.
+     */
+	int[] next(Reader<String> reader, Random rand, boolean in_layer)
+	{
+		// minor changes in this method - Austin
+		Vocabulary vocab = in_layer ? in_vocab : out_vocab;
+
+		List<String> words = null;
+		try { words = reader.next(); }
+		catch (IOException e)
+		{
+			System.err.println("Reader failure: progress "+reader.progress());
+			e.printStackTrace();
+			System.exit(1);
+		}
+
+>>>>>>> refs/remotes/origin/ablodge-branch
 		if (words == null) return null;
-		int[] next = new int[words.length];
+		int[] next = new int[words.size()];
 		int i, j, index, count = 0;
 		double d;
 		
-		for (i=0,j=0; i<words.length; i++)
+		for (i=0,j=0; i<words.size(); i++)
 		{
+<<<<<<< HEAD
 			index = vocab.indexOf(words[i]);
+=======
+			index = vocab.indexOf(words.get(i));
+>>>>>>> refs/remotes/origin/ablodge-branch
 			if (index < 0) continue;
 			count++;
 			
@@ -278,14 +418,9 @@ public class Word2Vec
 		}
 		
 		word_count_global += count;
-		return (j == 0) ? next(reader, rand) : (j == words.length) ? next : Arrays.copyOf(next, j);
+		return (j == 0) ? next(reader, rand, in_layer) : (j == words.size()) ? next : Arrays.copyOf(next, j);
 	}
-	
-	void save() throws IOException
-	{
-		save(IOUtils.createFileOutputStream(output_file));
-	}
-	
+
 	public Map<String,float[]> toMap(boolean normalize)
 	{
 		Map<String,float[]> map = new HashMap<>();
@@ -293,10 +428,10 @@ public class Word2Vec
 		String key;
 		int i, l;
 		
-		for (i=0; i<vocab.size(); i++)
+		for (i=0; i<in_vocab.size(); i++)
 		{
 			l = i * vector_size;
-			key = vocab.get(i).form;
+			key = in_vocab.get(i).form;
 			vector = Arrays.copyOfRange(W, l, l+vector_size);
 			if (normalize) normalize(vector);
 			map.put(key, vector);
@@ -317,13 +452,27 @@ public class Word2Vec
 		for (int i=0; i<vector.length; i++)
 			vector[i] /= z;
 	}
-	
-	public void save(OutputStream out) throws IOException
+
+	// ------ Austin's code --------------------------------
+
+	public void save(File save_file) throws IOException
 	{
-		ObjectOutputStream oout = IOUtils.createObjectXZBufferedOutputStream(out);
-		oout.writeObject(toMap(normalize));
-		oout.close();
+		Map<String,float[]> map = toMap(normalize);
+
+		StringBuilder sb = new StringBuilder();
+		for (String word : map.keySet())
+		{
+			sb.append(word).append("\t");
+			for (float f : map.get(word))
+				sb.append(f).append("\t");
+			sb.append("\n");
+		}
+
+		BufferedWriter out = new BufferedWriter(new FileWriter(save_file));
+		out.write(sb.toString());
+		out.close();
 	}
+	// -------------------------------------------------------
 	
 	static public void main(String[] args)
 	{
