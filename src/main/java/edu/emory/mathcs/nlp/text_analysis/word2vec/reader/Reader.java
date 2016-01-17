@@ -1,72 +1,13 @@
-<<<<<<< HEAD
-/**
- * Copyright 2015, Emory University
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package edu.emory.mathcs.nlp.text_analysis.word2vec.reader;
-
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-=======
 package edu.emory.mathcs.nlp.text_analysis.word2vec.reader;
 
 import java.io.*;
 import java.util.ArrayList;
->>>>>>> refs/remotes/origin/ablodge-branch
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-<<<<<<< HEAD
-import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
-
-/**
- * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
- */
-public abstract class Reader<N>
-{
-	static public final int VOCAB_REDUCE_SIZE = 21000000;
-	public abstract void add(Vocabulary vocab, N[] nodes);
-	public abstract void open(InputStream in);
-	public abstract void close();
-	public abstract N[]  next();
-	
-	/**
-	 * All words in the training files are first added then sorted by their counts in descending order.
-	 * @param minCount words whose counts are less than this are discarded. 
-	 * @return the total number of word tokens learned.
-	 */
-	public long learn(List<String> inputFiles, Vocabulary vocab, int minCount) throws IOException
-	{
-		N[] nodes;
-		
-		for (String inputFile : inputFiles)
-		{
-			open(new BufferedInputStream(new FileInputStream(inputFile)));
-			while ((nodes = next()) != null) add(vocab, nodes);
-			if (vocab.size() > VOCAB_REDUCE_SIZE) vocab.reduce();
-			close();
-		}
-		
-		long count = vocab.sort(minCount);
-		return count;
-	}
-=======
 /**
  * Much of the technical code necesary to implement Reader is included in this
  * abstract class which can be extended by other Readers.
@@ -88,7 +29,7 @@ public abstract class Reader<T> extends InputStream
 
     private int file_index = 0;
     private long index = 0;
-    private long start, end;
+    private final long start, end;
 
     private boolean finished = false;
 
@@ -135,6 +76,7 @@ public abstract class Reader<T> extends InputStream
     protected <S> Reader(Reader<S> r)
     {
         this.files = new ArrayList<>(r.files);
+        this.sentence_break = r.sentence_break;
         this.start = r.start;
         this.end = r.end;
 
@@ -187,8 +129,8 @@ public abstract class Reader<T> extends InputStream
             if (end_of_sentence.length() > 0) end_of_sentence = new StringBuilder();
             while (!sentence_break.matcher(end_of_sentence).find())
                 end_of_sentence.append((char) read());
-            end_of_sentence = new StringBuilder();
         }
+        end_of_sentence = new StringBuilder();
     }
 
     public Reader<T> addFilter(Predicate<T> filter)
@@ -295,5 +237,4 @@ public abstract class Reader<T> extends InputStream
             in.close();
         in = null;
     }
->>>>>>> refs/remotes/origin/ablodge-branch
 }

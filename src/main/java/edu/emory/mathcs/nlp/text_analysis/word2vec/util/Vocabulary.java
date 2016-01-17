@@ -86,7 +86,7 @@ public class Vocabulary implements Serializable
 				word_counter %= 1000000;
 			}
 		}
-		System.out.println(total_count + " total words");
+		System.out.println(total_count + " total word count");
 		reader.restart();
 		sort(min_word_count);
 	}
@@ -133,7 +133,7 @@ public class Vocabulary implements Serializable
 		}
 		sort(min_word_count);
 
-		System.out.println(total_count + " total words");
+		System.out.println(total_count + " total word count");
 	}
 
 	private static class LearnTask implements Callable<Vocabulary>

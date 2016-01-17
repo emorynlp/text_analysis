@@ -41,10 +41,10 @@ public class SyntacticWord2Vec extends Word2Vec
         DependencyReader reader = new DependencyReader(filenames.stream().map(File::new).collect(Collectors.toList()));
 
         // each word is a lemma, e.g., "go"
-        in_vocab.learnParallel(reader.addFeature(NLPNode::getLemma).splitParallel(thread_size), min_count);
+        lemma_vocab.learnParallel(reader.addFeature(NLPNode::getLemma).splitParallel(thread_size), min_count);
         // each word is a lemma with dependency, e.g., "root_go"
-        out_vocab.learnParallel(reader.addFeature(this::wordFeatures).splitParallel(thread_size), min_count);
-        word_count_train = in_vocab.totalCount();
+        depend_vocab.learnParallel(reader.addFeature(this::wordFeatures).splitParallel(thread_size), min_count);
+        word_count_train = lemma_vocab.totalCount();
 
         in_vocab = lemma_vocab;
         out_vocab = depend_vocab;
@@ -115,6 +115,13 @@ public class SyntacticWord2Vec extends Word2Vec
             {
                 try {
                     words = reader.next();
+                    if (words != null)
+                    {
+                        System.out.println("id "+id+" ");
+                        for(NLPNode n : words)
+                            System.out.print(n.getLemma()+" ");
+                        System.out.println();
+                    }
                 } catch (IOException e) {
                     System.err.println("Reader failure: progress "+reader.progress());
                     e.printStackTrace();
@@ -160,7 +167,6 @@ public class SyntacticWord2Vec extends Word2Vec
         int word_index = out_vocab.indexOf(wordFeatures(word));
 
         List<NLPNode> context_words = word.getDependentList(); // include dependents
-        context_words.add(word.getDependencyHead());           // include head
 
         // input -> hidden
         for (NLPNode context : context_words)
@@ -192,7 +198,6 @@ public class SyntacticWord2Vec extends Word2Vec
         int word_index = out_vocab.indexOf(wordFeatures(word));
 
         List<NLPNode> context_words = word.getDependentList(); // include dependents
-        context_words.add(word.getDependencyHead());           // include head
 
         for (NLPNode context : context_words)
         {

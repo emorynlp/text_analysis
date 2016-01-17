@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
  */
 public class SentenceReaderTest {
 
-
     @Test
     public void testRead() throws Exception
     {
@@ -45,6 +44,23 @@ public class SentenceReaderTest {
         }
 
         assert(sb1.toString().equals(sb2.toString()));
+
+        // test restart
+        StringBuilder sb3 = new StringBuilder();
+        for (Reader<String> r : readers)
+            r.restart();
+        for (Reader<String> r : readers) {
+            while ((c = r.read()) != -1)
+                sb3.append((char) c);
+        }
+
+        System.out.println(sb1.toString());
+        System.out.println(sb2.toString());
+        System.out.println(sb3.toString());
+
+
+        assert(sb3.toString().equals(sb2.toString()));
+
     }
 
     @Test

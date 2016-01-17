@@ -73,12 +73,6 @@ public class Word2Vec
 	boolean cbow = false;
 	@Option(name="-normalize", usage="If set, normalize each vector.", required=false, metaVar="<boolean>")
 	boolean normalize = true;
-<<<<<<< HEAD
-	
-	final float ALPHA_MIN_RATE  = 0.0001f;      
-	final int   MAX_CODE_LENGTH = 40;
-	
-=======
 
 	/* TODO Austin
 	 * Add cmd line options
@@ -95,7 +89,6 @@ public class Word2Vec
 	public Vocabulary in_vocab;
 	public Vocabulary out_vocab;
 
->>>>>>> refs/remotes/origin/ablodge-branch
 	Sigmoid sigmoid;
 	long word_count_train;
 	float subsample_size;
@@ -125,11 +118,6 @@ public class Word2Vec
 	public void train(List<String> filenames) throws Exception
 	{
 		BinUtils.LOG.info("Reading vocabulary:\n");
-<<<<<<< HEAD
-		vocab = new Vocabulary();
-		word_count_train = new SentenceReader().learn(filenames, vocab, min_count);
-		BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", vocab.size(), word_count_train));
-=======
 
 		// ------- Austin's code -------------------------------------
 		in_vocab = (out_vocab = new Vocabulary());
@@ -141,7 +129,6 @@ public class Word2Vec
 		// -----------------------------------------------------------
 
 		BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
->>>>>>> refs/remotes/origin/ablodge-branch
 		
 		BinUtils.LOG.info("Initializing neural network.\n");
 		initNeuralNetwork();
@@ -154,19 +141,6 @@ public class Word2Vec
 		alpha_global      = alpha_init;
 		subsample_size    = subsample_threshold * word_count_train;
 		ExecutorService executor = Executors.newFixedThreadPool(thread_size);
-<<<<<<< HEAD
-		
-		for (String filename : filenames)
-			executor.execute(new TrainTask(filename));
-		
-		executor.shutdown();
-		
-		try
-		{
-			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-		}
-		catch (InterruptedException e) {e.printStackTrace();}
-=======
 
 		// ------- Austin's code -------------------------------------
 		start_time = System.currentTimeMillis();
@@ -180,29 +154,18 @@ public class Word2Vec
 		// -----------------------------------------------------------
 
 		executor.shutdown();
->>>>>>> refs/remotes/origin/ablodge-branch
 		
 		try { executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
 		catch (InterruptedException e) {e.printStackTrace();}
 
 
 		BinUtils.LOG.info("Saving word vectors.\n");
-<<<<<<< HEAD
-		save();
-=======
+
 		save(new File(output_file));
->>>>>>> refs/remotes/origin/ablodge-branch
 	}
 	
 	class TrainTask implements Runnable
 	{
-<<<<<<< HEAD
-		private String filename;
-		
-		public TrainTask(String filename)
-		{
-			this.filename = filename;
-=======
 		// ------- Austin ----------------------
 		private Reader<String> reader;
 		private int id;
@@ -214,19 +177,14 @@ public class Word2Vec
 		{
 			this.reader = reader;
 			this.id = id;
->>>>>>> refs/remotes/origin/ablodge-branch
 		}
 		// -------------------------------------
 
 		@Override
 		public void run()
 		{
-<<<<<<< HEAD
-			SentenceReader reader = new SentenceReader(IOUtils.createFileInputStream(filename));
-			Random  rand  = new XORShiftRandom(filename.hashCode());
-=======
 			Random  rand  = new XORShiftRandom(reader.hashCode());
->>>>>>> refs/remotes/origin/ablodge-branch
+
 			float[] neu1  = cbow ? new float[vector_size] : null;
 			float[] neu1e = new float[vector_size];
 			int     iter  = 0;
@@ -239,17 +197,10 @@ public class Word2Vec
 
 				if (words == null)
 				{
-<<<<<<< HEAD
-					BinUtils.LOG.info(String.format("%s: %d\n", FileUtils.getBaseName(filename), iter));
-					if (++iter == train_iteration) break;
-					adjustLearningRate();
-					reader.close(); reader.open(IOUtils.createFileInputStream(filename));
-=======
 					if (++iter == train_iteration) break;
 					adjustLearningRate();
 					// readers have a built in restart button - Austin
 					try { reader.restart(); } catch (IOException e) { e.printStackTrace(); }
->>>>>>> refs/remotes/origin/ablodge-branch
 					continue;
 				}
 				
@@ -366,12 +317,6 @@ public class Word2Vec
 		for (int i=0; i<size1; i++)
 			W[i] = (float)((rand.nextDouble() - 0.5) / vector_size);
 	}
-<<<<<<< HEAD
-	
-	int[] next(SentenceReader reader, Random rand)
-	{
-		String[] words = reader.next();
-=======
 
 	/* If input layer and output layer are asymmetrical, param in_layer
 	 * determines if you want to return input layer indices or output
@@ -391,7 +336,6 @@ public class Word2Vec
 			System.exit(1);
 		}
 
->>>>>>> refs/remotes/origin/ablodge-branch
 		if (words == null) return null;
 		int[] next = new int[words.size()];
 		int i, j, index, count = 0;
@@ -399,11 +343,7 @@ public class Word2Vec
 		
 		for (i=0,j=0; i<words.size(); i++)
 		{
-<<<<<<< HEAD
-			index = vocab.indexOf(words[i]);
-=======
 			index = vocab.indexOf(words.get(i));
->>>>>>> refs/remotes/origin/ablodge-branch
 			if (index < 0) continue;
 			count++;
 			

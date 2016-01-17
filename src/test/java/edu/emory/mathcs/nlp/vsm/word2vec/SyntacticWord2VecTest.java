@@ -34,7 +34,7 @@ public class SyntacticWord2VecTest {
         String[] params = {	"-train","src/test/resources/dat/dep_test_files",
                 "-output","src/test/resources/dat/cbow_vectors",
                 "-size",""+vector_size,
-                "-threads",  "2",
+                "-threads",  "3",
                 "-min-count","1",
                 "-cbow"};
         test(params);

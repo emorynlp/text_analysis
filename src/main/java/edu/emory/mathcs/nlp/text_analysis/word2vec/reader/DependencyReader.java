@@ -16,32 +16,18 @@ import java.util.stream.Collectors;
 public class DependencyReader extends Reader<NLPNode>
 {
 
-    TSVReader tree_reader = new TSVReader();
+    TSVReader tree_reader;
 
     private static final Pattern sentence_break = Pattern.compile("\\n\\s*\\n");
 
     public DependencyReader(List<File> files)
     {
         super(files, sentence_break);
-        tree_reader.open(this);
-
-        tree_reader.form = 1;
-        tree_reader.lemma = 2;
-        tree_reader.pos = 3;
-        tree_reader.dhead = 5;
-        tree_reader.deprel = 6;
     }
 
     protected DependencyReader(DependencyReader reader, long start, long end)
     {
         super(reader, start, end);
-        tree_reader.open(this);
-
-        tree_reader.form = 1;
-        tree_reader.lemma = 2;
-        tree_reader.pos = 3;
-        tree_reader.dhead = 5;
-        tree_reader.deprel = 6;
     }
 
     @Override
@@ -58,4 +44,16 @@ public class DependencyReader extends Reader<NLPNode>
         return new DependencyReader(this, start, end);
     }
 
+    @Override
+    public void restart() throws IOException {
+        super.restart();
+        tree_reader = new TSVReader();
+        tree_reader.open(this);
+
+        tree_reader.form = 1;
+        tree_reader.lemma = 2;
+        tree_reader.pos = 3;
+        tree_reader.dhead = 5;
+        tree_reader.deprel = 6;
+    }
 }

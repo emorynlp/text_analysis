@@ -25,15 +25,15 @@ public class DependencyReaderTest {
 
         DependencyReader dr = new DependencyReader(files);
 
-        List<Reader<String>> readers = dr.addFeature(NLPNode::getLemma).splitParallel(4);
+        List<Reader<NLPNode>> readers = dr.splitParallel(4);
 
-        List<String> words;
+        List<NLPNode> words;
         int i=0;
-        for (Reader<String> r : readers) {
+        for (Reader<NLPNode> r : readers) {
             System.out.println(i);
             while ((words = r.next()) != null) {
-                for (String word : words)
-                    System.out.print(word + " ");
+                for (NLPNode word : words)
+                    System.out.print(word.getLemma() + " ");
                 System.out.println();
             }
             i++;
@@ -65,6 +65,38 @@ public class DependencyReaderTest {
             }
             tree_reader.close();
         }
+        System.out.println("Finished");
+    }
+
+    @Test
+    public void testRestart() throws Exception {
+
+        List<String> filenames = FileUtils.getFileList("src/test/resources/dat/dep_test_files", "*");
+        List<File> files = filenames.stream().map(File::new).collect(Collectors.toList());
+
+        DependencyReader dr = new DependencyReader(files);
+
+        List<Reader<NLPNode>> readers = dr.splitParallel(4);
+
+        List<NLPNode> words;
+        int i=0;
+        for (Reader<NLPNode> r : readers) {
+            System.out.println(i);
+            while ((words = r.next()) != null) {
+                for (NLPNode word : words)
+                    System.out.print(word.getLemma() + " ");
+                System.out.println();
+            }
+            r.restart();
+            System.out.println(i);
+            while ((words = r.next()) != null) {
+                for (NLPNode word : words)
+                    System.out.print(word.getLemma() + " ");
+                System.out.println();
+            }
+            i++;
+        }
+
         System.out.println("Finished");
     }
 
