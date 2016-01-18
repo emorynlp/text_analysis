@@ -398,18 +398,15 @@ public class Word2Vec
 	public void save(File save_file) throws IOException
 	{
 		Map<String,float[]> map = toMap(normalize);
+		BufferedWriter out = new BufferedWriter(new FileWriter(save_file));
 
-		StringBuilder sb = new StringBuilder();
 		for (String word : map.keySet())
 		{
-			sb.append(word).append("\t");
+			out.write(word+"\t");
 			for (float f : map.get(word))
-				sb.append(f).append("\t");
-			sb.append("\n");
+				out.write(f+"\t");
+			out.write("\n");
 		}
-
-		BufferedWriter out = new BufferedWriter(new FileWriter(save_file));
-		out.write(sb.toString());
 		out.close();
 	}
 	// -------------------------------------------------------

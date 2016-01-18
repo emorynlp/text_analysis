@@ -7,31 +7,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="939b0bb9-6662-4522-b47e-3ab90e4362a8" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/test/resources/dat/word2vec.txt" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/classes/artifacts/Word2Vec_jar/text_analysis.jar" afterPath="$PROJECT_DIR$/classes/artifacts/Word2Vec_jar/text_analysis.jar" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec$TrainTask.class" afterPath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec$TrainTask.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec.class" afterPath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec$TrainTask.class" afterPath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec$TrainTask.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.class" afterPath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/DependencyReader.class" afterPath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/DependencyReader.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Reader.class" afterPath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Reader.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/util/Vocabulary$LearnTask.class" afterPath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/util/Vocabulary$LearnTask.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/util/Vocabulary.class" afterPath="$PROJECT_DIR$/target/classes/edu/emory/mathcs/nlp/text_analysis/word2vec/util/Vocabulary.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/test-classes/edu/emory/mathcs/nlp/vsm/reader/DependencyReaderTest.class" afterPath="$PROJECT_DIR$/target/test-classes/edu/emory/mathcs/nlp/vsm/reader/DependencyReaderTest.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/test-classes/edu/emory/mathcs/nlp/vsm/reader/SentenceReaderTest.class" afterPath="$PROJECT_DIR$/target/test-classes/edu/emory/mathcs/nlp/vsm/reader/SentenceReaderTest.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/test-classes/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.class" afterPath="$PROJECT_DIR$/target/test-classes/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.class" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/classes/artifacts/Word2Vec_jar/text_analysis.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/classes/artifacts/Word2Vec_jar/text_analysis.zip" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/DependencyReader.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/DependencyReader.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Reader.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Reader.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/SentenceReader.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/SentenceReader.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/util/Vocabulary.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/util/Vocabulary.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/DependencyReaderTest.java" afterPath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/DependencyReaderTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/SentenceReaderTest.java" afterPath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/SentenceReaderTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java" afterPath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/resources/dat/cbow_vectors" afterPath="$PROJECT_DIR$/src/test/resources/dat/cbow_vectors" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/resources/dat/skip_vectors" afterPath="$PROJECT_DIR$/src/test/resources/dat/skip_vectors" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/test-classes/dat/cbow_vectors" afterPath="$PROJECT_DIR$/target/test-classes/dat/cbow_vectors" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/test-classes/dat/skip_vectors" afterPath="$PROJECT_DIR$/target/test-classes/dat/skip_vectors" />
     </list>
@@ -60,19 +39,36 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="54" column="28" selection-start-line="54" selection-start-column="28" selection-end-line="54" selection-end-column="28" />
-              <folding>
-                <element signature="e#1072#1073#0" expanded="false" />
-                <element signature="e#1133#1134#0" expanded="false" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SyntacticWord2VecTest.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="SyntacticWord2VecTest.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.38636363">
+            <state vertical-scroll-proportion="0.0">
               <caret line="13" column="32" selection-start-line="13" selection-start-column="32" selection-end-line="13" selection-end-column="32" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SyntacticWord2Vec.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="0" column="51" selection-start-line="0" selection-start-column="8" selection-end-line="0" selection-end-column="51" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Word2Vec.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.59107804">
+              <caret line="408" column="9" selection-start-line="408" selection-start-column="9" selection-end-line="408" selection-end-column="9" />
               <folding />
             </state>
           </provider>
@@ -200,7 +196,6 @@
         <option value="$MAVEN_REPOSITORY$/edu/emory/mathcs/nlp/corenlp/1.0.0-SNAPSHOT/corenlp-1.0.0-20151127.230438-5.jar!/edu/emory/mathcs/nlp/component/template/reader/TSVReader.class" />
         <option value="$PROJECT_DIR$/src/test/resources/dat/dep_test_files/dep_test2.txt" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/SentenceReader.java" />
-        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java" />
         <option value="$MAVEN_REPOSITORY$/edu/emory/mathcs/nlp/corenlp/1.0.0-SNAPSHOT/corenlp-1.0.0-20151127.230438-5.jar!/edu/emory/mathcs/nlp/component/template/node/NLPNode.class" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/util/Vocabulary.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec.java" />
@@ -212,6 +207,7 @@
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/DependencyReader.java" />
         <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/SentenceReaderTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/reader/Reader.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java" />
       </list>
     </option>
   </component>
@@ -286,8 +282,6 @@
     </navigator>
     <panes>
       <pane id="Scope" />
-      <pane id="PackagesPane" />
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -698,6 +692,8 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -1245,7 +1241,6 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.13206106" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32843137" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.28499156" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2816794" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -1253,13 +1248,14 @@
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24810892" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3979764" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.28499156" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32546374" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3979764" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1312,9 +1308,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="17" column="6" selection-start-line="17" selection-start-column="6" selection-end-line="17" selection-end-column="6" />
-          <folding>
-            <element signature="e#1281#1282#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1329,10 +1322,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#13998#13999#0" expanded="true" />
-            <element signature="e#14023#14024#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1350,9 +1340,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="17" column="6" selection-start-line="17" selection-start-column="6" selection-end-line="17" selection-end-column="6" />
-          <folding>
-            <element signature="e#1281#1282#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1367,11 +1354,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="23" column="5" selection-start-line="23" selection-start-column="5" selection-end-line="23" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#1509#1510#0" expanded="false" />
-            <element signature="e#1566#1567#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1396,9 +1378,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#1281#1282#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1406,11 +1385,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="23" column="5" selection-start-line="23" selection-start-column="5" selection-end-line="23" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#1509#1510#0" expanded="false" />
-            <element signature="e#1566#1567#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1418,10 +1392,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#13998#13999#0" expanded="true" />
-            <element signature="e#14023#14024#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1535,7 +1506,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33274338">
           <caret line="48" column="6" selection-start-line="48" selection-start-column="6" selection-end-line="48" selection-end-column="6" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1564,11 +1534,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="45" column="33" selection-start-line="45" selection-start-column="33" selection-end-line="45" selection-end-column="33" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#1509#1510#0" expanded="false" />
-            <element signature="e#1566#1567#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1576,20 +1541,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
-          <folding>
-            <element signature="e#1281#1282#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-192.03703">
-          <caret line="345" column="48" selection-start-line="345" selection-start-column="48" selection-end-line="345" selection-end-column="48" />
-          <folding>
-            <element signature="e#13998#13999#0" expanded="true" />
-            <element signature="e#14023#14024#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1619,15 +1570,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="6.0530305">
           <caret line="154" column="0" selection-start-line="154" selection-start-column="0" selection-end-line="154" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="119" column="54" selection-start-line="119" selection-start-column="54" selection-end-line="119" selection-end-column="54" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1687,10 +1629,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="54" column="28" selection-start-line="54" selection-start-column="28" selection-end-line="54" selection-end-column="28" />
-          <folding>
-            <element signature="e#1072#1073#0" expanded="false" />
-            <element signature="e#1133#1134#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1724,8 +1663,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.38636363">
+        <state vertical-scroll-proportion="0.0">
           <caret line="13" column="32" selection-start-line="13" selection-start-column="32" selection-end-line="13" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/SyntacticWord2Vec.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="51" selection-start-line="0" selection-start-column="8" selection-end-line="0" selection-end-column="51" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/text_analysis/word2vec/Word2Vec.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.59107804">
+          <caret line="408" column="9" selection-start-line="408" selection-start-column="9" selection-end-line="408" selection-end-column="9" />
           <folding />
         </state>
       </provider>
