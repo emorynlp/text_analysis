@@ -114,6 +114,15 @@ public class Word2Vec
 	}
 	
 //	=================================== Training ===================================
+
+	// ----- Austin's Code ----------------------------------------------------
+
+	Reader<String> getReader(List<File> files)
+	{
+		return new SentenceReader(files);
+	}
+
+	// ---------------------------------------------------------------
 	
 	public void train(List<String> filenames) throws Exception
 	{
@@ -122,7 +131,7 @@ public class Word2Vec
 		// ------- Austin's code -------------------------------------
 		in_vocab = (out_vocab = new Vocabulary());
 
-		List<Reader<String>> readers = (new SentenceReader(filenames.stream().map(File::new).collect(Collectors.toList())))
+		List<Reader<String>> readers = getReader(filenames.stream().map(File::new).collect(Collectors.toList()))
 												.splitParallel(thread_size);
 		in_vocab.learnParallel(readers, min_count);
 		word_count_train = in_vocab.totalCount();

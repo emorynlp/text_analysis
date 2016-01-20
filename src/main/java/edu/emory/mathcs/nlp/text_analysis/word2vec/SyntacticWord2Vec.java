@@ -11,6 +11,7 @@ import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -39,11 +40,11 @@ public class SyntacticWord2Vec extends Word2Vec
         Vocabulary depend_vocab  = new Vocabulary();
 
         DependencyReader reader = new DependencyReader(filenames.stream().map(File::new).collect(Collectors.toList()));
-
+        // TODO add dependency label
         // each word is a lemma, e.g., "go"
         lemma_vocab.learnParallel(reader.addFeature(NLPNode::getLemma).splitParallel(thread_size), min_count);
         // each word is a lemma with dependency, e.g., "root_go"
-        depend_vocab.learnParallel(reader.addFeature(this::wordFeatures).splitParallel(thread_size), min_count);
+        depend_vocab.learnParallel(reader.addFeature(NLPNode::getLemma).splitParallel(thread_size), min_count);
         word_count_train = lemma_vocab.totalCount();
 
         in_vocab = lemma_vocab;
@@ -164,9 +165,9 @@ public class SyntacticWord2Vec extends Word2Vec
     {
         int k, l, wc = 0;
         NLPNode word = words.get(index);
-        int word_index = out_vocab.indexOf(wordFeatures(word));
+        int word_index = out_vocab.indexOf(getWordLabel(word));
 
-        List<NLPNode> context_words = word.getDependentList(); // include dependents
+        List<NLPNode> context_words = word.getDependentList();
 
         // input -> hidden
         for (NLPNode context : context_words)
@@ -195,9 +196,9 @@ public class SyntacticWord2Vec extends Word2Vec
     {
         int k, l1;
         NLPNode word = words.get(index);
-        int word_index = out_vocab.indexOf(wordFeatures(word));
+        int word_index = out_vocab.indexOf(getWordLabel(word));
 
-        List<NLPNode> context_words = word.getDependentList(); // include dependents
+        List<NLPNode> context_words = word.getDependentList();
 
         for (NLPNode context : context_words)
         {
@@ -211,15 +212,10 @@ public class SyntacticWord2Vec extends Word2Vec
         }
     }
 
-    public String wordFeatures(NLPNode word)
+    public String getWordLabel(NLPNode word)
     {
         return word.getDependencyLabel()+"_"+word.getLemma();
     }
 
-
-
-    static public void main(String[] args)
-    {
-        new Word2Vec(args);
-    }
+    static public void main(String[] args) { new SyntacticWord2Vec(args); }
 }
