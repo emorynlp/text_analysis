@@ -2,10 +2,11 @@ package edu.emory.mathcs.nlp.vsm.types;
 
 import edu.emory.mathcs.nlp.common.constant.StringConst;
 import edu.emory.mathcs.nlp.common.util.FileUtils;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.Reader;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.SentenceReader;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Word;
+import edu.emory.mathcs.nlp.vsm.reader.Reader;
+import edu.emory.mathcs.nlp.vsm.reader.SentenceReader;
+import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
+import edu.emory.mathcs.nlp.vsm.util.Word;
+
 import org.junit.Test;
 
 import java.io.File;
@@ -125,6 +126,7 @@ public class VocabularyTest {
         vocab.learnParallel(reader.splitParallel(3), 2);
 
         System.out.println(vocab.toString());
+        reader.close();
     }
 
     @Test

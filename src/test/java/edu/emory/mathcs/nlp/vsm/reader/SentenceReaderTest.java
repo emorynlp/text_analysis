@@ -1,29 +1,30 @@
 package edu.emory.mathcs.nlp.vsm.reader;
 
-import edu.emory.mathcs.nlp.common.util.FileUtils;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.Reader;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.SentenceReader;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.junit.Test;
+
+import edu.emory.mathcs.nlp.common.util.FileUtils;
+import edu.emory.mathcs.nlp.vsm.reader.Reader;
+import edu.emory.mathcs.nlp.vsm.reader.SentenceReader;
+
 /**
  * Created by austin on 12/24/2015.
  */
 public class SentenceReaderTest {
 
-    @Test
+	@Test
     public void testRead() throws Exception
     {
         List<String> filenames = FileUtils.getFileList("src/test/resources/dat/test_files", "*");
         List<File> files = filenames.stream().map(File::new).collect(Collectors.toList());
 
-        List<Reader<String>> readers = new SentenceReader(files)
-                .splitParallel(4);
+        @SuppressWarnings("resource")
+		List<Reader<String>> readers = new SentenceReader(files).splitParallel(4);
 
         StringBuilder sb1 = new StringBuilder();
         int c;
@@ -60,7 +61,7 @@ public class SentenceReaderTest {
 
 
         assert(sb3.toString().equals(sb2.toString()));
-
+        for (Reader<String> reader : readers) reader.close();
     }
 
     @Test
@@ -79,6 +80,7 @@ public class SentenceReaderTest {
             sb.append("\n");
         }
         System.out.println(sb);
+        reader.close();
     }
 
     @Test
@@ -99,6 +101,7 @@ public class SentenceReaderTest {
             }
             System.out.println(sb);
         }
+        reader.close();
     }
 
     @Test
@@ -119,6 +122,7 @@ public class SentenceReaderTest {
             }
             System.out.println(sb);
         }
+        reader.close();
     }
 
     @Test
@@ -139,6 +143,7 @@ public class SentenceReaderTest {
             }
             System.out.println();
         }
+        reader.close();
     }
 
     @Test
@@ -161,12 +166,14 @@ public class SentenceReaderTest {
             sb.append("\n");
         }
         System.out.println(sb);
+        reader.close();
     }
 
     @Test
     public void testAddFilter() throws Exception
     {
-        Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        @SuppressWarnings("resource")
+		Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
                                             .stream().map(File::new).collect(Collectors.toList()))
                                             .addFilter(w -> w.contains("o"));
 
@@ -179,16 +186,18 @@ public class SentenceReaderTest {
             sb.append("\n");
         }
         System.out.println(sb);
+        reader.close();
     }
 
     @Test
     public void testAddFeature() throws Exception
     {
-        Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        @SuppressWarnings("resource")
+		Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
                                         .stream().map(File::new).collect(Collectors.toList()))
                                         .addFeature(String::toUpperCase)
                                         .addFeature(String::toLowerCase);
-
+        
         StringBuilder sb = new StringBuilder();
         List<String> words;
         while((words = reader.next()) != null)
@@ -203,6 +212,7 @@ public class SentenceReaderTest {
     @Test
     public void testAddFeature1() throws Exception
     {
+    	@SuppressWarnings("resource")
         Reader<Integer> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
                                             .stream().map(File::new).collect(Collectors.toList()))
                                             .addFeature(String::hashCode);
@@ -221,6 +231,7 @@ public class SentenceReaderTest {
     @Test
     public void testAddMap() throws Exception
     {
+    	@SuppressWarnings("resource")
         Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
                                             .stream().map(File::new).collect(Collectors.toList()))
                                             .addMap(l -> l.subList(0, l.size()/2));
@@ -235,5 +246,6 @@ public class SentenceReaderTest {
             sb.append("\n");
         }
         System.out.println(sb);
+        reader.close();
     }
 }
