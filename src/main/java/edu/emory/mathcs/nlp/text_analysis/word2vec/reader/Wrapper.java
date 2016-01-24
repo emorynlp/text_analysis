@@ -41,4 +41,7 @@ class Wrapper<S,T> extends Reader<T>
     {
         return new Wrapper<>(reader.subReader(start, end), convert);
     }
+
+    @Override
+    public float progress() { return reader.progress(); }
 }

@@ -56,8 +56,6 @@ public class Vocabulary implements Serializable
 
 
 	/**
-<<<<<<< HEAD
-=======
 	 * Add every word in reader to vocabulary,
 	 * then sort vocabulary and restart reader.
 	 *
@@ -173,7 +171,6 @@ public class Vocabulary implements Serializable
 	}
 
 	/**
->>>>>>> refs/remotes/origin/ablodge-branch
 	 * Adds the word to the vocabulary if absent, and increments its count by 1. 
 	 * @return the word object either already existing or newly introduced.
 	 */

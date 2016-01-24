@@ -95,10 +95,9 @@ public abstract class Reader<T> extends InputStream
      * Get the percentage of this reader that has already been read.
      * @return - float between 0% and 100%
      */
-    
-    public float progress() {return (index > end) ? 100.0f : 100*(float)(index-start)/(end-start);}
+     public float progress() { return (index > end) ? 100.0f : 100*(float)(index-start)/(end-start); }
 
-    /**
+     /**
      * Reset this reader to it's initial state. Using this function
      * you can make multiple passes though the same reader.
      * @throws IOException

@@ -100,4 +100,20 @@ public class DependencyReaderTest {
         System.out.println("Finished");
     }
 
+    @Test
+    public void testProgress() throws Exception
+    {
+        List<String> filenames = FileUtils.getFileList("src/test/resources/dat/dep_test_files", "*");
+        List<File> files = filenames.stream().map(File::new).collect(Collectors.toList());
+
+        Reader<String> reader = new DependencyReader(files).addFeature(NLPNode::getLemma);
+
+        while (reader.next() != null)
+        {
+            System.out.print(String.format("%.1f", reader.progress()) + "%\n");
+        }
+        System.out.print(String.format("%.1f", reader.progress()) + "%\n");
+        System.out.println("finished");
+    }
+
 }

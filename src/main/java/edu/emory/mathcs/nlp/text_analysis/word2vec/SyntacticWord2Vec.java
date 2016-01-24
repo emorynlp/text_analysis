@@ -44,7 +44,7 @@ public class SyntacticWord2Vec extends Word2Vec
         // each word is a lemma, e.g., "go"
         lemma_vocab.learnParallel(reader.addFeature(NLPNode::getLemma).splitParallel(thread_size), min_count);
         // each word is a lemma with dependency, e.g., "root_go"
-        depend_vocab.learnParallel(reader.addFeature(NLPNode::getLemma).splitParallel(thread_size), min_count);
+        depend_vocab.learnParallel(reader.addFeature(this::getWordLabel).splitParallel(thread_size), min_count);
         word_count_train = lemma_vocab.totalCount();
 
         in_vocab = lemma_vocab;
@@ -116,13 +116,7 @@ public class SyntacticWord2Vec extends Word2Vec
             {
                 try {
                     words = reader.next();
-                    if (words != null)
-                    {
-                        System.out.println("id "+id+" ");
-                        for(NLPNode n : words)
-                            System.out.print(n.getLemma()+" ");
-                        System.out.println();
-                    }
+                    word_count_global += words == null ? 0 : words.size();
                 } catch (IOException e) {
                     System.err.println("Reader failure: progress "+reader.progress());
                     e.printStackTrace();
@@ -166,6 +160,7 @@ public class SyntacticWord2Vec extends Word2Vec
         int k, l, wc = 0;
         NLPNode word = words.get(index);
         int word_index = out_vocab.indexOf(getWordLabel(word));
+        if (word_index < 0) return;
 
         List<NLPNode> context_words = word.getDependentList();
 
@@ -173,6 +168,7 @@ public class SyntacticWord2Vec extends Word2Vec
         for (NLPNode context : context_words)
         {
             int context_index = in_vocab.indexOf(context.getLemma());
+            if (context_index < 0) continue;
             l = context_index * vector_size;
             for (k=0; k<vector_size; k++) neu1[k] += W[k+l];
             wc++;
@@ -197,12 +193,15 @@ public class SyntacticWord2Vec extends Word2Vec
         int k, l1;
         NLPNode word = words.get(index);
         int word_index = out_vocab.indexOf(getWordLabel(word));
+        if (word_index < 0) return;
 
         List<NLPNode> context_words = word.getDependentList();
 
         for (NLPNode context : context_words)
         {
             int context_index = in_vocab.indexOf(context.getLemma());
+            if (context_index < 0) continue;
+
             l1 = context_index * vector_size;
             Arrays.fill(neu1e, 0);
             optimizer.learnSkipGram(rand, word_index, W, V, neu1e, alpha_global, l1);
