@@ -1,7 +1,8 @@
 package edu.emory.mathcs.nlp.vsm.word2vec;
 
-import edu.emory.mathcs.nlp.text_analysis.word2vec.Word2Vec;
 import org.junit.Test;
+
+import edu.emory.mathcs.nlp.vsm.Word2Vec;
 
 import java.io.IOException;
 
