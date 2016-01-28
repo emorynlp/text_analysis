@@ -20,7 +20,7 @@ public class SentenceReaderTest {
 	@Test
     public void testRead() throws Exception
     {
-        List<String> filenames = FileUtils.getFileList("src/test/resources/dat/test_files", "*");
+        List<String> filenames = FileUtils.getFileList("resources/dat/test_files", "*");
         List<File> files = filenames.stream().map(File::new).collect(Collectors.toList());
 
         @SuppressWarnings("resource")
@@ -67,7 +67,7 @@ public class SentenceReaderTest {
     @Test
     public void testNext() throws Exception
     {
-        Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                                                     .stream().map(File::new).collect(Collectors.toList()));
 
         StringBuilder sb = new StringBuilder();
@@ -86,7 +86,7 @@ public class SentenceReaderTest {
     @Test
     public void testParallel() throws Exception
     {
-        Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                                                  .stream().map(File::new).collect(Collectors.toList()));
 
         List<String> words;
@@ -107,7 +107,7 @@ public class SentenceReaderTest {
     @Test
     public void testTrainAndTest() throws Exception
     {
-        Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                 .stream().map(File::new).collect(Collectors.toList()));
 
         List<String> words;
@@ -128,7 +128,7 @@ public class SentenceReaderTest {
     @Test
     public void testProgress() throws Exception
     {
-        Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                 .stream().map(File::new).collect(Collectors.toList()));
 
         List<String> words;
@@ -149,7 +149,7 @@ public class SentenceReaderTest {
     @Test
     public void testRestart() throws Exception
     {
-        Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                 .stream().map(File::new).collect(Collectors.toList()));
 
         while(reader.next() != null);
@@ -173,7 +173,7 @@ public class SentenceReaderTest {
     public void testAddFilter() throws Exception
     {
         @SuppressWarnings("resource")
-		Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+		Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                                             .stream().map(File::new).collect(Collectors.toList()))
                                             .addFilter(w -> w.contains("o"));
 
@@ -193,7 +193,7 @@ public class SentenceReaderTest {
     public void testAddFeature() throws Exception
     {
         @SuppressWarnings("resource")
-		Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+		Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                                         .stream().map(File::new).collect(Collectors.toList()))
                                         .addFeature(String::toUpperCase)
                                         .addFeature(String::toLowerCase);
@@ -213,7 +213,7 @@ public class SentenceReaderTest {
     public void testAddFeature1() throws Exception
     {
     	@SuppressWarnings("resource")
-        Reader<Integer> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        Reader<Integer> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                                             .stream().map(File::new).collect(Collectors.toList()))
                                             .addFeature(String::hashCode);
 
@@ -232,7 +232,7 @@ public class SentenceReaderTest {
     public void testAddMap() throws Exception
     {
     	@SuppressWarnings("resource")
-        Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                                             .stream().map(File::new).collect(Collectors.toList()))
                                             .addMap(l -> l.subList(0, l.size()/2));
 

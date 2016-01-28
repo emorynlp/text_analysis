@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Word2Vec_jar">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/classes/artifacts/Word2Vec_jar/text_analysis.zip!/" />
+      <root url="jar://$PROJECT_DIR$/classes/artifacts/Word2Vec_jar/text_analysis.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

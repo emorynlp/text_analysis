@@ -59,7 +59,7 @@ public abstract class Reader<T> extends InputStream
      * and end on a sentence break. To do this, at the
      * start and end of a split Reader, the Reader reads
      * ahead until the next sentence break. */
-    protected StringBuilder end_of_sentence;
+    protected StringBuilder end_of_sentence = new StringBuilder();
 
     public Reader(List<File> files)
     {
@@ -70,7 +70,6 @@ public abstract class Reader<T> extends InputStream
     public Reader(List<File> files, Pattern sentence_break)
     {
     	this(files, sentence_break, 0, files.stream().mapToLong(File::length).sum());
-    	end_of_sentence = new StringBuilder();
         try { restart(); } catch (IOException e) { e.printStackTrace(); }
     }
     

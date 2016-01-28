@@ -21,7 +21,7 @@ public class DEPTreeReaderTest {
     @Test
     public void testNext() throws Exception {
 
-        List<String> filenames = FileUtils.getFileList("src/test/resources/dat/dep_test_files", "*");
+        List<String> filenames = FileUtils.getFileList("resources/dat/dep_test_files", "*");
         List<File> files = filenames.stream().map(File::new).collect(Collectors.toList());
 
         DEPTreeReader dr = new DEPTreeReader(files);
@@ -47,7 +47,7 @@ public class DEPTreeReaderTest {
     @Test
     public void testTSVReader() throws Exception {
 
-        List<String> filenames = FileUtils.getFileList("src/test/resources/dat/dep_test_files", "*");
+        List<String> filenames = FileUtils.getFileList("resources/dat/dep_test_files", "*");
 
         TSVReader tree_reader = new TSVReader();
 
@@ -73,7 +73,7 @@ public class DEPTreeReaderTest {
     @Test
     public void testRestart() throws Exception {
 
-        List<String> filenames = FileUtils.getFileList("src/test/resources/dat/dep_test_files", "*");
+        List<String> filenames = FileUtils.getFileList("resources/dat/dep_test_files", "*");
         List<File> files = filenames.stream().map(File::new).collect(Collectors.toList());
 
         DEPTreeReader dr = new DEPTreeReader(files);
@@ -106,10 +106,10 @@ public class DEPTreeReaderTest {
     @Test
     public void testProgress() throws Exception
     {
-        List<String> filenames = FileUtils.getFileList("src/test/resources/dat/dep_test_files", "*");
+        List<String> filenames = FileUtils.getFileList("resources/dat/dep_test_files", "*");
         List<File> files = filenames.stream().map(File::new).collect(Collectors.toList());
 
-        Reader<String> reader = new DependencyReader(files).addFeature(NLPNode::getLemma);
+        Reader<String> reader = new DEPTreeReader(files).addFeature(NLPNode::getLemma);
 
         while (reader.next() != null)
         {

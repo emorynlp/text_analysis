@@ -15,6 +15,7 @@
  */
 package edu.emory.mathcs.nlp.vsm.optimizer;
 
+import java.io.Serializable;
 import java.util.Random;
 
 import edu.emory.mathcs.nlp.common.util.Sigmoid;

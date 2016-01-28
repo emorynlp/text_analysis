@@ -1,11 +1,26 @@
+/**
+ * Copyright 2015, Emory University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package edu.emory.mathcs.nlp.vsm;
 
 import edu.emory.mathcs.nlp.common.random.XORShiftRandom;
 import edu.emory.mathcs.nlp.common.util.BinUtils;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.HierarchicalSoftmax;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.optimizer.NegativeSampling;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.reader.Reader;
-import edu.emory.mathcs.nlp.text_analysis.word2vec.util.Vocabulary;
+import edu.emory.mathcs.nlp.vsm.optimizer.HierarchicalSoftmax;
+import edu.emory.mathcs.nlp.vsm.optimizer.NegativeSampling;
+import edu.emory.mathcs.nlp.vsm.reader.Reader;
+import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
 import org.kohsuke.args4j.Option;
 
 import java.io.File;
@@ -34,17 +49,17 @@ public class PolysemousWord2Vec extends Word2Vec
     /** Initializes weights between the input layer to the hidden layer using random numbers between [-0.5, 0.5]. */
     void initNeuralNetwork()
     {
-        int size1 = in_vocab.size() * vector_size;
+        int size = in_vocab.size() * vector_size;
         Random rand = new XORShiftRandom(1);
 
-        S = new float[senses][size1]; // S[word_sense][vector_size*word_index + component]
-        V = new float[size1]; // V[vector_size*word_index + component]
+        S = new float[senses][size]; // S[word_sense][vector_size*word_index + component]
+        V = new float[size]; // V[vector_size*word_index + component]
 
-        for (int s=0; s<senses; s++) for (int i=0; i<size1; i++)
+        for (int s=0; s<senses; s++) for (int i=0; i<size; i++)
             S[s][i] = (float)((rand.nextDouble() - 0.5) / vector_size);
         // these keep track of proportionality of use for each sense
         sense_dist = new float[senses][in_vocab.size()]; // sense_dist[word_sense][word_index]
-        sense_norm = new float[out_vocab.size()];         // sense_norm[word_index]
+        sense_norm = new float[in_vocab.size()];         // sense_norm[word_index]
     }
 
     public void train(List<String> filenames) throws Exception
@@ -119,6 +134,7 @@ public class PolysemousWord2Vec extends Word2Vec
 
             float[][] neu1s  = cbow ? new float[senses][vector_size] : null;
             float[] neu1e = new float[vector_size];
+            float[] E = new float[senses];
             int     iter  = 0;
             int     index, window;
             int[]   words;
@@ -142,8 +158,8 @@ public class PolysemousWord2Vec extends Word2Vec
                     if (cbow) Arrays.fill(neu1s, 0);
                     Arrays.fill(neu1e, 0);
 
-                    if (cbow) bagOfWords(words, index, window, rand, neu1e, neu1s);
-                    else      skipGram  (words, index, window, rand, neu1e);
+                    if (cbow) bagOfWords(words, index, window, rand, neu1e, neu1s, E);
+                    else      skipGram  (words, index, window, rand, neu1e, E);
                 }
 
                 // output progress every 15 minutes
@@ -159,7 +175,7 @@ public class PolysemousWord2Vec extends Word2Vec
         }
     }
 
-    void bagOfWords(int[] words, int index, int window, Random rand, float[] neu1e, float[][] neu1s)
+    void bagOfWords(int[] words, int index, int window, Random rand, float[] neu1e, float[][] neu1s, float[] E)
     {
         int i, j, k, l, wc = 0, word = words[index];
 
@@ -173,23 +189,79 @@ public class PolysemousWord2Vec extends Word2Vec
         }
 
         if (wc == 0) return;
-        for (int s=0; s<senses; s++) for (k=0; k<vector_size; k++) neu1s[s][vector_size+k] /= wc;
-        polysemousBagOfWords(rand, word, neu1e, neu1s);
+        for (int s=0; s<senses; s++) for (k=0; k<vector_size; k++) neu1s[s][k] /= wc;
 
-        // hidden -> input
+        getSenseDist(E, word, neu1s);
+
+        // expectation maximization
+        for (int s = 0; s < senses; s++) {
+            optimizer.learnBagOfWords(rand, word, V, neu1s[s], neu1e, E[s]*alpha_global);
+
+            // hidden -> input
+            for (i=-window,j=index+i; i<=window; i++,j++)
+            {
+                l = words[j] * vector_size;
+                if (i == 0 || words.length <= j || j < 0) continue;
+                for (k = 0; k < vector_size; k++) S[s][k+l] += neu1e[k];
+            }
+            sense_dist[s][word] += E[s];
+        }
+        sense_norm[word]++;
+    }
+
+    void skipGram(int[] words, int index, int window, Random rand, float[] neu1e, float[] E)
+    {
+        int i, j, k, l1, word = words[index];
+
         for (i=-window,j=index+i; i<=window; i++,j++)
         {
-            l = words[j] * vector_size;
             if (i == 0 || words.length <= j || j < 0) continue;
-            for (int s=0; s<senses; s++) for (k = 0; k < vector_size; k++) S[s][k+l] += neu1e[k];
+            l1 = words[j] * vector_size;
+            Arrays.fill(neu1e, 0);
+
+            getSenseDist(E, word, words[j]);
+
+            // expectation maximization
+            for (int s = 0; s < senses; s++) {
+                optimizer.learnSkipGram(rand, word, S[s], V, neu1e, E[s]*alpha_global, l1);
+
+                // hidden -> input
+                for (k = 0; k < vector_size; k++) S[s][l1+k] += neu1e[k];
+                sense_dist[s][word] += E[s];
+            }
+            sense_norm[word]++;
         }
     }
 
-    public void polysemousBagOfWords(Random rand, int word, float[] neu1e, float[][] neu1s)
+    public void getSenseDist(float[] E, int word, int context) {
+        int max = 0, s, k, l1, l2;
+        float score = 0, sum = 0;
+
+        for (s = 0; s < senses; s++) {
+            l1 = context * vector_size;
+            l2 = word * vector_size;
+            // hidden -> output
+            for (k = 0; k < vector_size; k++) score += S[s][l1 + k] * V[l2 + k];
+            E[s] = (1 - sigmoid.get(score));
+            E[s] = 1 - E[s] * E[s];
+            if (E[s] > E[max])
+                max = s;
+            sum += E[s];
+        }
+
+        if (sum == 0) for (s = 0; s < senses; s++)
+        {
+            E[s] = 1;
+            sum++;
+        }
+        for (s = 0; s < senses; s++)
+            E[s] /= sum;
+    }
+
+    public void getSenseDist(float[] E, int word, float[][] neu1s)
     {
         int max = 0, s, k, l;
         float score = 0, sum = 0;
-        float[] E = new float[senses];
 
         l = word * vector_size;
 
@@ -202,66 +274,15 @@ public class PolysemousWord2Vec extends Word2Vec
                 max = s;
             sum += E[s];
         }
-        if (sum == 0) return;
-        for (s = 0; s < senses; s++)
-            E[s] /= sum;
 
-        // expectation maximization
-        for (s = 0; s < senses; s++) {
-            optimizer.learnBagOfWords(rand, word, V, neu1s[s], neu1e, alpha_global);
-            sense_dist[s][word] += E[s];
-        }
-        sense_norm[word]++;
-    }
-
-    void skipGram(int[] words, int index, int window, Random rand, float[] neu1e)
-    {
-        int i, j, k, l1, word = words[index];
-
-        for (i=-window,j=index+i; i<=window; i++,j++)
+        if (sum == 0) for (s = 0; s < senses; s++)
         {
-            if (i == 0 || words.length <= j || j < 0) continue;
-            l1 = words[j] * vector_size;
-            Arrays.fill(neu1e, 0);
-            polysemousSkipGram(rand, word, neu1e, words[j]);
-
-            // hidden -> input
-            for (int s=0; s<senses; s++) for (k = 0; k < vector_size; k++) S[s][l1+k] += neu1e[k];
+            E[s] = 1;
+            sum++;
         }
-    }
-
-    public void polysemousSkipGram(Random rand, int word, float[] neu1e, int context)
-    {
-        int max = 0, s, k, l1, l2;
-        float score = 0, sum = 0;
-        float[] E = new float[senses];
-
-        for (s = 0; s < senses; s++) {
-            l1 = context * vector_size;
-            l2 = word * vector_size;
-            // hidden -> output
-            for (k = 0; k < vector_size; k++) score += S[s][l1+k] * V[l2+k];
-            E[s] = (1 - sigmoid.get(score));
-            E[s] = 1 - E[s] * E[s];
-            if (E[s] > E[max])
-                max = s;
-            sum += E[s];
-        }
-
-        if (sum == 0) return;
-
         for (s = 0; s < senses; s++)
             E[s] /= sum;
-
-        // expectation maximization
-        for (s = 0; s < senses; s++) {
-            l1 = context * vector_size;
-            optimizer.learnSkipGram(rand, word, S[s], V, neu1e, E[s]*alpha_global, l1);
-            sense_dist[s][word] += E[s];
-        }
-        sense_norm[word]++;
     }
-
 
     String senseToString(int sense, int word_index){
         return in_vocab.get(word_index).form
@@ -277,9 +298,10 @@ public class PolysemousWord2Vec extends Word2Vec
         String key;
         int i, l;
 
-        for (int s=0; s<senses; s++)
+        for (i = 0; i < in_vocab.size(); i++)
         {
-            for (i = 0; i < in_vocab.size(); i++) {
+            for (int s=0; s<senses; s++)
+            {
                 l = i * vector_size;
                 key = senseToString(s, i);
                 vector = Arrays.copyOfRange(S[s], l, l + vector_size);

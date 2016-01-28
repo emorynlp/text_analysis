@@ -15,22 +15,6 @@
  */
 package edu.emory.mathcs.nlp.vsm;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import org.kohsuke.args4j.Option;
-
 import edu.emory.mathcs.nlp.common.random.XORShiftRandom;
 import edu.emory.mathcs.nlp.common.util.BinUtils;
 import edu.emory.mathcs.nlp.common.util.FileUtils;
@@ -42,11 +26,17 @@ import edu.emory.mathcs.nlp.vsm.optimizer.Optimizer;
 import edu.emory.mathcs.nlp.vsm.reader.Reader;
 import edu.emory.mathcs.nlp.vsm.reader.SentenceReader;
 import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
+import org.kohsuke.args4j.Option;
+
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
- * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
- * http://arxiv.org/pdf/1301.3781.pdf
- * http://www-personal.umich.edu/~ronxin/pdf/w2vexp.pdf
+ * @author Austin Blodgett
  */
 public class Word2Vec
 {
