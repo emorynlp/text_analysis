@@ -44,6 +44,10 @@ public class Word2Vec
 	String train_path = null;
 	@Option(name="-output", usage="output file to save the resulting word vectors.", required=true, metaVar="<filename>")
 	String output_file = null;
+	@Option(name="-write-vocab", usage="file to save serialized vocabulary.", required=false, metaVar="<filename>")
+	String write_vocab_file = null;
+	@Option(name="-read-vocab", usage="file with serialized vocabulary to read.", required=false, metaVar="<filename>")
+	String read_vocab_file = null;
 	@Option(name="-ext", usage="extension of the training files (default: \"*\").", required=false, metaVar="<string>")
 	String train_ext = "*";
 	@Option(name="-size", usage="size of word vectors (default: 100).", required=false, metaVar="<int>")
@@ -130,7 +134,8 @@ public class Word2Vec
 		List<Reader<String>> train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
 		Reader<String> 		 test_reader   = evaluate ? readers.get(thread_size-1) 		 : null;
 
-		in_vocab.learnParallel(train_readers, min_count);
+		if (read_vocab_file == null) in_vocab.learnParallel(train_readers, min_count);
+		else 						 in_vocab.readVocab(new File(read_vocab_file));
 		word_count_train = in_vocab.totalCount();
 		// -----------------------------------------------------------
 
@@ -169,6 +174,7 @@ public class Word2Vec
 		BinUtils.LOG.info("Saving word vectors.\n");
 
 		save(new File(output_file));
+		if (write_vocab_file != null) in_vocab.writeVocab(new File(write_vocab_file));
 	}
 	
 	class TrainTask implements Runnable

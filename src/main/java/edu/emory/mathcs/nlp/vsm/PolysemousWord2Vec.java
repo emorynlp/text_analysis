@@ -72,6 +72,7 @@ public class PolysemousWord2Vec extends Word2Vec
         List<Reader<String>> readers = getReader(filenames.stream().map(File::new).collect(Collectors.toList()))
                 .splitParallel(thread_size);
         in_vocab.learnParallel(readers, min_count);
+
         word_count_train = in_vocab.totalCount();
         // -----------------------------------------------------------
 

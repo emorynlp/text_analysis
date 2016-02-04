@@ -50,21 +50,19 @@ public class SyntacticWord2Vec extends Word2Vec
         BinUtils.LOG.info("Reading vocabulary:\n");
 
         // ------- Austin's code -------------------------------------
-        Vocabulary lemma_vocab  = new Vocabulary();
-        Vocabulary depend_vocab  = new Vocabulary();
+        in_vocab  = (out_vocab = new Vocabulary());
 
         DEPTreeReader reader = new DEPTreeReader(filenames.stream().map(File::new).collect(Collectors.toList()));
         // TODO add dependency label
         // each word is a lemma, e.g., "go"
-        
-        lemma_vocab.learnParallel(reader.addFeature(NLPNode::getLemma).splitParallel(thread_size), min_count);
+
+        if (read_vocab_file == null)
+            in_vocab.learnParallel(reader.addFeature(NLPNode::getLemma).splitParallel(thread_size), min_count);
+        else
+            in_vocab.readVocab(new File(read_vocab_file));
         // each word is a lemma with dependency, e.g., "root_go"
         // depend_vocab.learnParallel(reader.addFeature(this::getWordLabel).splitParallel(thread_size), min_count);
-        depend_vocab = lemma_vocab;
-        word_count_train = lemma_vocab.totalCount();
-
-        in_vocab = lemma_vocab;
-        out_vocab = depend_vocab;
+        word_count_train = in_vocab.totalCount();
         // -----------------------------------------------------------
 
         BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
@@ -100,7 +98,7 @@ public class SyntacticWord2Vec extends Word2Vec
 
         BinUtils.LOG.info("Saving word vectors.\n");
         save(new File(output_file));
-        reader.close();
+        if (write_vocab_file != null) in_vocab.writeVocab(new File(write_vocab_file));
     }
 
     class TrainTask implements Runnable
@@ -161,10 +159,10 @@ public class SyntacticWord2Vec extends Word2Vec
                 // output progress
                 if(id == 0)
                 {
-                    float current_progress = iter + reader.progress();
-                    if(current_progress-last_progress > 0.01f)
+                    float progress = (iter + reader.progress()/100)/train_iteration;
+                    if(progress-last_progress > 0.025f)
                     {
-                        outputProgress(System.currentTimeMillis(), current_progress/train_iteration);
+                        outputProgress(System.currentTimeMillis(), progress/train_iteration);
                         last_progress += 0.1f;
                     }
                 }
