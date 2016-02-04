@@ -116,7 +116,7 @@ public class PolysemousWord2Vec extends Word2Vec
         // ------- Austin ----------------------
         private Reader<String> reader;
         private int id;
-        private long last_time = System.currentTimeMillis() - 14*60*100; // set back 14 minutes (first output after 60 seconds)
+        private long last_progress = 0;
 
         /* Tasks are each parameterized by a reader which is dedicated to a section of the corpus
          * (not necesarily one file). The corpus is split to divide it evenly between Tasks without breaking up sentences. */
@@ -162,12 +162,14 @@ public class PolysemousWord2Vec extends Word2Vec
                     else      skipGram  (words, index, window, rand, neu1e, E);
                 }
 
-                // output progress every 15 minutes
-                if(id == 0){
-                    long now = System.currentTimeMillis();
-                    if(now-last_time > 15*1000*60){
-                        outputProgress(now);
-                        last_time = now;
+                // output progress
+                if(id == 0)
+                {
+                    float current_progress = iter + reader.progress();
+                    if(current_progress-last_progress > 0.01f)
+                    {
+                        outputProgress(System.currentTimeMillis(), current_progress/train_iteration);
+                        last_progress += 0.1f;
                     }
                 }
 
@@ -234,7 +236,7 @@ public class PolysemousWord2Vec extends Word2Vec
     }
 
     public void getSenseDist(float[] E, int word, int context) {
-        int max = 0, s, k, l1, l2;
+        int s, k, l1, l2;
         float score = 0, sum = 0;
 
         for (s = 0; s < senses; s++) {
@@ -244,8 +246,6 @@ public class PolysemousWord2Vec extends Word2Vec
             for (k = 0; k < vector_size; k++) score += S[s][l1 + k] * V[l2 + k];
             E[s] = (1 - sigmoid.get(score));
             E[s] = 1 - E[s] * E[s];
-            if (E[s] > E[max])
-                max = s;
             sum += E[s];
         }
 
@@ -260,7 +260,7 @@ public class PolysemousWord2Vec extends Word2Vec
 
     public void getSenseDist(float[] E, int word, float[][] neu1s)
     {
-        int max = 0, s, k, l;
+        int s, k, l;
         float score = 0, sum = 0;
 
         l = word * vector_size;
@@ -270,8 +270,6 @@ public class PolysemousWord2Vec extends Word2Vec
             for (k = 0; k < vector_size; k++) score += neu1s[s][k] * V[l+k];
             E[s] = (1 - sigmoid.get(score));
             E[s] = 1 - E[s] * E[s]; // 1 - squared error
-            if (E[s] > E[max])
-                max = s;
             sum += E[s];
         }
 

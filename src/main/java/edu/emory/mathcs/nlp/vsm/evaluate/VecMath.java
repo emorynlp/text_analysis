@@ -20,6 +20,7 @@ import org.kohsuke.args4j.Option;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @author Austin Blodgett
@@ -27,16 +28,19 @@ import java.util.*;
 public class VecMath
 {
 
-
     @Option(name="-input", usage="file of word vectors to evaluate.", required=true, metaVar="<filename>")
     String vector_file = null;
     @Option(name="-output", usage="output file to save evaluation.", required=false, metaVar="<filename>")
     String output_file = null;
     @Option(name="-word-file", usage="file with list of words to consider (for faster processing).", required=false, metaVar="<filename>")
     String word_file = null;
+    @Option(name="--N", usage="number of closest word vectors to find.", required=false, metaVar="<integer>")
+    int N = 10;
 
     Map<String,float[]> map = null;
     Set<String> word_list = null;
+
+    static Pattern vec_arithmetic = Pattern.compile("(\\w+)\\s*(\\s*[+-]\\s*\\w+\\s*)*");
 
     public VecMath(String[] args)
     {
@@ -83,30 +87,22 @@ public class VecMath
         return word_list;
     }
 
-    void add(float[] a, float[] vector)
-    {
-        for (int i=0; i<a.length; i++)
-            vector[i] += a[i];
-    }
-
-    void subtract(float[] a, float[] vector)
-    {
-        for (int i=0; i<a.length; i++)
-            vector[i] -= a[i];
-    }
-
     void parseCommand(String line) throws IOException
     {
-        float[] vector;
         line = line.replaceAll("\\s+","");
 
-        List<String> parse = new ArrayList<>();
-
+        // records words in arithmetic expression as keys,
+        // with value false if needs to be subtracted, true otherwise.
+        Map<String, Boolean> word_is_plus = new HashMap<>();
+        boolean isPlus = true;
         int i=0;
         while (i<line.length())
         {
-            int next_plus  = line.indexOf('+',i);
-            int next_minus = line.indexOf('-',i);
+            if (line.charAt(i) == '-') { isPlus = false; i++; }
+            else if (line.charAt(i) == '+') { isPlus = true; i++; }
+
+            int next_plus  = line.indexOf('+',i+1);
+            int next_minus = line.indexOf('-',i+1);
             if (next_plus < 0)  next_plus = line.length();
             if (next_minus < 0) next_minus = line.length();
 
@@ -117,42 +113,35 @@ public class VecMath
                 System.out.println("Cannot find word vector "+word+".");
                 return;
             }
-            if (word.isEmpty())
-            {
-                System.out.println("Cannot parse empty string as word vector.");
-                return;
-            }
-            parse.add(word);
-            if (next_plus < next_minus)      parse.add("+");
-            else if (next_minus < next_plus) parse.add("-");
+            word_is_plus.put(word, isPlus);
 
-            i = Math.min(next_plus, next_minus) + 1;
-        }
-        if (parse.isEmpty())
-        {
-            System.out.println("Please input a command for vector arithmetic or type q to quit.");
-            return;
+            i = Math.min(next_plus, next_minus);
         }
 
-        vector = map.get(parse.get(0));
-
-        for (i=1; i<parse.size(); i+=2)
+        float[] vector = null;
+        for (String w : word_is_plus.keySet())
         {
-            if      (parse.get(i).equals("+")) add(map.get(parse.get(i)),vector);
-            else if (parse.get(i).equals("-")) subtract(map.get(parse.get(i)),vector);
+            float[] a = map.get(w);
+            if (vector == null) { vector = new float[a.length]; Arrays.fill(vector, 0f); }
+
+            if (word_is_plus.get(w))
+                for (i=0; i<a.length; i++) vector[i] += a[i];
             else
-            {
-                System.out.println("Parsing failure. Please try again.");
-                return;
-            }
+                for (i=0; i<a.length; i++) vector[i] -= a[i];
+
         }
 
         StringBuilder sb = new StringBuilder();
 
         sb.append(vector_file).append(" top matches").append("\n");
 
-        Map<String, Float> top = getTopTen(vector);
-        for (String word2 : top.keySet())
+        Map<String, Float> top = getTopN(vector, N);
+        // sort in descending order
+        List<String> list = new ArrayList<>(top.keySet());
+        Collections.sort(list, (o1, o2) -> top.get(o1)<top.get(o2) ? 1 : -1);
+
+
+        for (String word2 : list)
             sb.append(word2).append(" ").append(top.get(word2)).append("\n");
 
 
@@ -166,9 +155,9 @@ public class VecMath
         }
     }
 
-    Map<String,Float> getTopTen(float[] vector)
+    Map<String,Float> getTopN(float[] vector, int N)
     {
-        TopNQueue top_ten = new TopNQueue(10);
+        TopNQueue top_ten = new TopNQueue(N);
 
         for (String word2 : map.keySet())
         {
@@ -183,24 +172,24 @@ public class VecMath
 
     float cosine(float[] w1, float[] w2)
     {
-        float norm1 = 0.0f, norm2 = 0.0f;
+        double norm1 = 0.0f, norm2 = 0.0f;
 
-        float dot_product = 0.0f;
+        double dot_product = 0.0f;
         for(int k=0; k<w1.length; k++){
             dot_product += w1[k]*w2[k];
             norm1       += w1[k]*w1[k];
             norm2       += w2[k]*w2[k];
         }
-        norm1 = (float) Math.sqrt(norm1);
-        norm2 = (float) Math.sqrt(norm2);
+        norm1 = Math.sqrt(norm1);
+        norm2 = Math.sqrt(norm2);
 
-        return dot_product/(norm1*norm2);
+        return (float)(dot_product/(norm1*norm2));
     }
 
     class TopNQueue
     {
         int size;
-        // top 10 values from samllest to largest
+        // top N values from smallest to largest
         List<String> words  = new ArrayList<>(size);
         List<Float>  values = new ArrayList<>(size);
 
@@ -259,6 +248,13 @@ public class VecMath
             System.out.println("Example: king - man + woman");
             while((input=br.readLine())!=null){
                 if (input.equals("q")) break;
+                if (!vec_arithmetic.matcher(input).matches())
+                {
+                    System.err.println("Cannot parse vector arithmetic.");
+                    System.out.println("Example: king - man + woman");
+                    System.out.println("Type q to quit.");
+                    continue;
+                }
                 vec_math.parseCommand(input);
             }
 

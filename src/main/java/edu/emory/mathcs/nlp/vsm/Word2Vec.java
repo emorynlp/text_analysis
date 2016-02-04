@@ -65,7 +65,9 @@ public class Word2Vec
 	@Option(name="-cbow", usage="If set, use the continuous bag-of-words model instead of the skip-gram model.", required=false, metaVar="<boolean>")
 	boolean cbow = false;
 	@Option(name="-normalize", usage="If set, normalize each vector.", required=false, metaVar="<boolean>")
-	boolean normalize = true;
+	boolean normalize = false;
+	@Option(name="-evaluate", usage="If set, reserve portion of training corpus for evaluating.", required=false, metaVar="<boolean>")
+	boolean evaluate = false;
 
 	/* TODO Austin
 	 * Add cmd line options
@@ -80,7 +82,7 @@ public class Word2Vec
 	 * between input and output vocabularies.
 	 */
 	public Vocabulary in_vocab;
-	public Vocabulary out_vocab;
+	Vocabulary out_vocab;
 
 	Sigmoid sigmoid;
 	long word_count_train;
@@ -123,10 +125,12 @@ public class Word2Vec
 
 		// ------- Austin's code -------------------------------------
 		in_vocab = (out_vocab = new Vocabulary());
-
 		List<Reader<String>> readers = getReader(filenames.stream().map(File::new).collect(Collectors.toList()))
-												.splitParallel(thread_size);
-		in_vocab.learnParallel(readers, min_count);
+											.splitParallel(thread_size);
+		List<Reader<String>> train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
+		Reader<String> 		 test_reader   = evaluate ? readers.get(thread_size-1) 		 : null;
+
+		in_vocab.learnParallel(train_readers, min_count);
 		word_count_train = in_vocab.totalCount();
 		// -----------------------------------------------------------
 
@@ -148,11 +152,12 @@ public class Word2Vec
 		start_time = System.currentTimeMillis();
 
 		int id = 0;
-		for (Reader<String> r: readers)
+		for (Reader<String> r: train_readers)
 		{
 			executor.execute(new TrainTask(r,id));
 			id++;
 		}
+		if (evaluate) executor.execute(new TestTask(test_reader,id));
 		// -----------------------------------------------------------
 
 		executor.shutdown();
@@ -169,9 +174,10 @@ public class Word2Vec
 	class TrainTask implements Runnable
 	{
 		// ------- Austin ----------------------
-		private Reader<String> reader;
+		protected Reader<String> reader;
 		private int id;
-		private long last_time = System.currentTimeMillis() - 14*60*100; // set back 14 minutes (first output after 60 seconds)
+		private float last_progress = 0;
+		protected long num_sentences = 0;
 
 		/* Tasks are each parameterized by a reader which is dedicated to a section of the corpus
 		 * (not necesarily one file). The corpus is split to divide it evenly between Tasks without breaking up sentences. */
@@ -196,9 +202,11 @@ public class Word2Vec
 			while (true)
 			{
 				words = next(reader, rand, true);
+				num_sentences++;
 
 				if (words == null)
 				{
+					System.out.println("thread "+id+" "+iter+" "+num_sentences);
 					if (++iter == train_iteration) break;
 					adjustLearningRate();
 					// readers have a built in restart button - Austin
@@ -216,12 +224,14 @@ public class Word2Vec
 					else      skipGram  (words, index, window, rand, neu1e);
 				}
 
-				// output progress every 15 minutes
-				if(id == 0){
-					long now = System.currentTimeMillis();
-					if(now-last_time > 15*1000*60){
-						outputProgress(now);
-						last_time = now;
+				// output progress
+				if(id == 0)
+				{
+					float progress = (iter + reader.progress()/100)/train_iteration;
+					if(progress-last_progress > 0.025f)
+					{
+						outputProgress(System.currentTimeMillis(), progress);
+						last_progress += 0.1f;
 					}
 				}
 
@@ -231,11 +241,53 @@ public class Word2Vec
 
 	// -------------- Austin's code ------------------------------------------------------
 
-	void outputProgress(long now)
+	class TestTask extends TrainTask
+	{
+		public TestTask(Reader<String> reader, int id) { super(reader, id); }
+
+		@Override
+		public void run()
+		{
+			Random  rand  = new XORShiftRandom(reader.hashCode());
+
+			float[] neu1  = cbow ? new float[vector_size] : null;
+			float[] neu1e = new float[vector_size];
+			int     iter  = 0;
+			int     index, window;
+			int[]   words;
+
+			while (true)
+			{
+				words = next(reader, rand, true);
+				num_sentences++;
+
+				if (words == null)
+				{
+					System.out.println("error "+optimizer.getError()+" "+num_sentences);
+					optimizer.resetError();
+					if (++iter == train_iteration) break;
+					adjustLearningRate();
+					// readers have a built in restart button - Austin
+					try { reader.restart(); } catch (IOException e) { e.printStackTrace(); }
+					continue;
+				}
+
+				for (index=0; index<words.length; index++)
+				{
+					window = 1 + rand.nextInt() % max_skip_window;	// dynamic window size
+					if (cbow) Arrays.fill(neu1, 0);
+					Arrays.fill(neu1e, 0);
+
+					if (cbow) testBagOfWords(words, index, window, rand, neu1e, neu1);
+					else      testSkipGram  (words, index, window, rand, neu1e);
+				}
+			}
+		}
+	}
+
+	void outputProgress(long now, float progress)
 	{
 		float time_seconds = (now - start_time)/1000f;
-		float progress = word_count_global / (float)(train_iteration * word_count_train + 1);
-
 		int time_left_hours = (int) (((1-progress)/progress)*time_seconds/(60*60));
 		int time_left_remainder =  (int) (((1-progress)/progress)*time_seconds/60) % 60;
 
@@ -243,7 +295,7 @@ public class Word2Vec
 		long memory_usage = runtime.totalMemory()-runtime.freeMemory();
 
 		System.out.println("Alpha: "+ String.format("%1$,.4f",alpha_global)+" "+
-				"Progress: "+ String.format("%1$,.2f", progress * 100) + "% "+
+				"Progress: "+ String.format("%1$,.1f", progress * 100) + "% "+
 				"Words/thread/sec: " + (int)(word_count_global / thread_size / time_seconds) +" "+
 				"Estimated Time Left: " +time_left_hours +":"+String.format("%02d",time_left_remainder) +" "+
 				"Memory Usage: " + (int)(memory_usage/(1024*1024)) +"M");
@@ -293,7 +345,7 @@ public class Word2Vec
 			l1 = words[j] * vector_size;
 			Arrays.fill(neu1e, 0);
 			optimizer.learnSkipGram(rand, word, W, V, neu1e, alpha_global, l1);
-			
+
 			// hidden -> input
 			for (k=0; k<vector_size; k++) W[l1+k] += neu1e[k];
 		}
@@ -362,6 +414,40 @@ public class Word2Vec
 		word_count_global += count;
 		return (j == 0) ? next(reader, rand, in_layer) : (j == words.size()) ? next : Arrays.copyOf(next, j);
 	}
+
+
+	void testBagOfWords(int[] words, int index, int window, Random rand, float[] neu1e, float[] neu1)
+	{
+		int i, j, k, l, wc = 0, word = words[index];
+
+		// input -> hidden
+		for (i=-window,j=index+i; i<=window; i++,j++)
+		{
+			if (i == 0 || words.length <= j || j < 0) continue;
+			l = words[j] * vector_size;
+			for (k=0; k<vector_size; k++) neu1[k] += W[k+l];
+			wc++;
+		}
+
+		if (wc == 0) return;
+		for (k=0; k<vector_size; k++) neu1[k] /= wc;
+		optimizer.learnBagOfWords(rand, word, V, neu1, neu1e, alpha_global);
+	}
+
+	void testSkipGram(int[] words, int index, int window, Random rand, float[] neu1e)
+	{
+		int i, j, l1, word = words[index];
+
+		for (i=-window,j=index+i; i<=window; i++,j++)
+		{
+			if (i == 0 || words.length <= j || j < 0) continue;
+			l1 = words[j] * vector_size;
+			Arrays.fill(neu1e, 0);
+			optimizer.testSkipGram(rand, word, W, V, neu1e, alpha_global, l1);
+		}
+	}
+
+
 
 	public Map<String,float[]> toMap(boolean normalize)
 	{

@@ -36,7 +36,7 @@ public class Lemma2Vec extends Word2Vec
 	@SuppressWarnings("resource")
     Reader<String> getReader(List<File> files)
     {
-        return new DEPTreeReader(files).addFeature(NLPNode::getWordForm);
+        return new DEPTreeReader(files).addFeature(NLPNode::getLemma);
     }
 
     static public void main(String[] args) { new Lemma2Vec(args); }

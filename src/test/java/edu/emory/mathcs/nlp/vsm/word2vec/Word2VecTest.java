@@ -23,8 +23,8 @@ public class Word2VecTest {
 
 
     public static void test_skipgrams() throws IOException {
-        String[] params = {	"-train","src/test/resources/dat/test_files",
-                "-output","src/test/resources/dat/skip_vectors",
+        String[] params = {	"-train","resources/dat/test_files",
+                "-output","resources/dat/skip_vectors",
                 "-size",""+vector_size,
                 "-threads",  "2",
                 "-min-count","1"};
@@ -32,8 +32,8 @@ public class Word2VecTest {
     }
 
     public static void test_cbow() throws IOException {
-        String[] params = {	"-train","src/test/resources/dat/test_files",
-                "-output","src/test/resources/dat/cbow_vectors",
+        String[] params = {	"-train","resources/dat/test_files",
+                "-output","resources/dat/cbow_vectors",
                 "-size",""+vector_size,
                 "-threads",  "2",
                 "-min-count","1",

@@ -90,7 +90,6 @@ public abstract class Reader<T> extends InputStream
     protected Reader(Reader<?> r)
     {
     	this(r.files, r.sentence_break, r.start, r.end);
-        try { restart(); } catch (IOException e) { e.printStackTrace(); }
     }
 
     abstract public List<T> next() throws IOException;

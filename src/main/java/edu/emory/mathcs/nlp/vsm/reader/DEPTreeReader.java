@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 import edu.emory.mathcs.nlp.component.template.node.NLPNode;
 import edu.emory.mathcs.nlp.component.template.util.TSVReader;
-
 /**
  * @author Austin Blodgett
  */

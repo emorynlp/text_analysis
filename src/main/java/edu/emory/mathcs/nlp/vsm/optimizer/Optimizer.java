@@ -29,7 +29,9 @@ public abstract class Optimizer
 	protected Sigmoid sigmoid;
 	protected Vocabulary vocab;
 	protected int vector_size;
-	
+	volatile private double error;
+	volatile private int error_normalizer;
+
 	public Optimizer(Vocabulary vocab, Sigmoid sigmoid, int vectorSize)
 	{
 		this.vocab   = vocab;
@@ -39,7 +41,10 @@ public abstract class Optimizer
 	
 	public abstract void learnBagOfWords(Random rand, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha);
 	public abstract void learnSkipGram  (Random rand, int word, float[] syn0, float[] syn1, float[] neu1e, float alpha, int l1);
-	
+
+	public abstract void testBagOfWords(Random rand, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha);
+	public abstract void testSkipGram  (Random rand, int word, float[] syn0, float[] syn1, float[] neu1e, float alpha, int l1);
+
 	protected void learnBagOfWords(int label, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha)
 	{
 		int l = word * vector_size, k;
@@ -75,4 +80,38 @@ public abstract class Optimizer
 			for (k=0; k<vector_size; k++) syn1[k+l2] += syn0[k+l1] * gradient;
 		}
 	}
+
+	protected void testBagOfWords(int label, int word, float[] syn1, float[] neu1, float[] neu1e, float alpha)
+	{
+		int l2 = word * vector_size, k;
+		float score = 0;
+
+		// hidden -> output
+		for (k=0; k<vector_size; k++) score += neu1[k] * syn1[l2+k];
+
+		double squared_error = (label - sigmoid.get(score));
+		squared_error = squared_error * squared_error;
+
+		this.error += squared_error;
+		this.error_normalizer++;
+	}
+
+	protected void testSkipGram(int label, int word, float[] syn0, float[] syn1, float[] neu1e, float alpha, int l1)
+	{
+		int l2 = word * vector_size, k;
+		float score = 0;
+
+		// hidden -> output
+		for (k=0; k<vector_size; k++) score += syn0[l1+k] * syn1[l2+k];
+
+		double squared_error = (label - sigmoid.get(score));
+		squared_error = squared_error * squared_error;
+
+		this.error += squared_error;
+		this.error_normalizer++;
+	}
+	
+	public float getError() { return (float)(error/error_normalizer); }
+
+	public void resetError() { error = 0; error_normalizer = 0; }
 }

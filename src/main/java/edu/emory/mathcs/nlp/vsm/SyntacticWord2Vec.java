@@ -59,7 +59,8 @@ public class SyntacticWord2Vec extends Word2Vec
         
         lemma_vocab.learnParallel(reader.addFeature(NLPNode::getLemma).splitParallel(thread_size), min_count);
         // each word is a lemma with dependency, e.g., "root_go"
-        depend_vocab.learnParallel(reader.addFeature(this::getWordLabel).splitParallel(thread_size), min_count);
+        // depend_vocab.learnParallel(reader.addFeature(this::getWordLabel).splitParallel(thread_size), min_count);
+        depend_vocab = lemma_vocab;
         word_count_train = lemma_vocab.totalCount();
 
         in_vocab = lemma_vocab;
@@ -107,7 +108,7 @@ public class SyntacticWord2Vec extends Word2Vec
         // ------- Austin ----------------------
         private Reader<NLPNode> reader;
         private int id;
-        private long last_time = System.currentTimeMillis() - 14*60*100; // set back 14 minutes (first output after 60 seconds)
+        private float last_progress = 0;
 
         /* Tasks are each parameterized by a reader which is dedicated to a section of the corpus
          * (not necesarily one file). The corpus is split to divide it evenly between Tasks without breaking up sentences. */
@@ -157,12 +158,14 @@ public class SyntacticWord2Vec extends Word2Vec
                     else      skipGram  (words, index, rand, neu1e);
                 }
 
-                // output progress every 15 minutes
-                if(id == 0){
-                    long now = System.currentTimeMillis();
-                    if(now-last_time > 15*1000*60){
-                        outputProgress(now);
-                        last_time = now;
+                // output progress
+                if(id == 0)
+                {
+                    float current_progress = iter + reader.progress();
+                    if(current_progress-last_progress > 0.01f)
+                    {
+                        outputProgress(System.currentTimeMillis(), current_progress/train_iteration);
+                        last_progress += 0.1f;
                     }
                 }
 

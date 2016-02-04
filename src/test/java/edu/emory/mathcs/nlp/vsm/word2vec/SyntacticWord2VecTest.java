@@ -1,5 +1,6 @@
 package edu.emory.mathcs.nlp.vsm.word2vec;
 
+import edu.emory.mathcs.nlp.vsm.Lemma2Vec;
 import org.junit.Test;
 
 import edu.emory.mathcs.nlp.vsm.SyntacticWord2Vec;
@@ -23,8 +24,8 @@ public class SyntacticWord2VecTest {
     }
 
     public static void test_skipgrams() throws IOException {
-        String[] params = {	"-train","src/test/resources/dat/dep_test_files",
-                "-output","src/test/resources/dat/skip_vectors",
+        String[] params = {	"-train","resources/dat/dep_test_files",
+                "-output","resources/dat/skip_vectors",
                 "-size",""+vector_size,
                 "-threads",  "2",
                 "-min-count","1"};
@@ -32,8 +33,8 @@ public class SyntacticWord2VecTest {
     }
 
     public static void test_cbow() throws IOException {
-        String[] params = {	"-train","src/test/resources/dat/dep_test_files",
-                "-output","src/test/resources/dat/cbow_vectors",
+        String[] params = {	"-train","resources/dat/dep_test_files",
+                "-output","resources/dat/cbow_vectors",
                 "-size",""+vector_size,
                 "-threads",  "3",
                 "-min-count","1",
@@ -42,7 +43,7 @@ public class SyntacticWord2VecTest {
     }
 
     public static void test(String[] params) throws IOException {
-        Word2Vec word2vec = new SyntacticWord2Vec(params);
+        Word2Vec word2vec = new Lemma2Vec(params);
 
         for(int i=0; i<word2vec.in_vocab.size(); i++){
             System.out.print(word2vec.in_vocab.get(i).form+" ");

@@ -13,5 +13,6 @@
     <orderEntry type="library" name="Maven: it.unimi.dsi:fastutil:7.0.7" level="project" />
     <orderEntry type="library" name="Maven: edu.emory.mathcs.nlp:tokenization:1.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />
+    <orderEntry type="library" name="Maven: org.tukaani:xz:1.5" level="project" />
   </component>
 </module>

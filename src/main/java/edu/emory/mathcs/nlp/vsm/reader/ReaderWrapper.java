@@ -38,6 +38,8 @@ class ReaderWrapper<S,T> extends Reader<T>
 
         this.reader = reader;
         this.convert = convert;
+
+        try { restart(); } catch (IOException e) { e.printStackTrace(); }
     }
     
     @Override
@@ -55,4 +57,7 @@ class ReaderWrapper<S,T> extends Reader<T>
 
     @Override
     public float progress() { return reader.progress(); }
+
+    @Override
+    public void restart() throws IOException { reader.restart(); }
 }
