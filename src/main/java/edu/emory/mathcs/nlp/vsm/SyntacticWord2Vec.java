@@ -162,7 +162,7 @@ public class SyntacticWord2Vec extends Word2Vec
                     float progress = (iter + reader.progress()/100)/train_iteration;
                     if(progress-last_progress > 0.025f)
                     {
-                        outputProgress(System.currentTimeMillis(), progress/train_iteration);
+                        outputProgress(System.currentTimeMillis(), progress);
                         last_progress += 0.1f;
                     }
                 }

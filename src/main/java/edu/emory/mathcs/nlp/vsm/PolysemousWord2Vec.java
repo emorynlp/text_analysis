@@ -166,10 +166,10 @@ public class PolysemousWord2Vec extends Word2Vec
                 // output progress
                 if(id == 0)
                 {
-                    float current_progress = iter + reader.progress();
-                    if(current_progress-last_progress > 0.01f)
+                    float progress = (iter + reader.progress()/100)/train_iteration;
+                    if(progress-last_progress > 0.01f)
                     {
-                        outputProgress(System.currentTimeMillis(), current_progress/train_iteration);
+                        outputProgress(System.currentTimeMillis(), progress);
                         last_progress += 0.1f;
                     }
                 }
