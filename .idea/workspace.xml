@@ -7,9 +7,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="788c18c1-614a-4701-b3a0-4465f8005d62" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec$TrainTask.class" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/artifacts/text_analysis_jar/text_analysis.jar" afterPath="$PROJECT_DIR$/out/artifacts/text_analysis_jar/text_analysis.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec$TrainTask.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec$TrainTask.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/Word2Vec$TestTask.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/Word2Vec$TestTask.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/Word2Vec$TrainTask.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/Word2Vec$TrainTask.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/Word2Vec.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/Word2Vec.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/test/test/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.class" afterPath="$PROJECT_DIR$/out/test/test/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/test/test/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.class" afterPath="$PROJECT_DIR$/out/test/test/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/test/test/dat/cbow_vectors" afterPath="$PROJECT_DIR$/out/test/test/dat/cbow_vectors" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/test/test/dat/skip_vectors" afterPath="$PROJECT_DIR$/out/test/test/dat/skip_vectors" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Word2Vec.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Word2Vec.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java" afterPath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java" afterPath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/resources/dat/cbow_vectors" afterPath="$PROJECT_DIR$/src/test/resources/dat/cbow_vectors" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/resources/dat/skip_vectors" afterPath="$PROJECT_DIR$/src/test/resources/dat/skip_vectors" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/test-classes/dat/cbow_vectors" afterPath="$PROJECT_DIR$/target/test-classes/dat/cbow_vectors" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/test-classes/dat/skip_vectors" afterPath="$PROJECT_DIR$/target/test-classes/dat/skip_vectors" />
     </list>
     <ignored path="text_analysis.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -47,29 +66,19 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="120" column="0" selection-start-line="120" selection-start-column="0" selection-end-line="120" selection-end-column="0" />
-              <folding />
+              <folding>
+                <element signature="imports" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SortedArrayList.class" pinned="false" current-in-tab="false">
-        <entry file="jar://$MAVEN_REPOSITORY$/edu/emory/mathcs/nlp/corenlp/1.0.0-SNAPSHOT/corenlp-1.0.0-20160121.195221-6.jar!/edu/emory/mathcs/nlp/common/collection/list/SortedArrayList.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="10" column="26" selection-start-line="10" selection-start-column="26" selection-end-line="11" selection-end-column="50" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SyntacticWord2VecTest.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="SyntacticWord2VecTest.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="15" column="32" selection-start-line="15" selection-start-column="32" selection-end-line="15" selection-end-column="32" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+            <state vertical-scroll-proportion="1.6495957">
+              <caret line="42" column="27" selection-start-line="42" selection-start-column="27" selection-end-line="42" selection-end-column="27" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -78,8 +87,22 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="164" column="75" selection-start-line="164" selection-start-column="75" selection-end-line="164" selection-end-column="75" />
-              <folding />
+              <caret line="88" column="19" selection-start-line="88" selection-start-column="19" selection-end-line="88" selection-end-column="19" />
+              <folding>
+                <element signature="e#1629#1658#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Word2VecTest.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="41" column="27" selection-start-line="41" selection-start-column="27" selection-end-line="41" selection-end-column="27" />
+              <folding>
+                <element signature="imports" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -88,17 +111,17 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Word2Vec.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="421" column="5" selection-start-line="421" selection-start-column="5" selection-end-line="421" selection-end-column="5" />
+              <caret line="124" column="4" selection-start-line="124" selection-start-column="4" selection-end-line="124" selection-end-column="4" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PolysemousWord2Vec.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="PolysemousWord2Vec.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-3.5053003">
-              <caret line="172" column="46" selection-start-line="172" selection-start-column="46" selection-end-line="172" selection-end-column="46" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="66" column="51" selection-start-line="66" selection-start-column="51" selection-end-line="66" selection-end-column="51" />
               <folding />
             </state>
           </provider>
@@ -122,10 +145,7 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="91" column="56" selection-start-line="91" selection-start-column="56" selection-end-line="91" selection-end-column="56" />
-              <folding>
-                <element signature="e#3211#3212#0" expanded="true" />
-                <element signature="e#3271#3272#0" expanded="true" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -167,7 +187,6 @@
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/POSLemma2Vec.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TriadEvaluator.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TopTenEvaluator.java" />
-        <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/Random2Vec.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Random2Vec.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/Evaluator.java" />
@@ -178,13 +197,14 @@
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecMath.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Lemma2Vec.java" />
         <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/DEPTreeReaderTest.java" />
-        <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/reader/DEPTreeReader.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/reader/Reader.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/reader/ReaderWrapper.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java" />
+        <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java" />
+        <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Word2Vec.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.java" />
-        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java" />
       </list>
     </option>
   </component>
@@ -540,58 +560,6 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunManager" selected="JUnit.SyntacticWord2VecTest">
-    <configuration default="false" name="DEPTreeReaderTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="edu.emory.mathcs.nlp.vsm.reader.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <module name="test" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="edu.emory.mathcs.nlp.vsm.reader" />
-      <option name="MAIN_CLASS_NAME" value="edu.emory.mathcs.nlp.vsm.reader.DEPTreeReaderTest" />
-      <option name="METHOD_NAME" />
-      <option name="TEST_OBJECT" value="class" />
-      <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="singleModule" />
-      </option>
-      <envs />
-      <patterns />
-      <method />
-    </configuration>
-    <configuration default="false" name="PolysemousWord2VecTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="edu.emory.mathcs.nlp.vsm.word2vec.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <module name="test" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="edu.emory.mathcs.nlp.vsm.word2vec" />
-      <option name="MAIN_CLASS_NAME" value="edu.emory.mathcs.nlp.vsm.word2vec.PolysemousWord2VecTest" />
-      <option name="METHOD_NAME" />
-      <option name="TEST_OBJECT" value="class" />
-      <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="singleModule" />
-      </option>
-      <envs />
-      <patterns />
-      <method />
-    </configuration>
     <configuration default="false" name="Word2VecTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -657,6 +625,58 @@
       <option name="PACKAGE_NAME" value="edu.emory.mathcs.nlp.vsm.reader" />
       <option name="MAIN_CLASS_NAME" value="edu.emory.mathcs.nlp.vsm.reader.DEPTreeReaderTest" />
       <option name="METHOD_NAME" value="testRestart" />
+      <option name="TEST_OBJECT" value="method" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="false" name="SyntacticWord2VecTest.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="edu.emory.mathcs.nlp.vsm.word2vec.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <module name="test" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" value="edu.emory.mathcs.nlp.vsm.word2vec" />
+      <option name="MAIN_CLASS_NAME" value="edu.emory.mathcs.nlp.vsm.word2vec.SyntacticWord2VecTest" />
+      <option name="METHOD_NAME" value="test" />
+      <option name="TEST_OBJECT" value="method" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="false" name="Word2VecTest.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="edu.emory.mathcs.nlp.vsm.word2vec.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <module name="test" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" value="edu.emory.mathcs.nlp.vsm.word2vec" />
+      <option name="MAIN_CLASS_NAME" value="edu.emory.mathcs.nlp.vsm.word2vec.Word2VecTest" />
+      <option name="METHOD_NAME" value="test" />
       <option name="TEST_OBJECT" value="method" />
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" />
@@ -972,19 +992,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="JUnit.DEPTreeReaderTest" />
-      <item index="1" class="java.lang.String" itemvalue="JUnit.PolysemousWord2VecTest" />
-      <item index="2" class="java.lang.String" itemvalue="JUnit.Word2VecTest" />
-      <item index="3" class="java.lang.String" itemvalue="JUnit.SyntacticWord2VecTest" />
-      <item index="4" class="java.lang.String" itemvalue="JUnit.DEPTreeReaderTest.testRestart" />
+      <item index="0" class="java.lang.String" itemvalue="JUnit.Word2VecTest" />
+      <item index="1" class="java.lang.String" itemvalue="JUnit.SyntacticWord2VecTest" />
+      <item index="2" class="java.lang.String" itemvalue="JUnit.DEPTreeReaderTest.testRestart" />
+      <item index="3" class="java.lang.String" itemvalue="JUnit.SyntacticWord2VecTest.test" />
+      <item index="4" class="java.lang.String" itemvalue="JUnit.Word2VecTest.test" />
     </list>
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="JUnit.SyntacticWord2VecTest" />
-        <item index="1" class="java.lang.String" itemvalue="JUnit.DEPTreeReaderTest.testRestart" />
-        <item index="2" class="java.lang.String" itemvalue="JUnit.DEPTreeReaderTest" />
-        <item index="3" class="java.lang.String" itemvalue="JUnit.Word2VecTest" />
-        <item index="4" class="java.lang.String" itemvalue="JUnit.PolysemousWord2VecTest" />
+        <item index="1" class="java.lang.String" itemvalue="JUnit.Word2VecTest.test" />
+        <item index="2" class="java.lang.String" itemvalue="JUnit.Word2VecTest" />
+        <item index="3" class="java.lang.String" itemvalue="JUnit.SyntacticWord2VecTest.test" />
+        <item index="4" class="java.lang.String" itemvalue="JUnit.DEPTreeReaderTest.testRestart" />
       </list>
     </recent_temporary>
   </component>
@@ -1007,27 +1027,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="DEPTreeReaderTest_testRestart - 2016.02.03 at 11h 44m 56s.xml">
-      <configuration name="DEPTreeReaderTest.testRestart" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="SyntacticWord2VecTest - 2016.02.03 at 11h 38m 39s.xml">
-      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="SyntacticWord2VecTest - 2016.02.03 at 11h 41m 53s.xml">
-      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="SyntacticWord2VecTest - 2016.02.03 at 11h 43m 19s.xml">
-      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="SyntacticWord2VecTest - 2016.02.03 at 11h 44m 01s.xml">
-      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="SyntacticWord2VecTest - 2016.02.03 at 11h 51m 06s.xml">
-      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="SyntacticWord2VecTest - 2016.02.03 at 11h 55m 26s.xml">
-      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="SyntacticWord2VecTest - 2016.02.03 at 11h 58m 16s.xml">
       <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
     </history-entry>
@@ -1037,6 +1036,27 @@
     <history-entry file="SyntacticWord2VecTest - 2016.02.03 at 12h 01m 42s.xml">
       <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="SyntacticWord2VecTest - 2016.02.05 at 18h 38m 52s.xml">
+      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="SyntacticWord2VecTest - 2016.02.05 at 18h 42m 39s.xml">
+      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="SyntacticWord2VecTest - 2016.02.05 at 18h 59m 36s.xml">
+      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="SyntacticWord2VecTest_test - 2016.02.05 at 18h 38m 10s.xml">
+      <configuration name="SyntacticWord2VecTest.test" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="Word2VecTest - 2016.02.05 at 18h 37m 51s.xml">
+      <configuration name="Word2VecTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="Word2VecTest - 2016.02.05 at 18h 40m 33s.xml">
+      <configuration name="Word2VecTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="Word2VecTest_test - 2016.02.05 at 18h 41m 49s.xml">
+      <configuration name="Word2VecTest.test" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="11" width="1369" height="726" extended-state="0" />
@@ -1044,10 +1064,12 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32715008" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32925898" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32715008" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24904507" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -1055,15 +1077,13 @@
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32715008" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32715008" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -1340,13 +1360,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/edu/emory/mathcs/nlp/corenlp/1.0.0-SNAPSHOT/corenlp-1.0.0-20160121.195221-6.jar!/edu/emory/mathcs/nlp/common/util/FileUtils.class">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1379,7 +1392,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="10" column="26" selection-start-line="10" selection-start-column="26" selection-end-line="11" selection-end-column="50" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1387,7 +1399,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="120" column="0" selection-start-line="120" selection-start-column="0" selection-end-line="120" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1403,10 +1417,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="91" column="56" selection-start-line="91" selection-start-column="56" selection-end-line="91" selection-end-column="56" />
-          <folding>
-            <element signature="e#3211#3212#0" expanded="true" />
-            <element signature="e#3271#3272#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1421,10 +1432,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Word2Vec.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="421" column="5" selection-start-line="421" selection-start-column="5" selection-end-line="421" selection-end-column="5" />
+          <caret line="66" column="51" selection-start-line="66" selection-start-column="51" selection-end-line="66" selection-end-column="51" />
           <folding />
         </state>
       </provider>
@@ -1437,28 +1448,38 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java">
+    <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="15" column="32" selection-start-line="15" selection-start-column="32" selection-end-line="15" selection-end-column="32" />
+          <caret line="41" column="27" selection-start-line="41" selection-start-column="27" selection-end-line="41" selection-end-column="27" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Word2Vec.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="124" column="4" selection-start-line="124" selection-start-column="4" selection-end-line="124" selection-end-column="4" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="164" column="75" selection-start-line="164" selection-start-column="75" selection-end-line="164" selection-end-column="75" />
-          <folding />
+          <caret line="88" column="19" selection-start-line="88" selection-start-column="19" selection-end-line="88" selection-end-column="19" />
+          <folding>
+            <element signature="e#1629#1658#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java">
+    <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.5053003">
-          <caret line="172" column="46" selection-start-line="172" selection-start-column="46" selection-end-line="172" selection-end-column="46" />
+        <state vertical-scroll-proportion="1.6495957">
+          <caret line="42" column="27" selection-start-line="42" selection-start-column="27" selection-end-line="42" selection-end-column="27" />
           <folding />
         </state>
       </provider>

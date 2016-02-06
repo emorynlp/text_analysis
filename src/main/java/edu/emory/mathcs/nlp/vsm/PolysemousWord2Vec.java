@@ -71,8 +71,8 @@ public class PolysemousWord2Vec extends Word2Vec
 
         List<Reader<String>> readers = getReader(filenames.stream().map(File::new).collect(Collectors.toList()))
                 .splitParallel(thread_size);
-        in_vocab.learnParallel(readers, min_count);
-
+        if (read_vocab_file == null) in_vocab.learnParallel(readers, min_count);
+        else 						 in_vocab.readVocab(new File(read_vocab_file));
         word_count_train = in_vocab.totalCount();
         // -----------------------------------------------------------
 
@@ -110,6 +110,12 @@ public class PolysemousWord2Vec extends Word2Vec
         BinUtils.LOG.info("Saving word vectors.\n");
 
         save(new File(output_file));
+        if (write_vocab_file != null)
+        {
+            File f = new File(write_vocab_file);
+            if (!f.isFile()) f.createNewFile();
+            in_vocab.writeVocab(f);
+        }
     }
 
     class TrainTask implements Runnable

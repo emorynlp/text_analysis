@@ -130,7 +130,7 @@ public class Word2Vec
 		// ------- Austin's code -------------------------------------
 		in_vocab = (out_vocab = new Vocabulary());
 		List<Reader<String>> readers = getReader(filenames.stream().map(File::new).collect(Collectors.toList()))
-											.splitParallel(thread_size);
+				.splitParallel(thread_size);
 		List<Reader<String>> train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
 		Reader<String> 		 test_reader   = evaluate ? readers.get(thread_size-1) 		 : null;
 
@@ -174,7 +174,12 @@ public class Word2Vec
 		BinUtils.LOG.info("Saving word vectors.\n");
 
 		save(new File(output_file));
-		if (write_vocab_file != null) in_vocab.writeVocab(new File(write_vocab_file));
+		if (write_vocab_file != null)
+		{
+			File f = new File(write_vocab_file);
+			if (!f.isFile()) f.createNewFile();
+			in_vocab.writeVocab(f);
+		}
 	}
 	
 	class TrainTask implements Runnable
@@ -437,7 +442,7 @@ public class Word2Vec
 
 		if (wc == 0) return;
 		for (k=0; k<vector_size; k++) neu1[k] /= wc;
-		optimizer.learnBagOfWords(rand, word, V, neu1, neu1e, alpha_global);
+		optimizer.testBagOfWords(rand, word, V, neu1, neu1e, alpha_global);
 	}
 
 	void testSkipGram(int[] words, int index, int window, Random rand, float[] neu1e)
@@ -491,6 +496,8 @@ public class Word2Vec
 
 	public void save(File save_file) throws IOException
 	{
+		if (!save_file.isFile()) save_file.createNewFile();
+
 		Map<String,float[]> map = toMap(normalize);
 		BufferedWriter out = new BufferedWriter(new FileWriter(save_file));
 
