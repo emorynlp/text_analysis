@@ -53,7 +53,7 @@ public class PolysemousWord2Vec extends Word2Vec
         Random rand = new XORShiftRandom(1);
 
         S = new float[senses][size]; // S[word_sense][vector_size*word_index + component]
-        V = new float[size]; // V[vector_size*word_index + component]
+        V = new float[size];         // V[vector_size*word_index + component]
 
         for (int s=0; s<senses; s++) for (int i=0; i<size; i++)
             S[s][i] = (float)((rand.nextDouble() - 0.5) / vector_size);
@@ -72,7 +72,7 @@ public class PolysemousWord2Vec extends Word2Vec
         List<Reader<String>> readers = getReader(filenames.stream().map(File::new).collect(Collectors.toList()))
                 .splitParallel(thread_size);
         if (read_vocab_file == null) in_vocab.learnParallel(readers, min_count);
-        else 						 in_vocab.readVocab(new File(read_vocab_file));
+        else 						 in_vocab.readVocab(new File(read_vocab_file), min_count);
         word_count_train = in_vocab.totalCount();
         // -----------------------------------------------------------
 

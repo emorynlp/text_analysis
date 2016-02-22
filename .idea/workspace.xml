@@ -7,24 +7,39 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="788c18c1-614a-4701-b3a0-4465f8005d62" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec$TrainTask.class" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TopNQueue.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecCluster.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecFeatures.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/artifacts/text_analysis_jar/Word2vec.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/evaluate/TopNEvaluator$TopNQueue.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/evaluate/VecMath$TopNQueue.class" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/artifacts/text_analysis_jar/text_analysis.jar" afterPath="$PROJECT_DIR$/out/artifacts/text_analysis_jar/text_analysis.jar" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec$TrainTask.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec$TrainTask.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/POSLemma2Vec.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/POSLemma2Vec.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec$SynTestTask.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec$SynTestTask.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec$SynTrainTask.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec$SynTrainTask.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/Word2Vec$TestTask.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/Word2Vec$TestTask.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/Word2Vec$TrainTask.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/Word2Vec$TrainTask.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/Word2Vec.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/Word2Vec.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/test/test/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.class" afterPath="$PROJECT_DIR$/out/test/test/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/test/test/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.class" afterPath="$PROJECT_DIR$/out/test/test/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/evaluate/TopNEvaluator.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/evaluate/TopNEvaluator.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/evaluate/VecMath.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/evaluate/VecMath.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/optimizer/NegativeSampling.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/optimizer/NegativeSampling.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/optimizer/Optimizer.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/optimizer/Optimizer.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/util/Vocabulary.class" afterPath="$PROJECT_DIR$/out/production/main/edu/emory/mathcs/nlp/vsm/util/Vocabulary.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/test/test/edu/emory/mathcs/nlp/vsm/types/VocabularyTest.class" afterPath="$PROJECT_DIR$/out/test/test/edu/emory/mathcs/nlp/vsm/types/VocabularyTest.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/test/test/dat/cbow_vectors" afterPath="$PROJECT_DIR$/out/test/test/dat/cbow_vectors" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/test/test/dat/skip_vectors" afterPath="$PROJECT_DIR$/out/test/test/dat/skip_vectors" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/POSLemma2Vec.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/POSLemma2Vec.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Word2Vec.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Word2Vec.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java" afterPath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java" afterPath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TopNEvaluator.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TopNEvaluator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecMath.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecMath.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/optimizer/Optimizer.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/optimizer/Optimizer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/util/Vocabulary.java" afterPath="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/util/Vocabulary.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/types/VocabularyTest.java" afterPath="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/types/VocabularyTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/resources/dat/cbow_vectors" afterPath="$PROJECT_DIR$/src/test/resources/dat/cbow_vectors" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/resources/dat/skip_vectors" afterPath="$PROJECT_DIR$/src/test/resources/dat/skip_vectors" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/test-classes/dat/cbow_vectors" afterPath="$PROJECT_DIR$/target/test-classes/dat/cbow_vectors" />
@@ -51,110 +66,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Lemma2Vec.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Lemma2Vec.java">
+      <file leaf-file-name="VecCluster.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecCluster.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="40" column="0" selection-start-line="35" selection-start-column="4" selection-end-line="40" selection-end-column="0" />
+              <caret line="151" column="13" selection-start-line="151" selection-start-column="13" selection-end-line="151" selection-end-column="13" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DEPTreeReaderTest.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/DEPTreeReaderTest.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="120" column="0" selection-start-line="120" selection-start-column="0" selection-end-line="120" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SyntacticWord2VecTest.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.6495957">
-              <caret line="42" column="27" selection-start-line="42" selection-start-column="27" selection-end-line="42" selection-end-column="27" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SyntacticWord2Vec.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="SyntacticWord2Vec.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="88" column="19" selection-start-line="88" selection-start-column="19" selection-end-line="88" selection-end-column="19" />
-              <folding>
-                <element signature="e#1629#1658#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Word2VecTest.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="41" column="27" selection-start-line="41" selection-start-column="27" selection-end-line="41" selection-end-column="27" />
-              <folding>
-                <element signature="imports" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Word2Vec.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Word2Vec.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="124" column="4" selection-start-line="124" selection-start-column="4" selection-end-line="124" selection-end-column="4" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PolysemousWord2Vec.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="66" column="51" selection-start-line="66" selection-start-column="51" selection-end-line="66" selection-end-column="51" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ReaderWrapper.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/reader/ReaderWrapper.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="39" column="31" selection-start-line="39" selection-start-column="31" selection-end-line="39" selection-end-column="31" />
-              <folding>
-                <element signature="n#!!doc" expanded="false" />
-                <element signature="imports" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Reader.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/reader/Reader.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="91" column="56" selection-start-line="91" selection-start-column="56" selection-end-line="91" selection-end-column="56" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DEPTreeReader.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/reader/DEPTreeReader.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="48" column="0" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.45890412">
+              <caret line="49" column="39" selection-start-line="49" selection-start-column="39" selection-end-line="49" selection-end-column="39" />
               <folding />
             </state>
           </provider>
@@ -184,7 +110,6 @@
         <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/SentenceReaderTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/PolysemousWord2VecTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecArithmetic.java" />
-        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/POSLemma2Vec.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TriadEvaluator.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TopTenEvaluator.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/Random2Vec.java" />
@@ -192,18 +117,27 @@
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/Evaluator.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/optimizer/NegativeSampling.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/optimizer/HierarchicalSoftmax.java" />
-        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/optimizer/Optimizer.java" />
-        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TopNEvaluator.java" />
-        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecMath.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Lemma2Vec.java" />
         <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/DEPTreeReaderTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/reader/DEPTreeReader.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/reader/Reader.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/reader/ReaderWrapper.java" />
-        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java" />
         <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/Word2VecTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/POSLemma2Vec.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TopNQueue.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecMath.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TopNEvaluator.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/util/Vocabulary.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/util/GaussianClustering.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/util/GaussianClusterer.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/GaussianClusterer.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecFeatures.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/optimizer/Optimizer.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Word2Vec.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecCluster.java" />
+        <option value="$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/types/VocabularyTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.java" />
       </list>
     </option>
@@ -226,10 +160,10 @@
     </treeState>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-1" />
-    <option name="y" value="11" />
-    <option name="width" value="1369" />
-    <option name="height" value="726" />
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1382" />
+    <option name="height" value="744" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -278,9 +212,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -549,6 +480,9 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
+      <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -1027,15 +961,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="SyntacticWord2VecTest - 2016.02.03 at 11h 58m 16s.xml">
-      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="SyntacticWord2VecTest - 2016.02.03 at 12h 00m 19s.xml">
-      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="SyntacticWord2VecTest - 2016.02.03 at 12h 01m 42s.xml">
-      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="SyntacticWord2VecTest - 2016.02.05 at 18h 38m 52s.xml">
       <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
     </history-entry>
@@ -1043,6 +968,15 @@
       <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
     </history-entry>
     <history-entry file="SyntacticWord2VecTest - 2016.02.05 at 18h 59m 36s.xml">
+      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="SyntacticWord2VecTest - 2016.02.17 at 16h 25m 35s.xml">
+      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="SyntacticWord2VecTest - 2016.02.17 at 16h 31m 46s.xml">
+      <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="SyntacticWord2VecTest - 2016.02.17 at 16h 32m 18s.xml">
       <configuration name="SyntacticWord2VecTest" configurationId="JUnit" />
     </history-entry>
     <history-entry file="SyntacticWord2VecTest_test - 2016.02.05 at 18h 38m 10s.xml">
@@ -1059,31 +993,31 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="11" width="1369" height="726" extended-state="0" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32715008" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32925898" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3289689" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3290469" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32715008" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24904507" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24205749" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24961832" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32569557" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32569557" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -1099,7 +1033,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="2" />
+      <option name="time" value="3" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1108,31 +1042,11 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/reader/DEPTreeReaderTest.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecCluster.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="108" column="74" selection-start-line="108" selection-start-column="74" selection-end-line="108" selection-end-column="74" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/edu/emory/mathcs/nlp/corenlp/1.0.0-SNAPSHOT/corenlp-1.0.0-20160121.195221-6.jar!/edu/emory/mathcs/nlp/component/template/util/TSVReader.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="35" column="0" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/reader/DEPTreeReader.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="63" column="0" selection-start-line="63" selection-start-column="0" selection-end-line="63" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Word2Vec.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="18" column="49" selection-start-line="18" selection-start-column="49" selection-end-line="18" selection-end-column="49" />
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1227,13 +1141,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/types/VocabularyTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="21" column="13" selection-start-line="21" selection-start-column="13" selection-end-line="21" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_65/src.zip!/java/util/logging/Logger.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1262,13 +1169,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/util/Vocabulary.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="235" column="5" selection-start-line="235" selection-start-column="5" selection-end-line="235" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/util/Word.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1280,13 +1180,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="30" column="13" selection-start-line="30" selection-start-column="13" selection-end-line="30" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TriadEvaluator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="1" column="17" selection-start-line="1" selection-start-column="17" selection-end-line="1" selection-end-column="17" />
         </state>
       </provider>
     </entry>
@@ -1332,34 +1225,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/optimizer/Optimizer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="2.3539822">
-          <caret line="114" column="0" selection-start-line="114" selection-start-column="0" selection-end-line="114" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecMath.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="138" column="8" selection-start-line="138" selection-start-column="8" selection-end-line="138" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TopNEvaluator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="104" column="0" selection-start-line="104" selection-start-column="0" selection-end-line="104" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/POSLemma2Vec.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/edu/emory/mathcs/nlp/corenlp/1.0.0-SNAPSHOT/corenlp-1.0.0-20160121.195221-6.jar!/edu/emory/mathcs/nlp/common/util/FileUtils.class">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1399,9 +1264,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="120" column="0" selection-start-line="120" selection-start-column="0" selection-end-line="120" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1409,7 +1271,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="48" column="0" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1417,7 +1278,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="91" column="56" selection-start-line="91" selection-start-column="56" selection-end-line="91" selection-end-column="56" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1425,18 +1285,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="39" column="31" selection-start-line="39" selection-start-column="31" selection-end-line="39" selection-end-column="31" />
-          <folding>
-            <element signature="n#!!doc" expanded="false" />
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="66" column="51" selection-start-line="66" selection-start-column="51" selection-end-line="66" selection-end-column="51" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1444,7 +1292,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="40" column="0" selection-start-line="35" selection-start-column="4" selection-end-line="40" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1452,34 +1299,112 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="41" column="27" selection-start-line="41" selection-start-column="27" selection-end-line="41" selection-end-column="27" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/POSLemma2Vec.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="40" column="5" selection-start-line="40" selection-start-column="5" selection-end-line="40" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TopNQueue.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.02910959">
+          <caret line="14" column="11" selection-start-line="14" selection-start-column="11" selection-end-line="14" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TopNEvaluator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.09760274">
+          <caret line="134" column="31" selection-start-line="134" selection-start-column="31" selection-end-line="134" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/TriadEvaluator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.02910959">
+          <caret line="27" column="13" selection-start-line="27" selection-start-column="13" selection-end-line="27" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/PolysemousWord2Vec.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="31" column="35" selection-start-line="31" selection-start-column="35" selection-end-line="31" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/util/Vocabulary.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.1457976">
+          <caret line="223" column="7" selection-start-line="223" selection-start-column="7" selection-end-line="223" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecMath.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="45" column="5" selection-start-line="45" selection-start-column="5" selection-end-line="45" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecFeatures.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="69" column="28" selection-start-line="69" selection-start-column="28" selection-end-line="69" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/optimizer/Optimizer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/types/VocabularyTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="161" column="67" selection-start-line="161" selection-start-column="67" selection-end-line="161" selection-end-column="67" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/Word2Vec.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="124" column="4" selection-start-line="124" selection-start-column="4" selection-end-line="124" selection-end-column="4" />
+          <caret line="522" column="5" selection-start-line="507" selection-start-column="4" selection-end-line="522" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/evaluate/VecCluster.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="151" column="13" selection-start-line="151" selection-start-column="13" selection-end-line="151" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.02910959">
+          <caret line="20" column="25" selection-start-line="20" selection-start-column="25" selection-end-line="20" selection-end-column="25" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/emory/mathcs/nlp/vsm/SyntacticWord2Vec.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="88" column="19" selection-start-line="88" selection-start-column="19" selection-end-line="88" selection-end-column="19" />
-          <folding>
-            <element signature="e#1629#1658#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/edu/emory/mathcs/nlp/vsm/word2vec/SyntacticWord2VecTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.6495957">
-          <caret line="42" column="27" selection-start-line="42" selection-start-column="27" selection-end-line="42" selection-end-column="27" />
+        <state vertical-scroll-proportion="0.45890412">
+          <caret line="49" column="39" selection-start-line="49" selection-start-column="39" selection-end-line="49" selection-end-column="39" />
           <folding />
         </state>
       </provider>

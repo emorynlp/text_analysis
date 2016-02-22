@@ -15,11 +15,11 @@
  */
 package edu.emory.mathcs.nlp.vsm;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -41,15 +41,24 @@ import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
  */
 public class SyntacticWord2Vec extends Word2Vec
 {
+    private static final long serialVersionUID = -5597377581114506257L;
+
     public SyntacticWord2Vec(String[] args) {
         super(args);
     }
 
-    @Override
-    @SuppressWarnings("resource")
-    Reader<String> getReader(List<File> files)
+    /*String getWordLabel(NLPNode word)
     {
-        return new DEPTreeReader(files).addFeature(NLPNode::getLemma);
+        String POS = word.getPartOfSpeechTag();
+        if (POS.startsWith("VB")) POS = "VB";
+        else if (POS.startsWith("NN")) POS = "NN";
+
+        return POS+"_"+word.getLemma();
+    }*/
+
+    String getWordLabel(NLPNode word)
+    {
+        return word.getLemma();
     }
 
     @Override
@@ -58,14 +67,21 @@ public class SyntacticWord2Vec extends Word2Vec
         BinUtils.LOG.info("Reading vocabulary:\n");
 
         // ------- Austin's code -------------------------------------
-        in_vocab = (out_vocab = new Vocabulary());
+        in_vocab = new Vocabulary();
+        out_vocab = new Vocabulary();
+
         List<Reader<NLPNode>> readers = new DEPTreeReader(filenames.stream().map(File::new).collect(Collectors.toList()))
                 .splitParallel(thread_size);
         List<Reader<NLPNode>> train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
         Reader<NLPNode>       test_reader   = evaluate ? readers.get(thread_size-1)       : null;
 
-        if (read_vocab_file == null) in_vocab.learnParallel(train_readers.stream().map(r->r.addFeature(NLPNode::getLemma)).collect(Collectors.toList()), min_count);
-        else 						 in_vocab.readVocab(new File(read_vocab_file));
+        if (read_vocab_file == null) in_vocab.learnParallel(train_readers.stream()
+                                                            .map(r -> r.addFeature(this::getWordLabel))
+                                                            .collect(Collectors.toList()), min_count);
+        else 						 in_vocab.readVocab(new File(read_vocab_file), min_count);
+        out_vocab.learnParallel(train_readers.stream()
+                .map(r -> r.addFeature(this::getWordLabel))
+                .collect(Collectors.toList()), min_count);
         word_count_train = in_vocab.totalCount();
         // -----------------------------------------------------------
 
@@ -104,12 +120,14 @@ public class SyntacticWord2Vec extends Word2Vec
         BinUtils.LOG.info("Saving word vectors.\n");
 
         save(new File(output_file));
+        save2(new File(output_file+".2"));
         if (write_vocab_file != null)
         {
             File f = new File(write_vocab_file);
             if (!f.isFile()) f.createNewFile();
             in_vocab.writeVocab(f);
         }
+        if (feature_file != null) saveFeatures(new File(feature_file));
     }
 
     class SynTrainTask implements Runnable
@@ -240,7 +258,7 @@ public class SyntacticWord2Vec extends Word2Vec
     {
         int k, l, wc = 0;
         NLPNode word = words.get(index);
-        int word_index = out_vocab.indexOf(word.getLemma());
+        int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;
 
         List<NLPNode> context_words = word.getDependentList();
@@ -248,7 +266,7 @@ public class SyntacticWord2Vec extends Word2Vec
         // input -> hidden
         for (NLPNode context : context_words)
         {
-            int context_index = in_vocab.indexOf(context.getLemma());
+            int context_index = in_vocab.indexOf(getWordLabel(context));
             if (context_index < 0) continue;
             l = context_index * vector_size;
             for (k=0; k<vector_size; k++) neu1[k] += W[k+l];
@@ -262,7 +280,7 @@ public class SyntacticWord2Vec extends Word2Vec
         // hidden -> input
         for (NLPNode context : context_words)
         {
-            int context_index = in_vocab.indexOf(context.getLemma());
+            int context_index = in_vocab.indexOf(getWordLabel(context));
             l = context_index * vector_size;
 
             for (k=0; k<vector_size; k++) W[k+l] += neu1e[k];
@@ -273,14 +291,14 @@ public class SyntacticWord2Vec extends Word2Vec
     {
         int k, l1;
         NLPNode word = words.get(index);
-        int word_index = out_vocab.indexOf(word.getLemma());
+        int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;
 
         List<NLPNode> context_words = word.getDependentList();
 
         for (NLPNode context : context_words)
         {
-            int context_index = in_vocab.indexOf(context.getLemma());
+            int context_index = in_vocab.indexOf(getWordLabel(context));
             if (context_index < 0) continue;
 
             l1 = context_index * vector_size;
@@ -297,7 +315,7 @@ public class SyntacticWord2Vec extends Word2Vec
     {
         int k, l, wc = 0;
         NLPNode word = words.get(index);
-        int word_index = out_vocab.indexOf(word.getLemma());
+        int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;
 
         List<NLPNode> context_words = word.getDependentList();
@@ -305,7 +323,7 @@ public class SyntacticWord2Vec extends Word2Vec
         // input -> hidden
         for (NLPNode context : context_words)
         {
-            int context_index = in_vocab.indexOf(context.getLemma());
+            int context_index = in_vocab.indexOf(getWordLabel(context));
             if (context_index < 0) continue;
             l = context_index * vector_size;
             for (k=0; k<vector_size; k++) neu1[k] += W[k+l];
@@ -321,20 +339,56 @@ public class SyntacticWord2Vec extends Word2Vec
     {
         int l1;
         NLPNode word = words.get(index);
-        int word_index = out_vocab.indexOf(word.getLemma());
+        int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;
 
         List<NLPNode> context_words = word.getDependentList();
 
         for (NLPNode context : context_words)
         {
-            int context_index = in_vocab.indexOf(context.getLemma());
+            int context_index = in_vocab.indexOf(getWordLabel(context));
             if (context_index < 0) continue;
 
             l1 = context_index * vector_size;
             Arrays.fill(neu1e, 0);
             optimizer.testSkipGram(rand, word_index, W, V, neu1e, alpha_global, l1);
         }
+    }
+
+    public Map<String,float[]> toMap2(boolean normalize)
+    {
+        Map<String,float[]> map = new HashMap<>();
+        float[] vector;
+        String key;
+        int i, l;
+
+        for (i=0; i<out_vocab.size(); i++)
+        {
+            l = i * vector_size;
+            key = out_vocab.get(i).form;
+            vector = Arrays.copyOfRange(V, l, l+vector_size);
+            if (normalize) normalize(vector);
+            map.put(key, vector);
+        }
+
+        return map;
+    }
+
+    public void save2(File save_file) throws IOException
+    {
+        if (!save_file.isFile()) save_file.createNewFile();
+
+        Map<String,float[]> map = toMap2(normalize);
+        BufferedWriter out = new BufferedWriter(new FileWriter(save_file));
+
+        for (String word : map.keySet())
+        {
+            out.write(word+"\t");
+            for (float f : map.get(word))
+                out.write(f+"\t");
+            out.write("\n");
+        }
+        out.close();
     }
 
     static public void main(String[] args) { new SyntacticWord2Vec(args); }
