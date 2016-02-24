@@ -53,7 +53,7 @@ public class PolysemousWord2Vec extends Word2Vec
         Random rand = new XORShiftRandom(1);
 
         S = new float[senses][size]; // S[word_sense][vector_size*word_index + component]
-        V = new float[size]; // V[vector_size*word_index + component]
+        V = new float[size];         // V[vector_size*word_index + component]
 
         for (int s=0; s<senses; s++) for (int i=0; i<size; i++)
             S[s][i] = (float)((rand.nextDouble() - 0.5) / vector_size);
@@ -71,8 +71,8 @@ public class PolysemousWord2Vec extends Word2Vec
 
         List<Reader<String>> readers = getReader(filenames.stream().map(File::new).collect(Collectors.toList()))
                 .splitParallel(thread_size);
-        in_vocab.learnParallel(readers, min_count);
-
+        if (read_vocab_file == null) in_vocab.learnParallel(readers, min_count);
+        else 						 in_vocab.readVocab(new File(read_vocab_file), min_count);
         word_count_train = in_vocab.totalCount();
         // -----------------------------------------------------------
 
@@ -110,6 +110,12 @@ public class PolysemousWord2Vec extends Word2Vec
         BinUtils.LOG.info("Saving word vectors.\n");
 
         save(new File(output_file));
+        if (write_vocab_file != null)
+        {
+            File f = new File(write_vocab_file);
+            if (!f.isFile()) f.createNewFile();
+            in_vocab.writeVocab(f);
+        }
     }
 
     class TrainTask implements Runnable
@@ -166,10 +172,10 @@ public class PolysemousWord2Vec extends Word2Vec
                 // output progress
                 if(id == 0)
                 {
-                    float current_progress = iter + reader.progress();
-                    if(current_progress-last_progress > 0.01f)
+                    float progress = (iter + reader.progress()/100)/train_iteration;
+                    if(progress-last_progress > 0.01f)
                     {
-                        outputProgress(System.currentTimeMillis(), current_progress/train_iteration);
+                        outputProgress(System.currentTimeMillis(), progress);
                         last_progress += 0.1f;
                     }
                 }
