@@ -19,7 +19,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-<<<<<<< HEAD
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,9 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-=======
-import java.util.*;
->>>>>>> origin/master
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -215,9 +211,6 @@ public class SyntacticWord2Vec extends Word2Vec
     }
 
 
-<<<<<<< HEAD
-    void bagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1, Map<NLPNode,Set<NLPNode>> sargs)
-=======
     class SynTestTask extends SynTrainTask
     {
         public SynTestTask(Reader<NLPNode> reader, int id)
@@ -270,15 +263,14 @@ public class SyntacticWord2Vec extends Word2Vec
         }
     }
 
-    void bagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1)
->>>>>>> origin/master
-    {
+    void bagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1, Map<NLPNode,Set<NLPNode>> sargs) {
         int k, l, wc = 0;
         NLPNode word = words.get(index);
         int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;
 
-        List<NLPNode> context_words = word.getDependentList();
+        Set<NLPNode> context_words = new HashSet<NLPNode>();
+        context_words.addAll(word.getDependentList());
 
         // input -> hidden
         for (NLPNode context : context_words)
@@ -304,8 +296,7 @@ public class SyntacticWord2Vec extends Word2Vec
         }
     }
 
-    void skipGram(List<NLPNode> words, int index, Random rand, float[] neu1e, Map<NLPNode,Set<NLPNode>> sargs)
-    {
+    void skipGram(List<NLPNode> words, int index, Random rand, float[] neu1e, Map<NLPNode,Set<NLPNode>> sargs) {
         int k, l1;
         NLPNode word = words.get(index);
         int word_index = out_vocab.indexOf(getWordLabel(word));
@@ -345,15 +336,15 @@ public class SyntacticWord2Vec extends Word2Vec
     }
 
 
-    void testBagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1)
-    {
+    void testBagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1) {
         int k, l, wc = 0;
         NLPNode word = words.get(index);
         int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;
 
-        List<NLPNode> context_words = word.getDependentList();
-
+        Set<NLPNode> context_words = new HashSet<NLPNode>();
+        context_words.addAll(word.getDependentList());
+        
         // input -> hidden
         for (NLPNode context : context_words)
         {
@@ -376,8 +367,9 @@ public class SyntacticWord2Vec extends Word2Vec
         int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;
 
-        List<NLPNode> context_words = word.getDependentList();
-
+        Set<NLPNode> context_words = new HashSet<NLPNode>();
+        context_words.addAll(word.getDependentList());
+        
         for (NLPNode context : context_words)
         {
             int context_index = in_vocab.indexOf(getWordLabel(context));
