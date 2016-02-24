@@ -227,13 +227,12 @@ public class Vocabulary implements Serializable
 	 * @param read_vocab_file - file containing vocab
 	 * @throws IOException - if this method can't read file
 	 */
-	public void readVocab(File read_vocab_file, int min_word_count) throws IOException
+	public void readVocab(File read_vocab_file) throws IOException
 	{
 		ObjectInputStream oin = new ObjectInputStream(new FileInputStream(read_vocab_file));
 		try { addAll((Vocabulary) oin.readObject()); }
 		catch (ClassNotFoundException e) { e.printStackTrace(); }
 		oin.close();
-		sort(min_word_count);
 	}
 
 	/**

@@ -159,7 +159,7 @@ public class VocabularyTest {
     public void testReadVocab() throws Exception
     {
         Vocabulary vocab = new Vocabulary();
-        vocab.readVocab(new File("src/test/resources/dat/vocab"), 0);
+        vocab.readVocab(new File("src/test/resources/dat/vocab"));
 
         System.out.println(vocab);
     }

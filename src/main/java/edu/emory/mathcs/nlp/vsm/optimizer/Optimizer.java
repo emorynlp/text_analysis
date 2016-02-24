@@ -24,10 +24,8 @@ import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
  */
-public abstract class Optimizer implements Serializable
+public abstract class Optimizer
 {
-	private static final long serialVersionUID = 8034625696864986505L;
-
 	protected Sigmoid sigmoid;
 	protected Vocabulary vocab;
 	protected int vector_size;

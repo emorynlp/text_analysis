@@ -27,8 +27,7 @@ public class Word2VecTest {
                 "-output","resources/dat/skip_vectors",
                 "-size",""+vector_size,
                 "-threads",  "2",
-                "-min-count","1",
-                "-evaluate"};
+                "-min-count","1"};
         test(params);
     }
 
@@ -38,8 +37,7 @@ public class Word2VecTest {
                 "-size",""+vector_size,
                 "-threads",  "2",
                 "-min-count","1",
-                "-cbow",
-                "-evaluate"};
+                "-cbow"};
         test(params);
     }
 

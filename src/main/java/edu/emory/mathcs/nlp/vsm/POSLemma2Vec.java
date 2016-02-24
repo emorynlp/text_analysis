@@ -33,11 +33,7 @@ public class POSLemma2Vec extends Word2Vec {
 
     String getWordLabel(NLPNode word)
     {
-        String POS = word.getPartOfSpeechTag();
-        if (POS.startsWith("VB")) POS = "VB";
-        else if (POS.startsWith("NN")) POS = "NN";
-
-        return POS+"_"+word.getLemma();
+        return word.getPartOfSpeechTag()+"_"+word.getLemma();
     }
 
 	@Override

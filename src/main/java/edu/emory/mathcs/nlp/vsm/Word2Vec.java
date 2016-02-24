@@ -20,7 +20,6 @@ import edu.emory.mathcs.nlp.common.util.BinUtils;
 import edu.emory.mathcs.nlp.common.util.FileUtils;
 import edu.emory.mathcs.nlp.common.util.MathUtils;
 import edu.emory.mathcs.nlp.common.util.Sigmoid;
-import edu.emory.mathcs.nlp.vsm.evaluate.TopNQueue;
 import edu.emory.mathcs.nlp.vsm.optimizer.HierarchicalSoftmax;
 import edu.emory.mathcs.nlp.vsm.optimizer.NegativeSampling;
 import edu.emory.mathcs.nlp.vsm.optimizer.Optimizer;
@@ -39,26 +38,20 @@ import java.util.stream.Collectors;
 /**
  * @author Austin Blodgett
  */
-public class Word2Vec implements Serializable
+public class Word2Vec
 {
-	private static final long serialVersionUID = 7372230197727987245L;
-
 	@Option(name="-train", usage="path to the training file or the directory containig the training files.", required=true, metaVar="<filepath>")
 	String train_path = null;
 	@Option(name="-output", usage="output file to save the resulting word vectors.", required=true, metaVar="<filename>")
 	String output_file = null;
-	@Option(name="-output-features", usage="output file to save words associated with each hidden layer component.", required=false, metaVar="<filename>")
-	String feature_file = null;
 	@Option(name="-write-vocab", usage="file to save serialized vocabulary.", required=false, metaVar="<filename>")
 	String write_vocab_file = null;
 	@Option(name="-read-vocab", usage="file with serialized vocabulary to read.", required=false, metaVar="<filename>")
 	String read_vocab_file = null;
-	@Option(name="-write-model", usage="file to save serialized neural net.", required=false, metaVar="<filename>")
-	String write_model_file = null;
 	@Option(name="-ext", usage="extension of the training files (default: \"*\").", required=false, metaVar="<string>")
 	String train_ext = "*";
 	@Option(name="-size", usage="size of word vectors (default: 100).", required=false, metaVar="<int>")
-	public int vector_size = 100;
+	int vector_size = 100;
 	@Option(name="-window", usage="max-window of contextual words (default: 5).", required=false, metaVar="<int>")
 	int max_skip_window = 5;
 	@Option(name="-sample", usage="threshold for occurrence of words (default: 1e-3). Those that appear with higher frequency in the training data will be randomly down-sampled.", required=false, metaVar="<float>")
@@ -79,8 +72,6 @@ public class Word2Vec implements Serializable
 	boolean normalize = false;
 	@Option(name="-evaluate", usage="If set, reserve portion of training corpus for evaluating.", required=false, metaVar="<boolean>")
 	boolean evaluate = false;
-	@Option(name="-debug", usage="If set, output more to command line.", required=false, metaVar="<boolean>")
-	boolean debug = false;
 
 	/* TODO Austin
 	 * Add cmd line options
@@ -95,7 +86,7 @@ public class Word2Vec implements Serializable
 	 * between input and output vocabularies.
 	 */
 	public Vocabulary in_vocab;
-	public Vocabulary out_vocab;
+	Vocabulary out_vocab;
 
 	Sigmoid sigmoid;
 	long word_count_train;
@@ -139,12 +130,12 @@ public class Word2Vec implements Serializable
 		// ------- Austin's code -------------------------------------
 		in_vocab = (out_vocab = new Vocabulary());
 		List<Reader<String>> readers = getReader(filenames.stream().map(File::new).collect(Collectors.toList()))
-				.splitParallel(thread_size);
+											.splitParallel(thread_size);
 		List<Reader<String>> train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
 		Reader<String> 		 test_reader   = evaluate ? readers.get(thread_size-1) 		 : null;
 
 		if (read_vocab_file == null) in_vocab.learnParallel(train_readers, min_count);
-		else 						 in_vocab.readVocab(new File(read_vocab_file), min_count);
+		else 						 in_vocab.readVocab(new File(read_vocab_file));
 		word_count_train = in_vocab.totalCount();
 		// -----------------------------------------------------------
 
@@ -183,14 +174,7 @@ public class Word2Vec implements Serializable
 		BinUtils.LOG.info("Saving word vectors.\n");
 
 		save(new File(output_file));
-		if (write_vocab_file != null)
-		{
-			File f = new File(write_vocab_file);
-			if (!f.isFile()) f.createNewFile();
-			in_vocab.writeVocab(f);
-		}
-		if (feature_file != null) saveFeatures(new File(feature_file));
-		if (write_model_file != null) writeModel(new File(write_model_file));
+		if (write_vocab_file != null) in_vocab.writeVocab(new File(write_vocab_file));
 	}
 	
 	class TrainTask implements Runnable
@@ -228,7 +212,7 @@ public class Word2Vec implements Serializable
 
 				if (words == null)
 				{
-					if (debug) System.out.println("thread "+id+" "+iter+" "+num_sentences);
+					System.out.println("thread "+id+" "+iter+" "+num_sentences);
 					if (++iter == train_iteration) break;
 					adjustLearningRate();
 					// readers have a built in restart button - Austin
@@ -453,7 +437,7 @@ public class Word2Vec implements Serializable
 
 		if (wc == 0) return;
 		for (k=0; k<vector_size; k++) neu1[k] /= wc;
-		optimizer.testBagOfWords(rand, word, V, neu1, neu1e, alpha_global);
+		optimizer.learnBagOfWords(rand, word, V, neu1, neu1e, alpha_global);
 	}
 
 	void testSkipGram(int[] words, int index, int window, Random rand, float[] neu1e)
@@ -507,8 +491,6 @@ public class Word2Vec implements Serializable
 
 	public void save(File save_file) throws IOException
 	{
-		if (!save_file.isFile()) save_file.createNewFile();
-
 		Map<String,float[]> map = toMap(normalize);
 		BufferedWriter out = new BufferedWriter(new FileWriter(save_file));
 
@@ -521,43 +503,6 @@ public class Word2Vec implements Serializable
 		}
 		out.close();
 	}
-
-	void saveFeatures(File feature_file) throws IOException
-	{
-		if (!feature_file.isFile())
-			feature_file.createNewFile();
-
-		int N = 100;
-		float value;
-		BufferedWriter out = new BufferedWriter(new FileWriter(feature_file));
-
-		for (int k=0; k<vector_size; k++)
-		{
-			TopNQueue top = new TopNQueue(N);
-			for (int v=0; v<out_vocab.size(); v++)
-			{
-				value = V[v*vector_size + k] * (float) Math.pow(out_vocab.get(v).count, 0.75);
-				top.add(out_vocab.get(v).form, value);
-			}
-			out.write(k+"\t");
-			for (String s : top.list())
-				out.write(s+"\t");
-			out.write("\n");
-		}
-
-		out.close();
-	}
-
-	public void writeModel(File write_vocab_file) throws IOException
-	{
-		if (!write_vocab_file.isFile())
-			write_vocab_file.createNewFile();
-
-		ObjectOutputStream oout = new ObjectOutputStream(new FileOutputStream(write_vocab_file));
-		oout.writeObject(this);
-		oout.close();
-	}
-
 	// -------------------------------------------------------
 	
 	static public void main(String[] args)
