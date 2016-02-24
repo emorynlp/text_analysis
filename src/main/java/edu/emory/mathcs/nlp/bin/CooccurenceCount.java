@@ -35,6 +35,7 @@ import org.kohsuke.args4j.Option;
 import edu.emory.mathcs.nlp.common.util.BinUtils;
 import edu.emory.mathcs.nlp.common.util.DSUtils;
 import edu.emory.mathcs.nlp.common.util.IOUtils;
+import edu.emory.mathcs.nlp.component.template.node.NLPNode;
 import edu.emory.mathcs.nlp.tokenization.EnglishTokenizer;
 import edu.emory.mathcs.nlp.tokenization.Tokenizer;
 
@@ -70,7 +71,7 @@ public class CooccurenceCount
 		Tokenizer tokenizer = new EnglishTokenizer();
 		Map<String,int[]> map = new HashMap<>();
 		Set<String> set = new HashSet<>();
-		List<List<String>> sentences;
+		List<NLPNode[]> sentences;
 		String line; int dc;
 
 		while ((line = reader.readLine()) != null)
@@ -78,9 +79,14 @@ public class CooccurenceCount
 			sentences = tokenizer.segmentize(line);
 			set.clear();
 			
-			for (List<String> sentence : sentences)
-				set.addAll(count(map, sentence, window));
-
+			//fixed
+			for (NLPNode[] sentence : sentences){
+				List<String> tempHolder = new ArrayList<String>();	
+				for(NLPNode node : sentence) {
+					tempHolder.add(node.getWordForm());
+				}
+				set.addAll(count(map, tempHolder, window));
+			}
 			dc = window * 2 + 1;
 			for (String s : set) map.get(s)[dc]++;
 		}

@@ -18,8 +18,12 @@ package edu.emory.mathcs.nlp.vsm;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -126,6 +130,7 @@ public class SyntacticWord2Vec extends Word2Vec
             int     iter  = 0;
             int     index;
             List<NLPNode> words = null;
+            Map<NLPNode,Set<NLPNode>> sargs;
 
             while (true)
             {
@@ -146,14 +151,16 @@ public class SyntacticWord2Vec extends Word2Vec
                     try { reader.restart(); } catch (IOException e) { e.printStackTrace(); }
                     continue;
                 }
+                
+                sargs = getSemanticArgumentMap(words);
 
                 for (index=0; index<words.size(); index++)
                 {
                     if (cbow) Arrays.fill(neu1, 0);
                     Arrays.fill(neu1e, 0);
 
-                    if (cbow) bagOfWords(words, index, rand, neu1e, neu1);
-                    else      skipGram  (words, index, rand, neu1e);
+                    if (cbow) bagOfWords(words, index, rand, neu1e, neu1, sargs);
+                    else      skipGram  (words, index, rand, neu1e, sargs);
                 }
 
                 // output progress
@@ -172,7 +179,7 @@ public class SyntacticWord2Vec extends Word2Vec
     }
 
 
-    void bagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1)
+    void bagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1, Map<NLPNode,Set<NLPNode>> sargs)
     {
         int k, l, wc = 0;
         NLPNode word = words.get(index);
@@ -205,15 +212,16 @@ public class SyntacticWord2Vec extends Word2Vec
         }
     }
 
-    void skipGram(List<NLPNode> words, int index, Random rand, float[] neu1e)
+    void skipGram(List<NLPNode> words, int index, Random rand, float[] neu1e, Map<NLPNode,Set<NLPNode>> sargs)
     {
         int k, l1;
         NLPNode word = words.get(index);
         int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;
 
-        List<NLPNode> context_words = word.getDependentList();
-
+        Set<NLPNode> context_words = new HashSet<NLPNode>();
+        context_words.addAll(word.getDependentList());
+        		
         for (NLPNode context : context_words)
         {
             int context_index = in_vocab.indexOf(context.getLemma());
@@ -226,6 +234,22 @@ public class SyntacticWord2Vec extends Word2Vec
             // hidden -> input
             for (k=0; k<vector_size; k++) W[l1+k] += neu1e[k];
         }
+    }
+    
+    Map<NLPNode,Set<NLPNode>> getSemanticArgumentMap(List<NLPNode> nodes)
+    {
+    	Map<NLPNode,Set<NLPNode>> map = new HashMap<>();
+    	Set<NLPNode> args;
+    	NLPNode node;
+    	
+    	for (int i=1; i<nodes.size(); i++)
+    	{
+    		node = nodes.get(i);
+    		args = node.getSemanticHeadList().stream().map(a -> a.getNode()).collect(Collectors.toSet());
+    		map.put(node, args);
+    	}
+    	
+    	return map;
     }
 
     public String getWordLabel(NLPNode word)

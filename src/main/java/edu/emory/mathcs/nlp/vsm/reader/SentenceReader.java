@@ -17,11 +17,13 @@ package edu.emory.mathcs.nlp.vsm.reader;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import edu.emory.mathcs.nlp.component.template.node.NLPNode;
 import edu.emory.mathcs.nlp.tokenization.Tokenizer;
 
 /**
@@ -62,11 +64,15 @@ public class SentenceReader extends Reader<String> {
         if (line.isEmpty()) return next();
 
         List<String> words;
-        if (tokenizer == null)
+        if (tokenizer == null){
             words = Arrays.stream(spaces.split(line)).collect(Collectors.toList());
-        else
-            words = tokenizer.tokenize(line);
-
+        }else {  //words = tokenizer.tokenize(line);
+        	List<NLPNode> tempHolder = tokenizer.tokenize(line);
+        	words = new ArrayList<String>();
+        	for(NLPNode node : tempHolder){
+        		words.add(node.getWordForm());
+        	}
+        }
         return words;
     }
 

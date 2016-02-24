@@ -30,6 +30,7 @@ import edu.emory.mathcs.nlp.common.collection.tuple.ObjectDoublePair;
 import edu.emory.mathcs.nlp.common.util.IOUtils;
 import edu.emory.mathcs.nlp.common.util.Joiner;
 import edu.emory.mathcs.nlp.common.util.MathUtils;
+import edu.emory.mathcs.nlp.component.template.node.NLPNode;
 import edu.emory.mathcs.nlp.tokenization.EnglishTokenizer;
 import edu.emory.mathcs.nlp.tokenization.Tokenizer;
 
@@ -94,8 +95,14 @@ public class Tmp
 			line = line.trim();
 			if (line.isEmpty() || line.startsWith("<Windows Document")) continue;
 			
-			for (List<String> sen : tok.segmentize(line))
-				out.println(Joiner.join(sen, " "));
+			//fixed
+			for (NLPNode[] sen : tok.segmentize(line)) {
+				List<String> tempHolder = new ArrayList<String>();	
+				for(NLPNode node : sen) {
+					tempHolder.add(node.getWordForm());
+				}
+				out.println(Joiner.join(tempHolder, " "));
+			}
 		}
 		
 		reader.close();
