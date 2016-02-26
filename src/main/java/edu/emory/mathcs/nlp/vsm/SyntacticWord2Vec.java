@@ -319,6 +319,17 @@ public class SyntacticWord2Vec extends Word2Vec
         }
     }
     
+    void addSRLNodes(NLPNode word, Set<NLPNode> context_words, Map<NLPNode,Set<NLPNode>> sargs) {
+        context_words.addAll(word.getDependentList());
+        Set<NLPNode> set = sargs.get(word);
+        if (set != null)
+        {
+        	for (NLPNode s: set){
+        		context_words.add(s);
+        	}
+         }
+    }
+    
     Set<NLPNode> getAllSiblings(NLPNode node){
     	Set<NLPNode> siblings = new HashSet<>();
     	int id = node.getID();
