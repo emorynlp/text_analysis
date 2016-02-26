@@ -319,6 +319,16 @@ public class SyntacticWord2Vec extends Word2Vec
         }
     }
     
+    Set<NLPNode> getAllSiblings(NLPNode node){
+    	Set<NLPNode> siblings = new HashSet<>();
+    	int id = node.getID();
+    	for(NLPNode sib : node.getDependencyHead().getDependentList()) {
+    		if(id != sib.getID())
+    			siblings.add(sib);
+    	}
+    	return siblings;
+    }
+    
     Map<NLPNode,Set<NLPNode>> getSemanticArgumentMap(List<NLPNode> nodes)
     {
     	Map<NLPNode,Set<NLPNode>> map = new HashMap<>();
