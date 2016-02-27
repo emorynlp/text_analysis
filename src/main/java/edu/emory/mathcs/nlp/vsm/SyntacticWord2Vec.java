@@ -19,26 +19,28 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.Map.Entry;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import edu.emory.mathcs.nlp.common.random.XORShiftRandom;
 import edu.emory.mathcs.nlp.common.util.BinUtils;
 import edu.emory.mathcs.nlp.component.template.node.NLPNode;
-import edu.emory.mathcs.nlp.vsm.optimizer.HierarchicalSoftmax;
-import edu.emory.mathcs.nlp.vsm.optimizer.NegativeSampling;
 import edu.emory.mathcs.nlp.vsm.reader.DEPTreeReader;
 import edu.emory.mathcs.nlp.vsm.reader.Reader;
 import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
+import edu.emory.mathcs.nlp.vsm.util.Word;
 
 /**
  * This is an extension of classical word2vec to include features of dependency syntax.
@@ -52,15 +54,6 @@ public class SyntacticWord2Vec extends Word2Vec
     public SyntacticWord2Vec(String[] args) {
         super(args);
     }
-
-    /*String getWordLabel(NLPNode word)
-    {
-        String POS = word.getPartOfSpeechTag();
-        if (POS.startsWith("VB")) POS = "VB";
-        else if (POS.startsWith("NN")) POS = "NN";
-
-        return POS+"_"+word.getLemma();
-    }*/
 
     String getWordLabel(NLPNode word)
     {
@@ -92,20 +85,14 @@ public class SyntacticWord2Vec extends Word2Vec
         // -----------------------------------------------------------
 
         BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
+        
+        List<Word> words = in_vocab.list();
+        for(Word w: words) {
+        	
+        }
 
-        BinUtils.LOG.info("Initializing neural network.\n");
-        initNeuralNetwork();
-
-        BinUtils.LOG.info("Initializing optimizer.\n");
-        optimizer = isNegativeSampling() ? new NegativeSampling(in_vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(in_vocab, sigmoid, vector_size);
-
-        BinUtils.LOG.info("Training vectors:");
-        word_count_global = 0;
-        alpha_global      = alpha_init;
-        subsample_size    = subsample_threshold * word_count_train;
+        BinUtils.LOG.info("Going through vocab vectors:");
         ExecutorService executor = Executors.newFixedThreadPool(thread_size);
-
-        // ------- Austin's code -------------------------------------
         start_time = System.currentTimeMillis();
 
         int id = 0;
@@ -114,26 +101,14 @@ public class SyntacticWord2Vec extends Word2Vec
             executor.execute(new SynTrainTask(r,id));
             id++;
         }
-        if (evaluate) executor.execute(new SynTestTask(test_reader,id));
-        // -----------------------------------------------------------
 
         executor.shutdown();
 
         try { executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
         catch (InterruptedException e) {e.printStackTrace();}
 
-
-        BinUtils.LOG.info("Saving word vectors.\n");
-
-        save(new File(output_file));
-        save2(new File(output_file+".2"));
-        if (write_vocab_file != null)
-        {
-            File f = new File(write_vocab_file);
-            if (!f.isFile()) f.createNewFile();
-            in_vocab.writeVocab(f);
-        }
-        if (feature_file != null) saveFeatures(new File(feature_file));
+        
+       BinUtils.LOG.info("Saved\n");
     }
 
     class SynTrainTask implements Runnable
@@ -154,15 +129,18 @@ public class SyntacticWord2Vec extends Word2Vec
         @Override
         public void run()
         {
-            Random rand  = new XORShiftRandom(reader.hashCode());
-            float[] neu1  = cbow ? new float[vector_size] : null;
-            float[] neu1e = new float[vector_size];
+            BinUtils.LOG.info("Running and reading\n");
+
+        	Map<String, Integer> verbs = new HashMap<>();
+        	Map<String, Integer> nouns = new HashMap<>();
+        	Map<String, Integer> adjs = new HashMap<>();
+        	Map<String, Integer> adverbs = new HashMap<>();
+
             int     iter  = 0;
             int     index;
             List<NLPNode> words = null;
-            Map<NLPNode,Set<NLPNode>> sargs;
 
-            while (true)
+            while (words != null)
             {
                 try {
                     words = reader.next();
@@ -174,269 +152,88 @@ public class SyntacticWord2Vec extends Word2Vec
                     System.exit(1);
                 }
 
-                if (words == null)
-                {
-                    System.out.println("thread "+id+" "+iter+" "+num_sentences);
-                    if (++iter == train_iteration) break;
-                    adjustLearningRate();
-                    // readers have a built in restart button - Austin
-                    try { reader.restart(); } catch (IOException e) { e.printStackTrace(); }
-                    continue;
-                }
-                
-                sargs = getSemanticArgumentMap(words);
-
                 for (index=0; index<words.size(); index++)
                 {
-                    if (cbow) Arrays.fill(neu1, 0);
-                    Arrays.fill(neu1e, 0);
-
-                    if (cbow) bagOfWords(words, index, rand, neu1e, neu1, sargs);
-                    else      skipGram  (words, index, rand, neu1e, sargs);
-                }
-
-                // output progress
-                if(id == 0)
-                {
-                    float progress = (iter + reader.progress()/100)/train_iteration;
-                    if(progress-last_progress > 0.025f)
-                    {
-                        outputProgress(System.currentTimeMillis(), progress);
-                        last_progress += 0.1f;
+                    NLPNode word = words.get(index);
+                    String pos = word.getPartOfSpeechTag();
+                    pos = pos.substring(0, 2);
+                    int count = 0;
+                    switch (pos) {
+                    	case "VB": //verb
+                    		putWord(verbs, word.getLemma());
+                    		break;
+                    	case "NN": //noun
+                    		putWord(nouns, word.getLemma());
+                    		break;
+                    	case "JJ": //adjective
+                    		putWord(adjs, word.getLemma());
+                    		break;
+                    	case "RB": //adverb
+                    		putWord(adverbs, word.getLemma());
+                    		break;
                     }
                 }
-
             }
+            BinUtils.LOG.info("Finding top\n");
+
+            
+            try {
+                BinUtils.LOG.info("Finding verbs\n");
+				findTop(verbs, 5000, "/home/azureuser/PosWordLists/verbList.txt");
+	            BinUtils.LOG.info("Finding nouns\n");
+				findTop(nouns, 5000, "/home/azureuser/PosWordLists/nounList.txt");
+	            BinUtils.LOG.info("Finding adjs\n");
+	            findTop(adjs,5000, "/home/azureuser/PosWordLists/adjectiveList.txt");
+                BinUtils.LOG.info("Finding adverbs\n");
+	            findTop(adverbs, 5000, "/home/azureuser/PosWordLists/adverbList.txt");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
         }
     }
-
-
-    class SynTestTask extends SynTrainTask
-    {
-        public SynTestTask(Reader<NLPNode> reader, int id)
-        {
-            super(reader,id);
+    void findTop(Map<String,Integer> map, int k, String filePath) throws IOException{
+    	File outFile = new File(filePath);
+        BufferedWriter out;
+    	if (!outFile.isFile()) outFile.createNewFile();
+		out = new BufferedWriter(new FileWriter(outFile));
+		
+        HashMap<String, Integer> maph = sortByValues(map); 
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+			out.write(entry.getKey() + " " + entry.getValue());
+            if (k == 0) break;
+            k--;
         }
-
-        @Override
-        public void run()
-        {
-            Random rand  = new XORShiftRandom(reader.hashCode());
-            float[] neu1  = cbow ? new float[vector_size] : null;
-            float[] neu1e = new float[vector_size];
-            int     iter  = 0;
-            int     index;
-            List<NLPNode> words = null;
-
-            while (true)
-            {
-                try {
-                    words = reader.next();
-                    word_count_global += words == null ? 0 : words.size();
-                    num_sentences++;
-                } catch (IOException e) {
-                    System.err.println("Reader failure: progress "+reader.progress());
-                    e.printStackTrace();
-                    System.exit(1);
-                }
-
-                if (words == null)
-                {
-                    System.out.println("error "+optimizer.getError()+" "+num_sentences);
-                    optimizer.resetError();
-                    if (++iter == train_iteration) break;
-                    adjustLearningRate();
-                    // readers have a built in restart button - Austin
-                    try { reader.restart(); } catch (IOException e) { e.printStackTrace(); }
-                    continue;
-                }
-
-                for (index=0; index<words.size(); index++)
-                {
-                    if (cbow) Arrays.fill(neu1, 0);
-                    Arrays.fill(neu1e, 0);
-
-                    if (cbow) testBagOfWords(words, index, rand, neu1e, neu1);
-                    else      testSkipGram  (words, index, rand, neu1e);
-                }
-            }
-        }
-    }
-
-    void bagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1, Map<NLPNode,Set<NLPNode>> sargs) {
-        int k, l, wc = 0;
-        NLPNode word = words.get(index);
-        int word_index = out_vocab.indexOf(getWordLabel(word));
-        if (word_index < 0) return;
-
-        Set<NLPNode> context_words = new HashSet<NLPNode>();
-        context_words.addAll(word.getDependentList());
-
-        // input -> hidden
-        for (NLPNode context : context_words)
-        {
-            int context_index = in_vocab.indexOf(getWordLabel(context));
-            if (context_index < 0) continue;
-            l = context_index * vector_size;
-            for (k=0; k<vector_size; k++) neu1[k] += W[k+l];
-            wc++;
-        }
-
-        if (wc == 0) return;
-        for (k=0; k<vector_size; k++) neu1[k] /= wc;
-        optimizer.learnBagOfWords(rand, word_index, V, neu1, neu1e, alpha_global);
-
-        // hidden -> input
-        for (NLPNode context : context_words)
-        {
-            int context_index = in_vocab.indexOf(getWordLabel(context));
-            l = context_index * vector_size;
-
-            for (k=0; k<vector_size; k++) W[k+l] += neu1e[k];
-        }
-    }
-
-    void skipGram(List<NLPNode> words, int index, Random rand, float[] neu1e, Map<NLPNode,Set<NLPNode>> sargs) {
-        int k, l1;
-        NLPNode word = words.get(index);
-        int word_index = out_vocab.indexOf(getWordLabel(word));
-        if (word_index < 0) return;
-
-        Set<NLPNode> context_words = new HashSet<NLPNode>();
-        context_words.addAll(word.getDependentList());
-        		
-        for (NLPNode context : context_words)
-        {
-            int context_index = in_vocab.indexOf(getWordLabel(context));
-            if (context_index < 0) continue;
-
-            l1 = context_index * vector_size;
-            Arrays.fill(neu1e, 0);
-            optimizer.learnSkipGram(rand, word_index, W, V, neu1e, alpha_global, l1);
-
-            // hidden -> input
-            for (k=0; k<vector_size; k++) W[l1+k] += neu1e[k];
-        }
+       out.write("k: " + k);
+       
+       out.flush();
+       out.close();
     }
     
-    void addSRLNodes(NLPNode word, Set<NLPNode> context_words, Map<NLPNode,Set<NLPNode>> sargs) {
-        context_words.addAll(word.getDependentList());
-        Set<NLPNode> set = sargs.get(word);
-        if (set != null)
-        {
-        	for (NLPNode s: set){
-        		context_words.add(s);
-        	}
-         }
+    private static HashMap<String, Integer> sortByValues(Map<String, Integer> map) { 
+        List list = new LinkedList(map.entrySet());
+        Collections.sort(list, new Comparator() {
+             public int compare(Object o1, Object o2) {
+                return ((Comparable) ((Map.Entry) (o1)).getValue())
+                   .compareTo(((Map.Entry) (o2)).getValue());
+             }
+        });
+
+        HashMap<String, Integer> sortedHashMap = new LinkedHashMap<String, Integer>();
+        for (Iterator it = list.iterator(); it.hasNext();) {
+               Map.Entry<String, Integer> entry = (Entry<String, Integer>) it.next();
+               sortedHashMap.put(entry.getKey(), entry.getValue());
+        } 
+        return sortedHashMap;
+   }
+    
+    void putWord(Map<String, Integer> map, String lemma) {
+    	int count = 0;
+		if(map.containsKey(lemma)){
+			count = map.get(lemma);
+		}
+		count++;
+		map.put(lemma, count);
     }
     
-    Set<NLPNode> getAllSiblings(NLPNode node){
-    	Set<NLPNode> siblings = new HashSet<>();
-    	int id = node.getID();
-    	for(NLPNode sib : node.getDependencyHead().getDependentList()) {
-    		if(id != sib.getID())
-    			siblings.add(sib);
-    	}
-    	return siblings;
-    }
-    
-    Map<NLPNode,Set<NLPNode>> getSemanticArgumentMap(List<NLPNode> nodes)
-    {
-    	Map<NLPNode,Set<NLPNode>> map = new HashMap<>();
-    	Set<NLPNode> args;
-    	NLPNode node;
-    	
-    	for (int i=1; i<nodes.size(); i++)
-    	{
-    		node = nodes.get(i);
-    		args = node.getSemanticHeadList().stream().map(a -> a.getNode()).collect(Collectors.toSet());
-    		map.put(node, args);
-    	}
-    	
-    	return map;
-    }
-
-
-    void testBagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1) {
-        int k, l, wc = 0;
-        NLPNode word = words.get(index);
-        int word_index = out_vocab.indexOf(getWordLabel(word));
-        if (word_index < 0) return;
-
-        Set<NLPNode> context_words = new HashSet<NLPNode>();
-        context_words.addAll(word.getDependentList());
-        
-        // input -> hidden
-        for (NLPNode context : context_words)
-        {
-            int context_index = in_vocab.indexOf(getWordLabel(context));
-            if (context_index < 0) continue;
-            l = context_index * vector_size;
-            for (k=0; k<vector_size; k++) neu1[k] += W[k+l];
-            wc++;
-        }
-
-        if (wc == 0) return;
-        for (k=0; k<vector_size; k++) neu1[k] /= wc;
-        optimizer.testBagOfWords(rand, word_index, V, neu1, neu1e, alpha_global);
-    }
-
-    void testSkipGram(List<NLPNode> words, int index, Random rand, float[] neu1e)
-    {
-        int l1;
-        NLPNode word = words.get(index);
-        int word_index = out_vocab.indexOf(getWordLabel(word));
-        if (word_index < 0) return;
-
-        Set<NLPNode> context_words = new HashSet<NLPNode>();
-        context_words.addAll(word.getDependentList());
-        
-        for (NLPNode context : context_words)
-        {
-            int context_index = in_vocab.indexOf(getWordLabel(context));
-            if (context_index < 0) continue;
-
-            l1 = context_index * vector_size;
-            Arrays.fill(neu1e, 0);
-            optimizer.testSkipGram(rand, word_index, W, V, neu1e, alpha_global, l1);
-        }
-    }
-
-    public Map<String,float[]> toMap2(boolean normalize)
-    {
-        Map<String,float[]> map = new HashMap<>();
-        float[] vector;
-        String key;
-        int i, l;
-
-        for (i=0; i<out_vocab.size(); i++)
-        {
-            l = i * vector_size;
-            key = out_vocab.get(i).form;
-            vector = Arrays.copyOfRange(V, l, l+vector_size);
-            if (normalize) normalize(vector);
-            map.put(key, vector);
-        }
-
-        return map;
-    }
-
-    public void save2(File save_file) throws IOException
-    {
-        if (!save_file.isFile()) save_file.createNewFile();
-
-        Map<String,float[]> map = toMap2(normalize);
-        BufferedWriter out = new BufferedWriter(new FileWriter(save_file));
-
-        for (String word : map.keySet())
-        {
-            out.write(word+"\t");
-            for (float f : map.get(word))
-                out.write(f+"\t");
-            out.write("\n");
-        }
-        out.close();
-    }
-
     static public void main(String[] args) { new SyntacticWord2Vec(args); }
 }
