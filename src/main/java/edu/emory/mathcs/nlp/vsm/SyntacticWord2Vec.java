@@ -50,6 +50,11 @@ import edu.emory.mathcs.nlp.vsm.util.Word;
 public class SyntacticWord2Vec extends Word2Vec
 {
     private static final long serialVersionUID = -5597377581114506257L;
+	Map<String, Integer> verbs = new HashMap<>();
+	Map<String, Integer> nouns = new HashMap<>();
+	Map<String, Integer> adjs = new HashMap<>();
+	Map<String, Integer> adverbs = new HashMap<>();
+
 
     public SyntacticWord2Vec(String[] args) {
         super(args);
@@ -103,6 +108,21 @@ public class SyntacticWord2Vec extends Word2Vec
         try { executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
         catch (InterruptedException e) {e.printStackTrace();}
 
+        BinUtils.LOG.info("Finding top\n");
+
+        
+        try {
+            BinUtils.LOG.info("Finding verbs\n");
+			findTop(verbs, 5000, "/home/azureuser/PosWordLists/verbList.txt");
+            BinUtils.LOG.info("Finding nouns\n");
+			findTop(nouns, 5000, "/home/azureuser/PosWordLists/nounList.txt");
+            BinUtils.LOG.info("Finding adjs\n");
+            findTop(adjs,5000, "/home/azureuser/PosWordLists/adjectiveList.txt");
+            BinUtils.LOG.info("Finding adverbs\n");
+            findTop(adverbs, 5000, "/home/azureuser/PosWordLists/adverbList.txt");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
         
        BinUtils.LOG.info("Saved\n");
     }
@@ -127,10 +147,6 @@ public class SyntacticWord2Vec extends Word2Vec
         {
             BinUtils.LOG.info("Running and reading\n");
 
-        	Map<String, Integer> verbs = new HashMap<>();
-        	Map<String, Integer> nouns = new HashMap<>();
-        	Map<String, Integer> adjs = new HashMap<>();
-        	Map<String, Integer> adverbs = new HashMap<>();
 
             int     iter  = 0;
             int     index;
@@ -170,21 +186,6 @@ public class SyntacticWord2Vec extends Word2Vec
                     }
                 }
             }
-            BinUtils.LOG.info("Finding top\n");
-
-            
-            try {
-                BinUtils.LOG.info("Finding verbs\n");
-				findTop(verbs, 5000, "/home/azureuser/PosWordLists/verbList.txt");
-	            BinUtils.LOG.info("Finding nouns\n");
-				findTop(nouns, 5000, "/home/azureuser/PosWordLists/nounList.txt");
-	            BinUtils.LOG.info("Finding adjs\n");
-	            findTop(adjs,5000, "/home/azureuser/PosWordLists/adjectiveList.txt");
-                BinUtils.LOG.info("Finding adverbs\n");
-	            findTop(adverbs, 5000, "/home/azureuser/PosWordLists/adverbList.txt");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
         }
     }
     void findTop(Map<String,Integer> map, int k, String filePath) throws IOException{
