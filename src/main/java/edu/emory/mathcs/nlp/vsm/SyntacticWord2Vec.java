@@ -331,8 +331,10 @@ public class SyntacticWord2Vec extends Word2Vec
     }
     
     Set<NLPNode> getAllSiblings(NLPNode node){
-    	Set<NLPNode> siblings = new HashSet<>();
+    	Set<NLPNode> siblings = new HashSet<NLPNode>();
     	int id = node.getID();
+    	if(node.getDependencyHead() == null) return siblings;
+    	
     	for(NLPNode sib : node.getDependencyHead().getDependentList()) {
     		if(id != sib.getID())
     			siblings.add(sib);
