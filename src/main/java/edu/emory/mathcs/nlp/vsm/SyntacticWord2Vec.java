@@ -28,8 +28,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +38,6 @@ import edu.emory.mathcs.nlp.component.template.node.NLPNode;
 import edu.emory.mathcs.nlp.vsm.reader.DEPTreeReader;
 import edu.emory.mathcs.nlp.vsm.reader.Reader;
 import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
-import edu.emory.mathcs.nlp.vsm.util.Word;
 
 /**
  * This is an extension of classical word2vec to include features of dependency syntax.
