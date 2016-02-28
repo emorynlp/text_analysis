@@ -81,6 +81,8 @@ public class Word2Vec implements Serializable
 	boolean evaluate = false;
 	@Option(name="-debug", usage="If set, output more to command line.", required=false, metaVar="<boolean>")
 	boolean debug = false;
+	@Option(name="-load-model", usage="If set, a preexisting model and vocab are loaded from the path specified.", required = false, metaVar="<filename>")
+	String model_file = null;
 
 	/* TODO Austin
 	 * Add cmd line options

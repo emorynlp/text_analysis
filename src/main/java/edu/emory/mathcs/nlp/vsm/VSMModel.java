@@ -1,0 +1,48 @@
+package edu.emory.mathcs.nlp.vsm;
+
+import java.util.List;
+
+import edu.emory.mathcs.nlp.component.template.node.NLPNode;
+import edu.emory.mathcs.nlp.vsm.reader.Reader;
+import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
+
+public class VSMModel {
+	
+	float[] W;
+	float[] V;
+	Vocabulary in_vocab;
+	List<Reader<NLPNode>> train_readers;
+	
+
+	public List<Reader<NLPNode>> getTrain_readers() {
+		return train_readers;
+	}
+
+	public float[] getW() {
+		return W;
+	}
+
+	public float[] getV() {
+		return V;
+	}
+
+	public Vocabulary getIn_vocab() {
+		return in_vocab;
+	}
+
+	public Vocabulary getOut_vocab() {
+		return out_vocab;
+	}
+
+	Vocabulary out_vocab;
+	
+	public VSMModel(float[] w, float[] v, Vocabulary in_vocab, Vocabulary out_vocab, List<Reader<NLPNode>> train_readers) {
+		W = w;
+		V = v;
+		this.in_vocab = in_vocab;
+		this.out_vocab = out_vocab;
+		this.train_readers = train_readers;
+	}
+
+}
+
