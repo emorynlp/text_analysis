@@ -81,18 +81,14 @@ public class SyntacticWord2Vec extends Word2Vec
         out_vocab.learnParallel(train_readers.stream()
                 .map(r -> r.addFeature(this::getWordLabel))
                 .collect(Collectors.toList()), min_count);
+        
         word_count_train = in_vocab.totalCount();
         // -----------------------------------------------------------
 
         BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
-        
-        List<Word> words = in_vocab.list();
-        for(Word w: words) {
-        	
-        }
 
         BinUtils.LOG.info("Going through vocab vectors:");
-        ExecutorService executor = Executors.newFixedThreadPool(thread_size);
+        ExecutorService executor = Executors.newFixedThreadPool(1);
         start_time = System.currentTimeMillis();
 
         int id = 0;
