@@ -310,7 +310,9 @@ public class SyntacticWord2Vec extends Word2Vec
         context_words.addAll(word.getDependentList());
         
         //add other types of context structures
-        if(structure.equals("deph")) context_words.add(word.getDependencyHead());
+        if(structure.equals("deph")) {
+        	if(word.getDependencyHead() != null) context_words.add(word.getDependencyHead());
+        }
         if(structure.equals("dep2")) context_words.addAll(word.getGrandDependentList());
         if(structure.equals("dep2h")) {
         	context_words.add(word.getDependencyHead());
