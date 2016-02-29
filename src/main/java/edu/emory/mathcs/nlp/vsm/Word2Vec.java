@@ -81,6 +81,8 @@ public class Word2Vec implements Serializable
 	boolean evaluate = false;
 	@Option(name="-debug", usage="If set, output more to command line.", required=false, metaVar="<boolean>")
 	boolean debug = false;
+	@Option(name="-structure", usage="If set, use the context structure specificed.", required=false, metaVar="<string>")
+	String structure = "";
 
 	/* TODO Austin
 	 * Add cmd line options
@@ -114,11 +116,15 @@ public class Word2Vec implements Serializable
 		BinUtils.initArgs(args, this);
 		sigmoid = new Sigmoid();
 
-		try
-		{
-			train(FileUtils.getFileList(train_path, train_ext, false));
+		try{
+			List<String> filenames = new ArrayList<String>();
+			filenames.addAll(FileUtils.getFileList(train_path, train_ext, false));
+			filenames.addAll(FileUtils.getFileList("/mnt/ainos-research/corpus/wikipedia2015/tree/", train_ext, false));
+			train(filenames);
 		}
-		catch (Exception e) {e.printStackTrace();}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 //	=================================== Training ===================================
