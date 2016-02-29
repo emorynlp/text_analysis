@@ -114,11 +114,15 @@ public class Word2Vec implements Serializable
 		BinUtils.initArgs(args, this);
 		sigmoid = new Sigmoid();
 
-		try
-		{
-			train(FileUtils.getFileList(train_path, train_ext, false));
+		try{
+			List<String> filenames = new ArrayList<String>();
+			filenames.addAll(FileUtils.getFileList(train_path, train_ext, false));
+			filenames.addAll(FileUtils.getFileList("/mnt/ainos-research/corpus/wikipedia2015/tree/", train_ext, false));
+			train(filenames);
 		}
-		catch (Exception e) {e.printStackTrace();}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 //	=================================== Training ===================================
