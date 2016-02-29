@@ -1,12 +1,18 @@
 package edu.emory.mathcs.nlp.vsm;
 
+import java.io.Serializable;
 import java.util.List;
 
 import edu.emory.mathcs.nlp.component.template.node.NLPNode;
 import edu.emory.mathcs.nlp.vsm.reader.Reader;
 import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
 
-public class VSMModel {
+public class VSMModel implements Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	
 	float[] W;
 	float[] V;
