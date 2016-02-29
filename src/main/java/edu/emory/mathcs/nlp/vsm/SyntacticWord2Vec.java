@@ -108,18 +108,14 @@ public class SyntacticWord2Vec extends Word2Vec
         BinUtils.LOG.info("Finding top\n");
 
         
-        try {
-            BinUtils.LOG.info("Finding verbs\n");
-			findTop(verbs, 5000, "/home/azureuser/PosWordLists/verbList.txt");
-            BinUtils.LOG.info("Finding nouns\n");
-			findTop(nouns, 5000, "/home/azureuser/PosWordLists/nounList.txt");
-            BinUtils.LOG.info("Finding adjs\n");
-            findTop(adjs,5000, "/home/azureuser/PosWordLists/adjectiveList.txt");
-            BinUtils.LOG.info("Finding adverbs\n");
-            findTop(adverbs, 5000, "/home/azureuser/PosWordLists/adverbList.txt");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        BinUtils.LOG.info("Finding verbs\n");
+        findTop(verbs, 5000, "/home/azureuser/PosWordLists/verbList.txt");
+        BinUtils.LOG.info("Finding nouns\n");
+		findTop(nouns, 5000, "/home/azureuser/PosWordLists/nounList.txt");
+        BinUtils.LOG.info("Finding adjs\n");
+        findTop(adjs,5000, "/home/azureuser/PosWordLists/adjectiveList.txt");
+        BinUtils.LOG.info("Finding adverbs\n");
+        findTop(adverbs, 5000, "/home/azureuser/PosWordLists/adverbList.txt");
         
        BinUtils.LOG.info("Saved\n");
     }
