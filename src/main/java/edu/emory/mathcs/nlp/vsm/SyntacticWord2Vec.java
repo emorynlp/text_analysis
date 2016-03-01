@@ -47,10 +47,10 @@ import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
 public class SyntacticWord2Vec extends Word2Vec
 {
     private static final long serialVersionUID = -5597377581114506257L;
-	Map<String, Integer> verbs = new HashMap<String, Integer>();
-	Map<String, Integer> nouns = new HashMap<String, Integer>();
-	Map<String, Integer> adjs = new HashMap<String, Integer>();
-	Map<String, Integer> adverbs = new HashMap<String, Integer>();
+	Map<String, Integer> verbs; 
+	Map<String, Integer> nouns; 
+	Map<String, Integer> adjs; 
+	Map<String, Integer> adverbs; 
 
 
     public SyntacticWord2Vec(String[] args) {
@@ -65,6 +65,11 @@ public class SyntacticWord2Vec extends Word2Vec
     @Override
     public void train(List<String> filenames) throws Exception
     {
+    	verbs = new HashMap<String, Integer>();
+    	nouns = new HashMap<String, Integer>();
+    	adjs = new HashMap<String, Integer>();
+    	adverbs = new HashMap<String, Integer>();
+
         BinUtils.LOG.info("Reading vocabulary:\n");
 
         // ------- Austin's code -------------------------------------
@@ -109,13 +114,13 @@ public class SyntacticWord2Vec extends Word2Vec
 
         
         BinUtils.LOG.info("Finding verbs\n");
-        findTop(verbs, 5000, "/home/meera/emorynlp/poslists/verbList.txt");
+        findTop(verbs, 5000, "/home/azureuser/poslists/verbList.txt");
         BinUtils.LOG.info("Finding nouns\n");
-		findTop(nouns, 5000, "/home/meera/emorynlp/poslists/nounList.txt");
+		findTop(nouns, 5000, "/home/azureuser/poslists/nounList.txt");
         BinUtils.LOG.info("Finding adjs\n");
-        findTop(adjs,5000, "/home/meera/emorynlp/poslists/adjectiveList.txt");
+        findTop(adjs,5000, "/home/azureuser/poslists/adjectiveList.txt");
         BinUtils.LOG.info("Finding adverbs\n");
-        findTop(adverbs, 5000, "/home/meera/emorynlp/poslists/adverbList.txt");
+        findTop(adverbs, 5000, "/home/azureuser/poslists/adverbList.txt");
         
        BinUtils.LOG.info("Saved\n");
     }
