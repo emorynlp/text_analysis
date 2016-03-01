@@ -47,10 +47,10 @@ import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
 public class SyntacticWord2Vec extends Word2Vec
 {
     private static final long serialVersionUID = -5597377581114506257L;
-	Map<String, Integer> verbs = new HashMap<>();
-	Map<String, Integer> nouns = new HashMap<>();
-	Map<String, Integer> adjs = new HashMap<>();
-	Map<String, Integer> adverbs = new HashMap<>();
+	Map<String, Integer> verbs = new HashMap<String, Integer>();
+	Map<String, Integer> nouns = new HashMap<String, Integer>();
+	Map<String, Integer> adjs = new HashMap<String, Integer>();
+	Map<String, Integer> adverbs = new HashMap<String, Integer>();
 
 
     public SyntacticWord2Vec(String[] args) {
@@ -188,7 +188,7 @@ public class SyntacticWord2Vec extends Word2Vec
 		out = new BufferedWriter(new FileWriter(outFile));
 		
         HashMap<String, Integer> maph = sortByValues(map); 
-        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+        for (Map.Entry<String, Integer> entry : maph.entrySet()) {
 			out.write(entry.getKey() + " " + entry.getValue());
             if (k == 0) break;
             k--;
@@ -199,7 +199,11 @@ public class SyntacticWord2Vec extends Word2Vec
        out.close();
     }
     
-    private static HashMap<String, Integer> sortByValues(Map<String, Integer> map) { 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	private static HashMap<String, Integer> sortByValues(Map<String, Integer> map) { 
+    	if(map == null) BinUtils.LOG.info("Map is null");
+    	if(map.entrySet() == null) BinUtils.LOG.info("map entry set is null");
+
         List list = new LinkedList(map.entrySet());
         Collections.sort(list, new Comparator() {
              public int compare(Object o1, Object o2) {
