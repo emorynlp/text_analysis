@@ -178,7 +178,7 @@ public class SyntacticWord2Vec extends Word2Vec
 
                     NLPNode word = words.get(index);
                     String pos = word.getPartOfSpeechTag();
-                    pos = pos.substring(0, 2);
+                    BinUtils.LOG.info(pos);
                     int count = 0;
                     switch (pos) {
                     	case "VB": //verb
