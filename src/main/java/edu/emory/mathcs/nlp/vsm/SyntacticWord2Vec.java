@@ -178,21 +178,25 @@ public class SyntacticWord2Vec extends Word2Vec
 
                     NLPNode word = words.get(index);
                     String pos = word.getPartOfSpeechTag();
-                    BinUtils.LOG.info(pos);
-                    int count = 0;
-                    switch (pos) {
-                    	case "VB": //verb
-                    		putWord(verbs, word.getLemma());
-                    		break;
-                    	case "NN": //noun
-                    		putWord(nouns, word.getLemma());
-                    		break;
-                    	case "JJ": //adjective
-                    		putWord(adjs, word.getLemma());
-                    		break;
-                    	case "RB": //adverb
-                    		putWord(adverbs, word.getLemma());
-                    		break;
+                    if(pos.length() > 1) {
+                    	if(pos.length() > 2) {
+                    		pos = pos.substring(0, 2);
+                    	}
+	                    int count = 0;
+	                    switch (pos) {
+	                    	case "VB": //verb
+	                    		putWord(verbs, word.getLemma());
+	                    		break;
+	                    	case "NN": //noun
+	                    		putWord(nouns, word.getLemma());
+	                    		break;
+	                    	case "JJ": //adjective
+	                    		putWord(adjs, word.getLemma());
+	                    		break;
+	                    	case "RB": //adverb
+	                    		putWord(adverbs, word.getLemma());
+	                    		break;
+	                    }
                     }
                 }
             }
