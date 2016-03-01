@@ -114,13 +114,13 @@ public class SyntacticWord2Vec extends Word2Vec
 
         
         BinUtils.LOG.info("Finding verbs\n");
-        findTop(verbs, 5000, "/home/azureuser/poslists/verbList.txt");
+        findTop(verbs, 5000, "/home/meera/emorynlp/poslists/verbList.txt");
         BinUtils.LOG.info("Finding nouns\n");
-		findTop(nouns, 5000, "/home/azureuser/poslists/nounList.txt");
+		findTop(nouns, 5000, "/home/meera/emorynlp/poslists/nounList.txt");
         BinUtils.LOG.info("Finding adjs\n");
-        findTop(adjs,5000, "/home/azureuser/poslists/adjectiveList.txt");
+        findTop(adjs,5000, "/home/meera/emorynlp/poslists/adjectiveList.txt");
         BinUtils.LOG.info("Finding adverbs\n");
-        findTop(adverbs, 5000, "/home/azureuser/poslists/adverbList.txt");
+        findTop(adverbs, 5000, "/home/meera/emorynlp/poslists/adverbList.txt");
         
        BinUtils.LOG.info("Saved\n");
     }
@@ -201,13 +201,11 @@ public class SyntacticWord2Vec extends Word2Vec
 		out = new BufferedWriter(new FileWriter(outFile));
 		
         HashMap<String, Integer> maph = sortByValues(map); 
+        int count = 0;
         for (Map.Entry<String, Integer> entry : maph.entrySet()) {
-			out.write(entry.getKey() + " " + entry.getValue() + "\n");
-            if (k == 0) break;
-            k--;
+			if(maph.entrySet().size() - count > k) out.write(entry.getKey() + " " + entry.getValue() + "\n");
+			count++;
         }
-       out.write("k: " + k + "\n");
-       
        out.flush();
        out.close();
     }
