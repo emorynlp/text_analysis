@@ -152,6 +152,8 @@ public class SyntacticWord2Vec extends Word2Vec
 
             while (words != null)
             {
+                BinUtils.LOG.info("In while loop\n");
+
                 try {
                     words = reader.next();
                     word_count_global += words == null ? 0 : words.size();
@@ -164,6 +166,8 @@ public class SyntacticWord2Vec extends Word2Vec
 
                 for (index=0; index<words.size(); index++)
                 {
+                    BinUtils.LOG.info("In for loop\n");
+
                     NLPNode word = words.get(index);
                     String pos = word.getPartOfSpeechTag();
                     pos = pos.substring(0, 2);
