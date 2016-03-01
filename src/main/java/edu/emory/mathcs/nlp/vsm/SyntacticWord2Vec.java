@@ -150,19 +150,10 @@ public class SyntacticWord2Vec extends Word2Vec
             int     index;
             List<NLPNode> words = null;
             
-            try {
-                words = reader.next();
-                word_count_global += words == null ? 0 : words.size();
-                num_sentences++;
-            } catch (IOException e) {
-                System.err.println("Reader failure: progress "+reader.progress());
-                e.printStackTrace();
-                System.exit(1);
-            }
 
-            while (words != null)
+
+            while (true)
             {
-
                 try {
                     words = reader.next();
                     word_count_global += words == null ? 0 : words.size();
@@ -172,7 +163,8 @@ public class SyntacticWord2Vec extends Word2Vec
                     e.printStackTrace();
                     System.exit(1);
                 }
-
+                
+                if (words == null) break;
                 for (index=0; index<words.size(); index++)
                 {
 
