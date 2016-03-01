@@ -168,6 +168,7 @@ public class SyntacticWord2Vec extends Word2Vec
                     String pos = word.getPartOfSpeechTag();
                     pos = pos.substring(0, 2);
                     int count = 0;
+                    BinUtils.LOG.info(pos + "\n");
                     switch (pos) {
                     	case "VB": //verb
                     		putWord(verbs, word.getLemma());
