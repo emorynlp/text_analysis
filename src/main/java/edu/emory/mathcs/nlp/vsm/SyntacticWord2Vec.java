@@ -202,11 +202,11 @@ public class SyntacticWord2Vec extends Word2Vec
 		
         HashMap<String, Integer> maph = sortByValues(map); 
         for (Map.Entry<String, Integer> entry : maph.entrySet()) {
-			out.write(entry.getKey() + " " + entry.getValue());
+			out.write(entry.getKey() + " " + entry.getValue() + "\n");
             if (k == 0) break;
             k--;
         }
-       out.write("k: " + k);
+       out.write("k: " + k + "\n");
        
        out.flush();
        out.close();
