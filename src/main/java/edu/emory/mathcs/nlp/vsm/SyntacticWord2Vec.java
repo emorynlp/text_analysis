@@ -149,10 +149,19 @@ public class SyntacticWord2Vec extends Word2Vec
             int     iter  = 0;
             int     index;
             List<NLPNode> words = null;
+            
+            try {
+                words = reader.next();
+                word_count_global += words == null ? 0 : words.size();
+                num_sentences++;
+            } catch (IOException e) {
+                System.err.println("Reader failure: progress "+reader.progress());
+                e.printStackTrace();
+                System.exit(1);
+            }
 
             while (words != null)
             {
-                BinUtils.LOG.info("In while loop\n");
 
                 try {
                     words = reader.next();
@@ -166,13 +175,11 @@ public class SyntacticWord2Vec extends Word2Vec
 
                 for (index=0; index<words.size(); index++)
                 {
-                    BinUtils.LOG.info("In for loop\n");
 
                     NLPNode word = words.get(index);
                     String pos = word.getPartOfSpeechTag();
                     pos = pos.substring(0, 2);
                     int count = 0;
-                    BinUtils.LOG.info(pos + "\n");
                     switch (pos) {
                     	case "VB": //verb
                     		putWord(verbs, word.getLemma());
