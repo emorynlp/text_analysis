@@ -69,6 +69,9 @@ public class TriadEvaluator
     public void evaluate(File triad_file) throws IOException
     {
         BufferedReader in = new BufferedReader(new FileReader(triad_file));
+        BufferedWriter out = null;
+        if (output_file != null)
+            out = new BufferedWriter(new FileWriter(output_file));
 
         float weighted_eval = 0;
         int weighted_count = 0;
@@ -85,10 +88,24 @@ public class TriadEvaluator
             int word_count1 = Integer.parseInt(triad[3]);
             int word_count2 = Integer.parseInt(triad[4]);
 
-            if((word_count1 > word_count2) == (similarity(triad[1],triad[0]) > similarity(triad[2],triad[0]))) {
-                for(int i=0; i<Math.abs(word_count1-word_count2); i++)
-                    weighted_eval++;
-            }
+            if (output_file != null)
+                if((word_count1 > word_count2) == (similarity(triad[1],triad[0]) > similarity(triad[2],triad[0]))) 
+                    for(int i=0; i<Math.abs(word_count1-word_count2); i++)
+                        weighted_eval++;
+            else
+                if((word_count1 > word_count2) == (similarity(triad[1],triad[0]) > similarity(triad[2],triad[0]))) {
+                    for(int i=0; i<Math.abs(word_count1-word_count2); i++)
+                        weighted_eval++;
+                    if(word_count1 > word_count2)
+                        out.write(triad[0] + " " + triad[1] + " " + triad[2] + " Y 1 " + Math.abs(word_count1-word_count2) + "\n");
+                    else
+                        out.write(triad[0] + " " + triad[1] + " " + triad[2] + " Y 2 " + Math.abs(word_count1-word_count2) + "\n");
+                }else{
+                    if(word_count1 > word_count2)
+                        out.write(triad[0] + " " + triad[1] + " " + triad[2] + " N 1 " + Math.abs(word_count1-word_count2) + "\n");
+                    else
+                        out.write(triad[0] + " " + triad[1] + " " + triad[2] + " Y 2 " + Math.abs(word_count1-word_count2) + "\n");
+                }
 
             for(int i=0; i<Math.abs(word_count1-word_count2); i++)
                 weighted_count++;
@@ -103,7 +120,6 @@ public class TriadEvaluator
 
         if (output_file != null)
         {
-            BufferedWriter out = new BufferedWriter(new FileWriter(output_file));
             out.write(vector_file + " Weighted Traid Evaluation: " + weighted_eval + "\n");
             out.close();
         }
