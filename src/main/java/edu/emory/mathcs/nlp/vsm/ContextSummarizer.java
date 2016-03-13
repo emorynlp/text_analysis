@@ -43,15 +43,17 @@ import edu.emory.mathcs.nlp.vsm.reader.Reader;
 import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
 
 /**
- * This is a class to gather data about the context sizes of models trained with SyntacticWord2Vec
+ * Gathers data about the context sizes of models trained with SyntacticWord2Vec
  *
  * @author Austin Blodgett, Reid Kilgore
  */
 public class ContextSummarizer
 {
     private static final long serialVersionUID = -5597377581114506257L;
-    @Option(name="-train", usage="path to the context file or the directory containig the context files.", required=true, metaVar="<filepath>")
+    @Option(name="-train", usage="path to the context file or the directory containing the context files.", required=true, metaVar="<filepath>")
     String train_path = null;
+    @Option(name="-train2", usage="path to a second context file or the directory containing the context files.", required=false, metaVar="<filepath>")
+    String train_path2 = null;
     @Option(name="-output", usage="output files.", required=true, metaVar="<filename>")
     String output_file = null;
     @Option(name="-window", usage="window of contextual words (default: 5).", required=false, metaVar="<int>")
@@ -60,27 +62,33 @@ public class ContextSummarizer
     int thread_size = 12;
     @Option(name="-min-count", usage="min-count of words (default: 5). This will discard words that appear less than <int> times.", required=false, metaVar="<int>")
     int min_count = 5;
-    @Option(name="-context-type", usage="type of context to gather data for", required=true, metaVar="<String>")
-    String context_type = null;
+    @Option(name="-context-types", usage="types of context to gather data for, delimited by a comma", required=true, metaVar="<String>")
+    String context_types = null;
 
-    volatile int[] stats;
+    volatile Map<String,int[]> stats;
     volatile long word_count_global;
     long word_count_extract;
     long start_time;
     public Vocabulary in_vocab;
     public Vocabulary out_vocab;
+    String[] contexts;
 
     public ContextSummarizer(String[] args) {
         BinUtils.initArgs(args, this);
+        contexts = context_types.split(",");
 
-        stats = new int[3];
-        stats[0] = 0;
-        stats[1] = 1;
-        stats[2] = 2;
+        stats = new HashMap<String,int[]>();
+        for ( String context : contexts )
+            stats.put(context, new int [] {0, 0, 0});
 
+        List<String> filenames;
         try
         {
-            extract(FileUtils.getFileList(train_path, ".cnlp", false));
+            filenames = FileUtils.getFileList(train_path, ".cnlp", false);
+            if(train_path2 != null)
+                filenames.addAll(FileUtils.getFileList(train_path2, ".cnlp", false));
+            extract(filenames);
+
         }
         catch (Exception e) {e.printStackTrace();}
     }
@@ -169,44 +177,46 @@ public class ContextSummarizer
 
                 for (index=0; index<words.size(); index++)
                 {
-                    stats[2]++;
                     extractContext(words, index);
                 }
+                for (String ctype : contexts)
+                    stats.get(ctype)[2] += words.size();
             }
         }
 
         public void extractContext(List<NLPNode> words, int index){
-            int window = 5;
-            int inside = 0;
-            int outside = 0;
-            List<NLPNode> context = new ArrayList<NLPNode>();
-            switch(context_type){
-                case "dep1h":
-                    context.add(words.get(index).getDependencyHead());
-                case "dep1":
-                    context.addAll(words.get(index).getDependentList());
-                    break;
-                case "dep2h":
-                    context.add(words.get(index).getDependencyHead());
-                case "dep2":
-                    context.addAll(words.get(index).getDependentList());
-                    for(NLPNode dep : context)
-                        context.addAll(dep.getDependentList());
-                    break;
-                case "sib1dep1h":
-                    context.add(words.get(index).getDependencyHead());
-                case "sib1dep1":
-                    if(words.get(index).getRightNearestDependent() != null)
-                        context.add(words.get(index).getRightNearestDependent());
-                    if(words.get(index).getLeftNearestDependent() != null)
-                        context.add(words.get(index).getLeftNearestDependent());
-                    context.addAll(words.get(index).getDependentList());
-                    break;
-            }
-            for(NLPNode word : context){
-                if(word.getID() < words.get(index).getID() - 5) stats[1]++;
-                else if (word.getID() > words.get(index).getID() + 5) stats[1]++;
-                else stats[0]++;
+            List<NLPNode> context;
+            for (String context_type : contexts)
+            {
+                context  = new ArrayList<NLPNode>();
+                switch(context_type){
+                    case "dep1h":
+                        context.add(words.get(index).getDependencyHead());
+                    case "dep1":
+                        context.addAll(words.get(index).getDependentList());
+                        break;
+                    case "dep2h":
+                        context.add(words.get(index).getDependencyHead());
+                    case "dep2":
+                        context.addAll(words.get(index).getDependentList());
+                        for(NLPNode dep : context)
+                            context.addAll(dep.getDependentList());
+                        break;
+                    case "sib1dep1h":
+                        context.add(words.get(index).getDependencyHead());
+                    case "sib1dep1":
+                        if(words.get(index).getRightNearestDependent() != null)
+                            context.add(words.get(index).getRightNearestDependent());
+                        if(words.get(index).getLeftNearestDependent() != null)
+                            context.add(words.get(index).getLeftNearestDependent());
+                        context.addAll(words.get(index).getDependentList());
+                        break;
+                }
+                for(NLPNode word : context){
+                    if(word.getID() < words.get(index).getID() - 5) stats.get(context_type)[1]++;
+                    else if (word.getID() > words.get(index).getID() + 5) stats.get(context_type)[1]++;
+                    else stats.get(context_type)[0]++;
+                }
             }
         }
     }
@@ -217,8 +227,10 @@ public class ContextSummarizer
             save_file.createNewFile();
         
         BufferedWriter out = new BufferedWriter(new FileWriter(save_file));
-        out.write("Inside\tOutside\tCount\n");
-        String output = "" + stats[0] + "\t" + stats[1] + "\t" + stats[2] + "\n";
+        String output = "Inside\tOutside\tCount\n";
+        out.write(output);
+        for (String ctype : contexts)
+            output = ctype + " " + stats.get(ctype)[0] + "\t" + stats.get(ctype)[1] + "\t" + stats.get(ctype)[2] + "\n";
         out.write(output);
         out.close();
     }
