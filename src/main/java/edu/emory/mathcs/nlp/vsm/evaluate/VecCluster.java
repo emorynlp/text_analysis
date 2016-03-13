@@ -41,7 +41,12 @@ public class VecCluster
             catch (IOException e) { System.err.println("Could not read word file."); e.printStackTrace(); System.exit(1);}
         }
 
-        try { vectors = getVectors(new File(vector_file), word_list); }
+        try { 
+            if(word_list != null)
+                vectors = getVectors(new File(vector_file), word_list); 
+            else
+                vectors = getVectors(new File(vector_file));
+            }
         catch (IOException e) { System.err.println("Could not load Word2Vec vectors."); e.printStackTrace(); System.exit(1); }
 
         this.num_vectors = vectors.length;
@@ -53,6 +58,33 @@ public class VecCluster
         cluster();
         try { write(new File(output_file)); } catch (IOException e) { e.printStackTrace(); }
     }
+
+    private float[][] getVectors(File vector_file) throws IOException
+    {
+        Map<String,float[]> map = new HashMap<>();
+
+        BufferedReader in = new BufferedReader(new FileReader(vector_file));
+        String line;
+        while((line = in.readLine()) != null)
+        {
+            String[] split = line.split("\t");
+            String word = split[0];
+
+            float[] vector = new float[split.length - 1];
+            for (int i=1; i<split.length; i++)
+                vector[i-1] = Float.parseFloat(split[i]);
+            map.put(word, vector);
+        }
+        in.close();
+
+        word_list = new ArrayList<String>(map.keySet());
+        float[][] vectors = new float[word_list.size()][];
+        for (int i=0; i<word_list.size(); i++)
+            vectors[i] = map.get(word_list.get(i));
+
+        return vectors;
+    }
+
 
     private float[][] getVectors(File vector_file, List<String> word_list) throws IOException
     {
@@ -203,7 +235,6 @@ public class VecCluster
             for(int c=0; c<num_clusters; c++)
                 if (clusters[c][v]>clusters[max][v])
                     max = c;
-
             out.write(word_list.get(v)+"\t");
             out.write(max+"\t");
             for(int c=0; c<num_clusters; c++)
