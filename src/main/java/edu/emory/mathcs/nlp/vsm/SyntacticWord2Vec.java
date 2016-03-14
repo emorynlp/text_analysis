@@ -112,7 +112,9 @@ public class SyntacticWord2Vec extends Word2Vec
 			out_vocab = model.getOut_vocab();
 			W = model.getW();
 			V = model.getV();
-			train_readers = model.getTrain_readers();
+	        List<Reader<NLPNode>> readers = new DEPTreeReader(filenames.stream().map(File::new).collect(Collectors.toList()))
+	                .splitParallel(thread_size);
+	        train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
     	}
     	
         BinUtils.LOG.info("Initializing optimizer.\n");
@@ -155,7 +157,7 @@ public class SyntacticWord2Vec extends Word2Vec
         if (feature_file != null) saveFeatures(new File(feature_file));
         
         BinUtils.LOG.info("Saving model.\n");
-        VSMModel model = new VSMModel(W, V, in_vocab, out_vocab, train_readers);
+        VSMModel model = new VSMModel(W, V, in_vocab, out_vocab);
 		FileOutputStream out = new FileOutputStream(output_file + ".model");
 		ObjectOutputStream object = new ObjectOutputStream(out);
 		object.writeObject(model);

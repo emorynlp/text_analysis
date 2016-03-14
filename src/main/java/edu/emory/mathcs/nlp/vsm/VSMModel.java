@@ -17,12 +17,8 @@ public class VSMModel implements Serializable {
 	float[] W;
 	float[] V;
 	Vocabulary in_vocab;
-	List<Reader<NLPNode>> train_readers;
-	
+	Vocabulary out_vocab;
 
-	public List<Reader<NLPNode>> getTrain_readers() {
-		return train_readers;
-	}
 
 	public float[] getW() {
 		return W;
@@ -40,14 +36,12 @@ public class VSMModel implements Serializable {
 		return out_vocab;
 	}
 
-	Vocabulary out_vocab;
 	
-	public VSMModel(float[] w, float[] v, Vocabulary in_vocab, Vocabulary out_vocab, List<Reader<NLPNode>> train_readers) {
+	public VSMModel(float[] w, float[] v, Vocabulary in_vocab, Vocabulary out_vocab) {
 		W = w;
 		V = v;
 		this.in_vocab = in_vocab;
 		this.out_vocab = out_vocab;
-		this.train_readers = train_readers;
 	}
 
 }
