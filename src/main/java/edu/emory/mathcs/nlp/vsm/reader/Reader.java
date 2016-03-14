@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -41,8 +42,10 @@ import java.util.stream.Collectors;
  *
  * @author Austin Blodgett, Jinho D. Choi ({@code jinho.choi@emory.edu})
  */
-public abstract class Reader<T> extends InputStream
+public abstract class Reader<T> extends InputStream implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
     protected final Pattern sentence_break;
     protected final List<File> files;
     protected final long start, end;
