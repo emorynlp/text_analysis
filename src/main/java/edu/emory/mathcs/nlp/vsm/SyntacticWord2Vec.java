@@ -17,8 +17,12 @@ package edu.emory.mathcs.nlp.vsm;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,32 +74,49 @@ public class SyntacticWord2Vec extends Word2Vec
     @Override
     public void train(List<String> filenames) throws Exception
     {
-        BinUtils.LOG.info("Reading vocabulary:\n");
+        Reader<NLPNode> test_reader = null;
+        List<Reader<NLPNode>> train_readers;
 
-        // ------- Austin's code -------------------------------------
-        in_vocab = new Vocabulary();
-        out_vocab = new Vocabulary();
-
-        List<Reader<NLPNode>> readers = new DEPTreeReader(filenames.stream().map(File::new).collect(Collectors.toList()))
-                .splitParallel(thread_size);
-        List<Reader<NLPNode>> train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
-        Reader<NLPNode>       test_reader   = evaluate ? readers.get(thread_size-1)       : null;
-
-        if (read_vocab_file == null) in_vocab.learnParallel(train_readers.stream()
-                                                            .map(r -> r.addFeature(this::getWordLabel))
-                                                            .collect(Collectors.toList()), min_count);
-        else 						 in_vocab.readVocab(new File(read_vocab_file), min_count);
-        out_vocab.learnParallel(train_readers.stream()
-                .map(r -> r.addFeature(this::getWordLabel))
-                .collect(Collectors.toList()), min_count);
-        word_count_train = in_vocab.totalCount();
-        // -----------------------------------------------------------
-
-        BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
-
-        BinUtils.LOG.info("Initializing neural network.\n");
-        initNeuralNetwork();
-
+    	if(model_file == null) {
+    	
+	        BinUtils.LOG.info("Reading vocabulary:\n");
+	
+	        // ------- Austin's code -------------------------------------
+	        in_vocab = new Vocabulary();
+	        out_vocab = new Vocabulary();
+	
+	        List<Reader<NLPNode>> readers = new DEPTreeReader(filenames.stream().map(File::new).collect(Collectors.toList()))
+	                .splitParallel(thread_size);
+	        train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
+	        test_reader   = evaluate ? readers.get(thread_size-1)       : null;
+	
+	        if (read_vocab_file == null) in_vocab.learnParallel(train_readers.stream()
+	                                                            .map(r -> r.addFeature(this::getWordLabel))
+	                                                            .collect(Collectors.toList()), min_count);
+	        else 						 in_vocab.readVocab(new File(read_vocab_file), min_count);
+	        out_vocab.learnParallel(train_readers.stream()
+	                .map(r -> r.addFeature(this::getWordLabel))
+	                .collect(Collectors.toList()), min_count);
+	        word_count_train = in_vocab.totalCount();
+	        // -----------------------------------------------------------
+	
+	        BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
+	
+	        BinUtils.LOG.info("Initializing neural network.\n");
+	        initNeuralNetwork();
+    	} else {
+			ObjectInputStream objin = new ObjectInputStream(new FileInputStream(model_file));
+			VSMModel model = (VSMModel) objin.readObject();
+			objin.close();
+			in_vocab = model.getIn_vocab();
+			out_vocab = model.getOut_vocab();
+			W = model.getW();
+			V = model.getV();
+	        List<Reader<NLPNode>> readers = new DEPTreeReader(filenames.stream().map(File::new).collect(Collectors.toList()))
+	                .splitParallel(thread_size);
+	        train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
+    	}
+    	
         BinUtils.LOG.info("Initializing optimizer.\n");
         optimizer = isNegativeSampling() ? new NegativeSampling(in_vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(in_vocab, sigmoid, vector_size);
 
@@ -114,7 +135,7 @@ public class SyntacticWord2Vec extends Word2Vec
             executor.execute(new SynTrainTask(r,id));
             id++;
         }
-        if (evaluate) executor.execute(new SynTestTask(test_reader,id));
+		if (evaluate & model_file == null) executor.execute(new SynTestTask(test_reader,id));
         // -----------------------------------------------------------
 
         executor.shutdown();
@@ -134,6 +155,14 @@ public class SyntacticWord2Vec extends Word2Vec
             in_vocab.writeVocab(f);
         }
         if (feature_file != null) saveFeatures(new File(feature_file));
+        
+        BinUtils.LOG.info("Saving model.\n");
+        VSMModel model = new VSMModel(W, V, in_vocab, out_vocab);
+		FileOutputStream out = new FileOutputStream(output_file + ".model");
+		ObjectOutputStream object = new ObjectOutputStream(out);
+		object.writeObject(model);
+		object.close();
+		out.close();
     }
 
     class SynTrainTask implements Runnable
