@@ -30,7 +30,7 @@ import edu.emory.mathcs.nlp.component.template.util.TSVReader;
 public class DEPTreeReader extends Reader<NLPNode>
 {
     private static final Pattern sentence_break = Pattern.compile("\\n\\s*\\n");
-    private TSVReader tree_reader;
+    private transient TSVReader tree_reader;
 
     public DEPTreeReader(List<File> files)
     {
