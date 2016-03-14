@@ -193,6 +193,14 @@ public class Word2Vec implements Serializable
 		}
 		if (feature_file != null) saveFeatures(new File(feature_file));
 		if (write_model_file != null) writeModel(new File(write_model_file));
+		
+        BinUtils.LOG.info("Saving model.\n");
+        VSMModel model = new VSMModel(W, V, in_vocab, out_vocab);
+		FileOutputStream out = new FileOutputStream(output_file + ".model");
+		ObjectOutputStream object = new ObjectOutputStream(out);
+		object.writeObject(model);
+		object.close();
+		out.close();
 	}
 	
 	class TrainTask implements Runnable
