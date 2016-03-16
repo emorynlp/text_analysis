@@ -52,9 +52,10 @@ import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
 public class SyntacticWord2Vec extends Word2Vec
 {
     private static final long serialVersionUID = -5597377581114506257L;
-
+    int window;
     public SyntacticWord2Vec(String[] args) {
         super(args);
+        window = max_skip_window;
     }
 
     /*String getWordLabel(NLPNode word)
@@ -74,49 +75,49 @@ public class SyntacticWord2Vec extends Word2Vec
     @Override
     public void train(List<String> filenames) throws Exception
     {
+
         Reader<NLPNode> test_reader = null;
         List<Reader<NLPNode>> train_readers;
+        List<Reader<NLPNode>> readers;
 
-    	if(model_file == null) {
-    	
-	        BinUtils.LOG.info("Reading vocabulary:\n");
-	
-	        // ------- Austin's code -------------------------------------
-	        in_vocab = new Vocabulary();
-	        out_vocab = new Vocabulary();
-	
-	        List<Reader<NLPNode>> readers = new DEPTreeReader(filenames.stream().map(File::new).collect(Collectors.toList()))
-	                .splitParallel(thread_size);
-	        train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
-	        test_reader   = evaluate ? readers.get(thread_size-1)       : null;
-	
-	        if (read_vocab_file == null) in_vocab.learnParallel(train_readers.stream()
-	                                                            .map(r -> r.addFeature(this::getWordLabel))
-	                                                            .collect(Collectors.toList()), min_count);
-	        else 						 in_vocab.readVocab(new File(read_vocab_file), min_count);
-	        out_vocab.learnParallel(train_readers.stream()
-	                .map(r -> r.addFeature(this::getWordLabel))
-	                .collect(Collectors.toList()), min_count);
-	        word_count_train = in_vocab.totalCount();
-	        // -----------------------------------------------------------
-	
-	        BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
-	
-	        BinUtils.LOG.info("Initializing neural network.\n");
-	        initNeuralNetwork();
-    	} else {
-			ObjectInputStream objin = new ObjectInputStream(new FileInputStream(model_file));
-			VSMModel model = (VSMModel) objin.readObject();
-			objin.close();
-			in_vocab = model.getIn_vocab();
-			out_vocab = model.getOut_vocab();
-			W = model.getW();
-			V = model.getV();
-	        List<Reader<NLPNode>> readers = new DEPTreeReader(filenames.stream().map(File::new).collect(Collectors.toList()))
-	                .splitParallel(thread_size);
-	        train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
-    	}
-    	
+        if(model_file == null) {
+            BinUtils.LOG.info("Reading vocabulary:\n");
+
+            in_vocab = (out_vocab = new Vocabulary());
+
+            readers = new DEPTreeReader(filenames.stream().map(File::new).collect(Collectors.toList()))
+                    .splitParallel(thread_size);
+            train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
+            test_reader   = evaluate ? readers.get(thread_size-1)       : null;
+
+            if (read_vocab_file == null) in_vocab.learnParallel(train_readers.stream()
+                                                                .map(r -> r.addFeature(this::getWordLabel))
+                                                                .collect(Collectors.toList()), min_count);
+            else                          in_vocab.readVocab(new File(read_vocab_file), min_count);
+            out_vocab.learnParallel(train_readers.stream()
+                    .map(r -> r.addFeature(this::getWordLabel))
+                    .collect(Collectors.toList()), min_count);
+            word_count_train = in_vocab.totalCount();
+            // -----------------------------------------------------------
+
+            BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
+
+            BinUtils.LOG.info("Initializing neural network.\n");
+            initNeuralNetwork();
+        } else {
+            BinUtils.LOG.info("Loading Model\n");
+            ObjectInputStream objin = new ObjectInputStream(new FileInputStream(model_file));
+            VSMModel model = (VSMModel) objin.readObject();
+            objin.close();
+            in_vocab = model.getIn_vocab();
+            out_vocab = model.getOut_vocab();
+            W = model.getW();
+            V = model.getV();
+            readers = new DEPTreeReader(filenames.stream().map(File::new).collect(Collectors.toList()))
+                    .splitParallel(thread_size);
+            train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
+        }
+
         BinUtils.LOG.info("Initializing optimizer.\n");
         optimizer = isNegativeSampling() ? new NegativeSampling(in_vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(in_vocab, sigmoid, vector_size);
 
@@ -135,7 +136,7 @@ public class SyntacticWord2Vec extends Word2Vec
             executor.execute(new SynTrainTask(r,id));
             id++;
         }
-		if (evaluate & model_file == null) executor.execute(new SynTestTask(test_reader,id));
+        if (evaluate & model_file == null) executor.execute(new SynTestTask(test_reader,id));
         // -----------------------------------------------------------
 
         executor.shutdown();
@@ -155,14 +156,14 @@ public class SyntacticWord2Vec extends Word2Vec
             in_vocab.writeVocab(f);
         }
         if (feature_file != null) saveFeatures(new File(feature_file));
-        
+
         BinUtils.LOG.info("Saving model.\n");
         VSMModel model = new VSMModel(W, V, in_vocab, out_vocab);
-		FileOutputStream out = new FileOutputStream(output_file + ".model");
-		ObjectOutputStream object = new ObjectOutputStream(out);
-		object.writeObject(model);
-		object.close();
-		out.close();
+        FileOutputStream out = new FileOutputStream(output_file + ".model");
+        ObjectOutputStream object = new ObjectOutputStream(out);
+        object.writeObject(model);
+        object.close();
+        out.close();
     }
 
     class SynTrainTask implements Runnable
@@ -212,7 +213,7 @@ public class SyntacticWord2Vec extends Word2Vec
                     try { reader.restart(); } catch (IOException e) { e.printStackTrace(); }
                     continue;
                 }
-                
+
                 sargs = getSemanticArgumentMap(words);
 
                 for (index=0; index<words.size(); index++)
@@ -292,28 +293,63 @@ public class SyntacticWord2Vec extends Word2Vec
         }
     }
 
+    Set<NLPNode> getContext(String structure, NLPNode word, List<NLPNode> words, int index)
+    {
+        return addContext(new HashSet<NLPNode>(), structure, word, words, index);
+    }
+
+
+    Set<NLPNode> addContext(Set<NLPNode> context_words, String structure, NLPNode word, List<NLPNode> words, int index)
+    {
+        if(structure == null)   structure = "w2v";
+        switch(structure)
+        {
+            case "dep1h":
+                if(word.getDependencyHead() != null)    context_words.add(word.getDependencyHead());
+            case "dep1":
+                context_words.addAll(word.getDependentList());
+                break;
+            case "dep2h":
+                if(word.getDependencyHead() != null)    context_words.add(word.getDependencyHead());
+            case "dep2":
+                context_words.add(word.getDependencyHead());
+                context_words.addAll(word.getGrandDependentList());
+                break;
+            case "srlargs":
+                //Not implemented TODO
+                //addSRLNodes(word, context_words, sargs);
+                break;
+            case "sib1dep1h":
+                if(word.getDependencyHead() != null)    context_words.add(word.getDependencyHead());
+            case "sib1dep1":
+                context_words.addAll(word.getDependentList());
+            case "sib1":
+                if(word.getRightNearestSibling()!= null)    context_words.add(word.getRightNearestSibling());
+                if(word.getLeftNearestSibling()!= null)     context_words.add(word.getLeftNearestSibling());
+                break;
+            case "allSibilings":
+                context_words.addAll(getAllSiblings(word));
+                break;
+            case "w2v":
+            default:
+                int i, j, l;
+                for (i=-window,j=index+i; i<=window; i++,j++)
+                {
+                    if      (i == 0 || words.size() <= j || j < 0) continue;
+                    else    context_words.add(words.get(i));
+                }
+        }
+
+        return context_words;
+    }
+
     void bagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1, Map<NLPNode,Set<NLPNode>> sargs) {
         int k, l, wc = 0;
         NLPNode word = words.get(index);
         int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;
 
-        Set<NLPNode> context_words = new HashSet<NLPNode>();
-        context_words.addAll(word.getDependentList());
-
-        // input -> hidden
-        for (NLPNode context : context_words)
-        {
-            int context_index = in_vocab.indexOf(getWordLabel(context));
-            if (context_index < 0) continue;
-            l = context_index * vector_size;
-            for (k=0; k<vector_size; k++) neu1[k] += W[k+l];
-            wc++;
-        }
-
-        if (wc == 0) return;
-        for (k=0; k<vector_size; k++) neu1[k] /= wc;
-        optimizer.learnBagOfWords(rand, word_index, V, neu1, neu1e, alpha_global);
+        Set<NLPNode> context_words = getContext(structure, word, words, word_index);
 
         // hidden -> input
         for (NLPNode context : context_words)
@@ -331,9 +367,8 @@ public class SyntacticWord2Vec extends Word2Vec
         int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;
 
-        Set<NLPNode> context_words = new HashSet<NLPNode>();
-        context_words.addAll(word.getDependentList());
-        		
+        Set<NLPNode> context_words = getContext(structure, word, words, word_index);
+
         for (NLPNode context : context_words)
         {
             int context_index = in_vocab.indexOf(getWordLabel(context));
@@ -347,44 +382,44 @@ public class SyntacticWord2Vec extends Word2Vec
             for (k=0; k<vector_size; k++) W[l1+k] += neu1e[k];
         }
     }
-    
+
     void addSRLNodes(NLPNode word, Set<NLPNode> context_words, Map<NLPNode,Set<NLPNode>> sargs) {
         context_words.addAll(word.getDependentList());
         Set<NLPNode> set = sargs.get(word);
         if (set != null)
         {
-        	for (NLPNode s: set){
-        		context_words.add(s);
-        	}
+            for (NLPNode s: set){
+                context_words.add(s);
+            }
          }
     }
-    
+
     Set<NLPNode> getAllSiblings(NLPNode node){
-    	Set<NLPNode> siblings = new HashSet<NLPNode>();
-    	int id = node.getID();
-    	if(node.getDependencyHead() == null) return siblings;
-    	
-    	for(NLPNode sib : node.getDependencyHead().getDependentList()) {
-    		if(id != sib.getID())
-    			siblings.add(sib);
-    	}
-    	return siblings;
+        Set<NLPNode> siblings = new HashSet<NLPNode>();
+        int id = node.getID();
+        if(node.getDependencyHead() == null) return siblings;
+
+        for(NLPNode sib : node.getDependencyHead().getDependentList()) {
+            if(id != sib.getID())
+                siblings.add(sib);
+        }
+        return siblings;
     }
-    
+
     Map<NLPNode,Set<NLPNode>> getSemanticArgumentMap(List<NLPNode> nodes)
     {
-    	Map<NLPNode,Set<NLPNode>> map = new HashMap<>();
-    	Set<NLPNode> args;
-    	NLPNode node;
-    	
-    	for (int i=1; i<nodes.size(); i++)
-    	{
-    		node = nodes.get(i);
-    		args = node.getSemanticHeadList().stream().map(a -> a.getNode()).collect(Collectors.toSet());
-    		map.put(node, args);
-    	}
-    	
-    	return map;
+        Map<NLPNode,Set<NLPNode>> map = new HashMap<>();
+        Set<NLPNode> args;
+        NLPNode node;
+
+        for (int i=1; i<nodes.size(); i++)
+        {
+            node = nodes.get(i);
+            args = node.getSemanticHeadList().stream().map(a -> a.getNode()).collect(Collectors.toSet());
+            map.put(node, args);
+        }
+
+        return map;
     }
 
 
@@ -396,7 +431,7 @@ public class SyntacticWord2Vec extends Word2Vec
 
         Set<NLPNode> context_words = new HashSet<NLPNode>();
         context_words.addAll(word.getDependentList());
-        
+
         // input -> hidden
         for (NLPNode context : context_words)
         {
@@ -421,7 +456,7 @@ public class SyntacticWord2Vec extends Word2Vec
 
         Set<NLPNode> context_words = new HashSet<NLPNode>();
         context_words.addAll(word.getDependentList());
-        
+
         for (NLPNode context : context_words)
         {
             int context_index = in_vocab.indexOf(getWordLabel(context));
