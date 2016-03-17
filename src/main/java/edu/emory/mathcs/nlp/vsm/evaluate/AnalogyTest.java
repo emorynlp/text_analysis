@@ -107,7 +107,7 @@ public class AnalogyTest
         //out = new BufferedWriter(new FileWriter(output));
         out = new BufferedWriter(new FileWriter(output_file));
 
-        
+
         out.write("+W1 -W2 +W3 =Truth Prediction Correct?\n");
         float [] tVector = null;
         String prediction = null;
@@ -115,6 +115,10 @@ public class AnalogyTest
         int stotal = 0;
         int correct = 0;
         int scorrect = 0;
+        String pos1;
+        String neg1;
+        String pos2;
+        String gold;
         String lastSection = null;
         Map<String,float[]> memo = new HashMap<>();
 
@@ -138,27 +142,24 @@ public class AnalogyTest
 
             // Get test vector, w1 - w2 + w4 should = w3.
             // Dynamic
-            if(memo.containsKey(list[0]+"_"+list[1]+"_"+list[3]))
-                tVector = memo.get(list[0]+"_"+list[1]+"_"+list[3]);
-            else
-                if( (tVector = getTestVector(list[0].toLowerCase(), list[1].toLowerCase(), list[3].toLowerCase()) ) == null)
-                    continue;
-                else
-                    memo.put(list[0]+"_"+list[1]+"_"+list[3], tVector);
+            pos1 = list[2].toLowerCase();
+            neg1 = list[0].toLowerCase();
+            pos2 = list[1].toLowerCase();
+            gold = list[3].toLowerCase();
 
-            
-            
+            tVector = getTestVector(pos1, neg1, pos2);
             prediction = getNearestWord(tVector);
 
-            out.write(list[0] + " " + list[1] + " " + list[3] + " " + list[2] + " " + prediction);
-            if(prediction.toLowerCase().equals(list[2].toLowerCase())){
+            out.write(pos1 + " " + neg1 + " " + pos2 + " " + gold + " " + prediction);
+
+            if(prediction.toLowerCase().equals(gold)){
                 out.write(" Y\n");
                 correct++;
                 scorrect++;
             }
             else
                 out.write(" N\n");
-            
+
             stotal++;
             total++;
 
@@ -181,7 +182,7 @@ public class AnalogyTest
         float[] c = new float[a.length];
         for(int i = 0; i < c.length; i++)
            c[i] = a[i] + b[i];
-       return c; 
+       return c;
     }
 
     private float[] subtractVectors(float[] a, float[] b)
@@ -189,14 +190,14 @@ public class AnalogyTest
         float[] c = new float[a.length];
         for(int i = 0; i < c.length; i++)
            c[i] = a[i] - b[i];
-       return c; 
+       return c;
     }
 
     private String getNearestWord(String word){
         String nearest = null;
         float maxSimilarity = -Float.MAX_VALUE;
         float cos;
-        
+
         for (String word2 : map.keySet())
         {
             cos = cosine(word, word2);
