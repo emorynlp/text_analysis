@@ -19,8 +19,8 @@ import java.io.File;
 import java.util.List;
 
 import edu.emory.mathcs.nlp.component.template.node.NLPNode;
-import edu.emory.mathcs.nlp.vsm.reader.DEPTreeReader;
 import edu.emory.mathcs.nlp.vsm.reader.Reader;
+import edu.emory.mathcs.nlp.vsm.reader.DEPTreeReader;
 
 /**
  * @author Austin Blodgett

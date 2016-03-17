@@ -40,8 +40,8 @@ import edu.emory.mathcs.nlp.common.util.BinUtils;
 import edu.emory.mathcs.nlp.component.template.node.NLPNode;
 import edu.emory.mathcs.nlp.vsm.optimizer.HierarchicalSoftmax;
 import edu.emory.mathcs.nlp.vsm.optimizer.NegativeSampling;
-import edu.emory.mathcs.nlp.vsm.reader.DEPTreeReader;
 import edu.emory.mathcs.nlp.vsm.reader.Reader;
+import edu.emory.mathcs.nlp.vsm.reader.DEPTreeReader;
 import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
 
 /**
@@ -133,10 +133,15 @@ public class SyntacticWord2Vec extends Word2Vec
         int id = 0;
         for (Reader<NLPNode> r: train_readers)
         {
+            r.open();
             executor.execute(new SynTrainTask(r,id));
             id++;
         }
-        if (evaluate & model_file == null) executor.execute(new SynTestTask(test_reader,id));
+        if (evaluate & model_file == null)
+        {
+            test_reader.open();
+            executor.execute(new SynTestTask(test_reader,id));
+        }
         // -----------------------------------------------------------
 
         executor.shutdown();
@@ -144,6 +149,9 @@ public class SyntacticWord2Vec extends Word2Vec
         try { executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
         catch (InterruptedException e) {e.printStackTrace();}
 
+        for (Reader<NLPNode> r: train_readers)
+            r.close();
+        if (evaluate & model_file == null) test_reader.close();
 
         BinUtils.LOG.info("Saving word vectors.\n");
 

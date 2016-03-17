@@ -20,19 +20,19 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * This class extends Reader and is designed for adding functional features to other readers.
- * When adding a map, filter, or feature to some Reader, you actually create an instance of
- * this class which contains the Reader and converts its output by some function. You will never
- * call this class directly and you should never cast a Reader to type Wrapper.
+ * This class extends AbstractReader and is designed for adding functional features to other readers.
+ * When adding a map, filter, or feature to some AbstractReader, you actually create an instance of
+ * this class which contains the AbstractReader and converts its output by some function. You will never
+ * call this class directly and you should never cast a AbstractReader to type Wrapper.
  *
  * @author Austin Blodgett
  */
-class ReaderWrapper<S,T> extends Reader<T>
+class ReaderWrapper<S,T> extends AbstractReader<T>
 {
-    Reader<S> reader;
+    AbstractReader<S> reader;
     Function<List<S>, List<T>> convert;
 
-    protected ReaderWrapper(Reader<S> reader, Function<List<S>, List<T>> convert)
+    protected ReaderWrapper(AbstractReader<S> reader, Function<List<S>, List<T>> convert)
     {
         super(reader);
 
@@ -50,9 +50,9 @@ class ReaderWrapper<S,T> extends Reader<T>
     }
 
     @Override
-    protected Reader<T> subReader(long start, long end)
+    public Reader<T> subReader(long start, long end)
     {
-        return new ReaderWrapper<>(reader.subReader(start, end), convert);
+        return new ReaderWrapper<>((AbstractReader<S>)reader.subReader(start, end), convert);
     }
 
     @Override
@@ -60,4 +60,10 @@ class ReaderWrapper<S,T> extends Reader<T>
 
     @Override
     public void restart() throws IOException { reader.restart(); }
+
+    @Override
+    public void open() throws IOException { reader.open(); }
+
+    @Override
+    public void close() throws IOException { reader.close(); }
 }

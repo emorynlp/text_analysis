@@ -27,7 +27,7 @@ import edu.emory.mathcs.nlp.component.template.util.TSVReader;
 /**
  * @author Austin Blodgett
  */
-public class DEPTreeReader extends Reader<NLPNode>
+public class DEPTreeReader extends AbstractReader<NLPNode>
 {
     private static final Pattern sentence_break = Pattern.compile("\\n\\s*\\n");
     private TSVReader tree_reader;

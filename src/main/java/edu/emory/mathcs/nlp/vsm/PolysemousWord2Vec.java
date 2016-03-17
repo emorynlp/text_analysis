@@ -96,6 +96,7 @@ public class PolysemousWord2Vec extends Word2Vec
         int id = 0;
         for (Reader<String> r: readers)
         {
+            r.open();
             executor.execute(new TrainTask(r,id));
             id++;
         }
@@ -105,6 +106,9 @@ public class PolysemousWord2Vec extends Word2Vec
 
         try { executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
         catch (InterruptedException e) {e.printStackTrace();}
+
+        for (Reader<String> r: readers)
+            r.close();
 
 
         BinUtils.LOG.info("Saving word vectors.\n");

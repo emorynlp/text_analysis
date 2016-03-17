@@ -20,26 +20,22 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import edu.emory.mathcs.nlp.vsm.reader.Reader;
 import org.kohsuke.args4j.Option;
 
-import edu.emory.mathcs.nlp.common.random.XORShiftRandom;
 import edu.emory.mathcs.nlp.common.util.BinUtils;
 import edu.emory.mathcs.nlp.common.util.FileUtils;
 import edu.emory.mathcs.nlp.component.template.node.NLPNode;
 import edu.emory.mathcs.nlp.vsm.reader.DEPTreeReader;
-import edu.emory.mathcs.nlp.vsm.reader.Reader;
 import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
 
 /**
@@ -123,6 +119,7 @@ public class ContextSummarizer
         int id = 0;
         for (Reader<NLPNode> r: extract_readers)
         {
+            r.open();
             executor.execute(new ExtractionTask(r,id));
             id++;
         }
@@ -132,6 +129,9 @@ public class ContextSummarizer
 
         try { executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
         catch (InterruptedException e) {e.printStackTrace();}
+
+        for (Reader<NLPNode> r: extract_readers)
+            r.close();
 
         save(new File(output_file));
     }

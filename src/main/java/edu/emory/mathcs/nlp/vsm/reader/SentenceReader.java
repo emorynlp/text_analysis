@@ -30,7 +30,7 @@ import edu.emory.mathcs.nlp.tokenization.Tokenizer;
  * TODO
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu}), Austin Blodgett
  */
-public class SentenceReader extends Reader<String> {
+public class SentenceReader extends AbstractReader<String> {
 
     private Tokenizer tokenizer;
 

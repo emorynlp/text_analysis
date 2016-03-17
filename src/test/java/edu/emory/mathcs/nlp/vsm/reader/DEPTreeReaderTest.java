@@ -10,8 +10,6 @@ import org.junit.Test;
 import edu.emory.mathcs.nlp.common.util.FileUtils;
 import edu.emory.mathcs.nlp.component.template.node.NLPNode;
 import edu.emory.mathcs.nlp.component.template.util.TSVReader;
-import edu.emory.mathcs.nlp.vsm.reader.DEPTreeReader;
-import edu.emory.mathcs.nlp.vsm.reader.Reader;
 
 /**
  * Created by austin on 11/30/2015.
@@ -31,6 +29,7 @@ public class DEPTreeReaderTest {
         List<NLPNode> words;
         int i=0;
         for (Reader<NLPNode> r : readers) {
+            r.open();
             System.out.println(i);
             while ((words = r.next()) != null) {
                 for (NLPNode word : words)
@@ -38,9 +37,9 @@ public class DEPTreeReaderTest {
                 System.out.println();
             }
             i++;
+            r.close();
         }
 
-        dr.close();
         System.out.println("Finished");
     }
 
@@ -83,6 +82,7 @@ public class DEPTreeReaderTest {
         List<NLPNode> words;
         int i=0;
         for (Reader<NLPNode> r : readers) {
+            r.open();
             System.out.println(i);
             while ((words = r.next()) != null) {
                 for (NLPNode word : words)
@@ -97,9 +97,9 @@ public class DEPTreeReaderTest {
                 System.out.println();
             }
             i++;
+            r.close();
         }
 
-        dr.close();
         System.out.println("Finished");
     }
 
@@ -110,6 +110,7 @@ public class DEPTreeReaderTest {
         List<File> files = filenames.stream().map(File::new).collect(Collectors.toList());
 
         Reader<String> reader = new DEPTreeReader(files).addFeature(NLPNode::getLemma);
+        reader.open();
 
         while (reader.next() != null)
         {
@@ -117,6 +118,8 @@ public class DEPTreeReaderTest {
         }
         System.out.print(String.format("%.1f", reader.progress()) + "%\n");
         System.out.println("finished");
+
+        reader.close();
     }
 
 }

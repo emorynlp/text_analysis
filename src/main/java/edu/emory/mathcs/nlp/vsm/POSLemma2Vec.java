@@ -41,7 +41,6 @@ public class POSLemma2Vec extends Word2Vec {
     }
 
 	@Override
-	@SuppressWarnings("resource")
     Reader<String> getReader(List<File> files)
     {
         return new DEPTreeReader(files).addFeature(this::getWordLabel);
