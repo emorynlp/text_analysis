@@ -376,23 +376,53 @@ public class SyntacticWord2Vec extends Word2Vec
         if (word_index < 0) return;
 
         Set<NLPNode> context_words = new HashSet<NLPNode>();
-        context_words.addAll(word.getDependentList());
         
         //add other types of context structures
+        if(structure.equals("dep")) {
+            context_words.addAll(word.getDependentList());
+        }
         if(structure.equals("deph")) {
+            context_words.addAll(word.getDependentList());
         	if(word.getDependencyHead() != null) context_words.add(word.getDependencyHead());
         }
-        if(structure.equals("dep2")) context_words.addAll(word.getGrandDependentList());
+        if(structure.equals("dep2")) {
+            context_words.addAll(word.getDependentList());
+        	context_words.addAll(word.getGrandDependentList());
+        }
         if(structure.equals("dep2h")) {
+            context_words.addAll(word.getDependentList());
         	context_words.add(word.getDependencyHead());
         	context_words.addAll(word.getGrandDependentList());
         }
-        if(structure.equals("srlarguments")) addSRLNodes(word, context_words, sargs);
+        if(structure.equals("srlarguments")) {
+            context_words.addAll(word.getDependentList());
+        	addSRLNodes(word, context_words, sargs);
+        }
         if(structure.equals("closestSiblings")){
+            context_words.addAll(word.getDependentList());
         	if(word.getRightNearestSibling()!= null) context_words.add(word.getRightNearestSibling());
         	if(word.getLeftNearestSibling()!= null) context_words.add(word.getLeftNearestSibling());
         }
-        if(structure.equals("allSibilings")) context_words.addAll(getAllSiblings(word));
+        if(structure.equals("allSibilings")) {
+            context_words.addAll(word.getDependentList());
+        	context_words.addAll(getAllSiblings(word));
+        }
+        if(structure.equals("w2v&dep")) {
+            context_words.addAll(word.getDependentList());
+            int i, j;
+
+            for (i=-window,j=index+i; i<=window; i++,j++)
+            {
+                if (i == 0 || words.size() <= j || j < 0) continue;
+                
+                l1 = out_vocab.indexOf(getWordLabel(words.get(j))) * vector_size;
+                Arrays.fill(neu1e, 0);
+                optimizer.learnSkipGram(rand, word_index, W, V, neu1e, alpha_global, l1);
+
+                // hidden -> input
+                for (k=0; k<vector_size; k++) W[l1+k] += neu1e[k];
+            }        
+        }
         
         
         for (NLPNode context : context_words)
