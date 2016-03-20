@@ -375,8 +375,26 @@ public class SyntacticWord2Vec extends Word2Vec
         int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;
 
-        Set<NLPNode> context_words = getContext(structure, word, words, word_index);
-
+        Set<NLPNode> context_words = new HashSet<NLPNode>();
+        context_words.addAll(word.getDependentList());
+        
+        //add other types of context structures
+        if(structure.equals("deph")) {
+        	if(word.getDependencyHead() != null) context_words.add(word.getDependencyHead());
+        }
+        if(structure.equals("dep2")) context_words.addAll(word.getGrandDependentList());
+        if(structure.equals("dep2h")) {
+        	context_words.add(word.getDependencyHead());
+        	context_words.addAll(word.getGrandDependentList());
+        }
+        if(structure.equals("srlarguments")) addSRLNodes(word, context_words, sargs);
+        if(structure.equals("closestSiblings")){
+        	if(word.getRightNearestSibling()!= null) context_words.add(word.getRightNearestSibling());
+        	if(word.getLeftNearestSibling()!= null) context_words.add(word.getLeftNearestSibling());
+        }
+        if(structure.equals("allSibilings")) context_words.addAll(getAllSiblings(word));
+        
+        
         for (NLPNode context : context_words)
         {
             int context_index = in_vocab.indexOf(getWordLabel(context));
