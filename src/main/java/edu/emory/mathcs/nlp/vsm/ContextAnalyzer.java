@@ -49,23 +49,22 @@ import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
  *
  * @author Austin Blodgett
  */
-public class SyntacticWord2Vec extends Word2Vec
+public class ContextAnalyzer extends Word2Vec
 {
     private static final long serialVersionUID = -5597377581114506257L;
+    Map<String, Map<String, Integer>> sums;
+    Map<String, Map<String, Integer>> counts;
+	String[] strucs = {"dep", "deph", "dep1", "dep1h", "srlarguments", "closestSiblings", "allSibilings"};
+	String[] pos = {"adjective", "adverb", "allPos", "noun", "verb"};
+
+	
+	
     int window;
-    public SyntacticWord2Vec(String[] args) {
+    public ContextAnalyzer(String[] args) {
         super(args);
         window = max_skip_window;
     }
 
-    /*String getWordLabel(NLPNode word)
-    {
-        String POS = word.getPartOfSpeechTag();
-        if (POS.startsWith("VB")) POS = "VB";
-        else if (POS.startsWith("NN")) POS = "NN";
-
-        return POS+"_"+word.getLemma();
-    }*/
 
     String getWordLabel(NLPNode word)
     {
@@ -76,11 +75,54 @@ public class SyntacticWord2Vec extends Word2Vec
     public void train(List<String> filenames) throws Exception
     {
 
-        Reader<NLPNode> test_reader = null;
+    	//stuff to save
+    
+    	int allContextSum;
+    	int contextsRun;
+    	
+    	sums = new HashMap<String, Map<String, Integer>>();
+    	sums.put("adjective", new HashMap<String, Integer>());
+    	sums.put("adverb", new HashMap<String, Integer>());
+    	sums.put("allPos", new HashMap<String, Integer>());
+    	sums.put("noun", new HashMap<String, Integer>());
+    	sums.put("previousVerb", new HashMap<String, Integer>());
+    	sums.put("verb", new HashMap<String, Integer>());
+    	for (Map.Entry<String, Map<String, Integer>> entry : sums.entrySet()) {
+    	    Map<String, Integer> map = entry.getValue();
+    	    map.put("dep", 0);
+    	    map.put("deph", 0);
+    	    map.put("dep1", 0);
+    	    map.put("dep1h", 0);
+    	    map.put("srlarguments", 0);
+    	    map.put("closestSiblings", 0);
+    	    map.put("allSibilings", 0);
+    	}    	
+    	
+    	counts = new HashMap<String, Map<String, Integer>>();
+    	counts.put("adjective", new HashMap<String, Integer>());
+    	counts.put("adverb", new HashMap<String, Integer>());
+    	counts.put("allPos", new HashMap<String, Integer>());
+    	counts.put("noun", new HashMap<String, Integer>());
+    	counts.put("previousVerb", new HashMap<String, Integer>());
+    	counts.put("verb", new HashMap<String, Integer>());
+    	for (Map.Entry<String, Map<String, Integer>> entry : counts.entrySet()) {
+    	    Map<String, Integer> map = entry.getValue();
+    	    map.put("dep", 0);
+    	    map.put("deph", 0);
+    	    map.put("dep1", 0);
+    	    map.put("dep1h", 0);
+    	    map.put("srlarguments", 0);
+    	    map.put("closestSiblings", 0);
+    	    map.put("allSibilings", 0);
+    	} 
+    	
+    	
+    	
+    	
+    	//run
         List<Reader<NLPNode>> train_readers;
         List<Reader<NLPNode>> readers;
 
-        if(model_file == null) {
             BinUtils.LOG.info("Reading vocabulary:\n");
 
             in_vocab = (out_vocab = new Vocabulary());
@@ -88,7 +130,6 @@ public class SyntacticWord2Vec extends Word2Vec
             readers = new DEPTreeReader(filenames.stream().map(File::new).collect(Collectors.toList()))
                     .splitParallel(thread_size);
             train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
-            test_reader   = evaluate ? readers.get(thread_size-1)       : null;
 
             if (read_vocab_file == null) in_vocab.learnParallel(train_readers.stream()
                                                                 .map(r -> r.addFeature(this::getWordLabel))
@@ -102,32 +143,16 @@ public class SyntacticWord2Vec extends Word2Vec
 
             BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
 
-            BinUtils.LOG.info("Initializing neural network.\n");
-            initNeuralNetwork();
-        } else {
-            BinUtils.LOG.info("Loading Model\n");
-            ObjectInputStream objin = new ObjectInputStream(new FileInputStream(model_file));
-            VSMModel model = (VSMModel) objin.readObject();
-            objin.close();
-            in_vocab = model.getIn_vocab();
-            out_vocab = model.getOut_vocab();
-            W = model.getW();
-            V = model.getV();
-            readers = new DEPTreeReader(filenames.stream().map(File::new).collect(Collectors.toList()))
-                    .splitParallel(thread_size);
-            train_readers = evaluate ? readers.subList(0,thread_size-1) : readers;
-        }
 
         BinUtils.LOG.info("Initializing optimizer.\n");
-        optimizer = isNegativeSampling() ? new NegativeSampling(in_vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(in_vocab, sigmoid, vector_size);
+        //optimizer = isNegativeSampling() ? new NegativeSampling(in_vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(in_vocab, sigmoid, vector_size);
 
         BinUtils.LOG.info("Training vectors:");
         word_count_global = 0;
         alpha_global      = alpha_init;
         subsample_size    = subsample_threshold * word_count_train;
-        ExecutorService executor = Executors.newFixedThreadPool(thread_size);
+        ExecutorService executor = Executors.newFixedThreadPool(1);
 
-        // ------- Austin's code -------------------------------------
         start_time = System.currentTimeMillis();
 
         int id = 0;
@@ -137,12 +162,7 @@ public class SyntacticWord2Vec extends Word2Vec
             executor.execute(new SynTrainTask(r,id));
             id++;
         }
-        if (evaluate & model_file == null)
-        {
-            test_reader.open();
-            executor.execute(new SynTestTask(test_reader,id));
-        }
-        // -----------------------------------------------------------
+
 
         executor.shutdown();
 
@@ -151,27 +171,22 @@ public class SyntacticWord2Vec extends Word2Vec
 
         for (Reader<NLPNode> r: train_readers)
             r.close();
-        if (evaluate & model_file == null) test_reader.close();
 
-        BinUtils.LOG.info("Saving word vectors.\n");
-
-        save(new File(output_file));
-        save2(new File(output_file+".2"));
-        if (write_vocab_file != null)
-        {
-            File f = new File(write_vocab_file);
-            if (!f.isFile()) f.createNewFile();
-            in_vocab.writeVocab(f);
+        BinUtils.LOG.info("Writing output of things.\n");
+        
+        for (String str: pos) {
+        	System.out.println("POS: " + str);
+        	Map<String, Integer> cnt = counts.get(str);
+        	Map<String, Integer> sms = sums.get(str);
+        	for (Map.Entry<String, Integer> entry : cnt.entrySet()) {
+        		String struct = entry.getKey();
+            	System.out.print("\tStruct: " + struct + "  ");
+            	double avg =  (double) sms.get(struct) / (double) entry.getValue();
+            	System.out.println(avg);
+        	}
         }
-        if (feature_file != null) saveFeatures(new File(feature_file));
 
-        BinUtils.LOG.info("Saving model.\n");
-        VSMModel model = new VSMModel(W, V, in_vocab, out_vocab);
-        FileOutputStream out = new FileOutputStream(output_file + ".model");
-        ObjectOutputStream object = new ObjectOutputStream(out);
-        object.writeObject(model);
-        object.close();
-        out.close();
+        
     }
 
     class SynTrainTask implements Runnable
@@ -193,8 +208,8 @@ public class SyntacticWord2Vec extends Word2Vec
         public void run()
         {
             Random rand  = new XORShiftRandom(reader.hashCode());
-            float[] neu1  = cbow ? new float[vector_size] : null;
-            float[] neu1e = new float[vector_size];
+            //float[] neu1  = cbow ? new float[vector_size] : null;
+            //float[] neu1e = new float[vector_size];
             int     iter  = 0;
             int     index;
             List<NLPNode> words = null;
@@ -214,159 +229,139 @@ public class SyntacticWord2Vec extends Word2Vec
 
                 if (words == null)
                 {
-                    System.out.println("thread "+id+" "+iter+" "+num_sentences);
-                    if (++iter == train_iteration) break;
-                    adjustLearningRate();
-                    // readers have a built in restart button - Austin
-                    try { reader.restart(); } catch (IOException e) { e.printStackTrace(); }
-                    continue;
+                    break;
                 }
 
                 sargs = getSemanticArgumentMap(words);
 
                 for (index=0; index<words.size(); index++)
                 {
-                    if (cbow) Arrays.fill(neu1, 0);
-                    Arrays.fill(neu1e, 0);
 
-                    if (cbow) bagOfWords(words, index, rand, neu1e, neu1, sargs);
-                    else      skipGram  (words, index, rand, neu1e, sargs);
+                	//context here
+                	
+                	measureContext(words, index, sargs);
+                    //skipGram  (words, index, rand, neu1e, sargs);
                 }
 
-                // output progress
-                if(id == 0)
-                {
-                    float progress = (iter + reader.progress()/100)/train_iteration;
-                    if(progress-last_progress > 0.025f)
-                    {
-                        outputProgress(System.currentTimeMillis(), progress);
-                        last_progress += 0.1f;
-                    }
-                }
 
             }
         }
     }
-
-
-    class SynTestTask extends SynTrainTask
-    {
-        public SynTestTask(Reader<NLPNode> reader, int id)
-        {
-            super(reader,id);
-        }
-
-        @Override
-        public void run()
-        {
-            Random rand  = new XORShiftRandom(reader.hashCode());
-            float[] neu1  = cbow ? new float[vector_size] : null;
-            float[] neu1e = new float[vector_size];
-            int     iter  = 0;
-            int     index;
-            List<NLPNode> words = null;
-
-            while (true)
-            {
-                try {
-                    words = reader.next();
-                    word_count_global += words == null ? 0 : words.size();
-                    num_sentences++;
-                } catch (IOException e) {
-                    System.err.println("Reader failure: progress "+reader.progress());
-                    e.printStackTrace();
-                    System.exit(1);
-                }
-
-                if (words == null)
-                {
-                    System.out.println("error "+optimizer.getError()+" "+num_sentences);
-                    optimizer.resetError();
-                    if (++iter == train_iteration) break;
-                    adjustLearningRate();
-                    // readers have a built in restart button - Austin
-                    try { reader.restart(); } catch (IOException e) { e.printStackTrace(); }
-                    continue;
-                }
-
-                for (index=0; index<words.size(); index++)
-                {
-                    if (cbow) Arrays.fill(neu1, 0);
-                    Arrays.fill(neu1e, 0);
-
-                    if (cbow) testBagOfWords(words, index, rand, neu1e, neu1);
-                    else      testSkipGram  (words, index, rand, neu1e);
-                }
-            }
-        }
-    }
-
-    Set<NLPNode> getContext(String structure, NLPNode word, List<NLPNode> words, int index)
-    {
-        return addContext(new HashSet<NLPNode>(), structure, word, words, index);
-    }
-
-
-    Set<NLPNode> addContext(Set<NLPNode> context_words, String structure, NLPNode word, List<NLPNode> words, int index)
-    {
-        if(structure == null)   structure = "w2v";
-        switch(structure)
-        {
-            case "dep1h":
-                if(word.getDependencyHead() != null)    context_words.add(word.getDependencyHead());
-            case "dep1":
-                context_words.addAll(word.getDependentList());
-                break;
-            case "dep2h":
-                if(word.getDependencyHead() != null)    context_words.add(word.getDependencyHead());
-            case "dep2":
-                context_words.add(word.getDependencyHead());
-                context_words.addAll(word.getGrandDependentList());
-                break;
-            case "srlargs":
-                //Not implemented TODO
-                //addSRLNodes(word, context_words, sargs);
-                break;
-            case "sib1dep1h":
-                if(word.getDependencyHead() != null)    context_words.add(word.getDependencyHead());
-            case "sib1dep1":
-                context_words.addAll(word.getDependentList());
-            case "sib1":
-                if(word.getRightNearestSibling()!= null)    context_words.add(word.getRightNearestSibling());
-                if(word.getLeftNearestSibling()!= null)     context_words.add(word.getLeftNearestSibling());
-                break;
-            case "allSibilings":
-                context_words.addAll(getAllSiblings(word));
-                break;
-            case "w2v":
-            default:
-                int i, j, l;
-                for (i=-window,j=index+i; i<=window; i++,j++)
-                {
-                    if      (i == 0 || words.size() <= j || j < 0) continue;
-                    else    context_words.add(words.get(i));
-                }
-        }
-
-        return context_words;
-    }
-
-    void bagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1, Map<NLPNode,Set<NLPNode>> sargs) {
-        int k, l, wc = 0;
+    
+    
+    void measureContext(List<NLPNode> words, int index, Map<NLPNode,Set<NLPNode>> sargs){
+        int k, l1;
         NLPNode word = words.get(index);
         int word_index = out_vocab.indexOf(getWordLabel(word));
-        if (word_index < 0) return;
-
-        Set<NLPNode> context_words = getContext(structure, word, words, word_index);
-
-        // hidden -> input
-        for (NLPNode context : context_words)
-        {
-            int context_index = in_vocab.indexOf(getWordLabel(context));
-            l = context_index * vector_size;
-
-            for (k=0; k<vector_size; k++) W[k+l] += neu1e[k];
+        if (word_index < 0) return;        
+        analyzePOS(word, sargs);
+     
+    }
+    
+    void analyzePOS(NLPNode word, Map<NLPNode, Set<NLPNode>> sargs) {
+        String pos = word.getPartOfSpeechTag();
+        if(pos.length() > 1) {
+        	if(pos.length() > 2) {
+        		pos = pos.substring(0, 2);
+        	}
+            int count = 0;
+            switch (pos) {
+            	case "VB": //verb
+            		countContextPOS("verb", word, sargs);
+            		countContextPOS("allPos", word, sargs);
+            		break;
+            	case "NN": //noun
+            		countContextPOS("noun", word, sargs);
+            		countContextPOS("allPos", word, sargs);
+            		break;
+            	case "JJ": //adjective
+            		countContextPOS("adjective", word, sargs);
+            		countContextPOS("allPos", word, sargs);
+            		break;
+            	case "RB": //adverb
+            		countContextPOS("adverb", word, sargs);
+            		countContextPOS("allPos", word, sargs);
+            		break;
+            }
         }
+    }
+		
+	
+
+
+	void countContextPOS(String pos, NLPNode word, Map<NLPNode,Set<NLPNode>> sargs){
+		Map<String, Integer> mapSum = sums.get(pos);
+		int sum;
+		int dep1Size = word.getDependentList().size();
+		Map<String, Integer> mapCount = counts.get(pos);
+		int num;
+		
+		
+        //if(structure.equals("dep")) {
+			sum = mapSum.get("dep");
+            mapSum.put("dep", sum + dep1Size);
+            
+			num = mapCount.get("dep");
+			mapCount.put("dep", num + 1);
+			
+        //if(structure.equals("deph")) {
+			sum = mapSum.get("deph");
+        	if(word.getDependencyHead() != null) {
+                mapSum.put("deph", sum + dep1Size + 1);
+        	}else{
+                mapSum.put("deph", sum + dep1Size);
+        	}
+        	
+			num = mapCount.get("deph");
+			mapCount.put("deph", num + 1);
+			
+        //if(structure.equals("dep2")) {
+			sum = mapSum.get("dep2");
+            mapSum.put("dep2", sum + dep1Size + word.getGrandDependentList().size());  
+            
+			num = mapCount.get("dep2");
+			mapCount.put("dep2", num + 1);
+			
+        //if(structure.equals("dep2h")) {
+			sum = mapSum.get("dep2h");
+			if(word.getDependencyHead() != null) {
+				mapSum.put("dep2h", sum + dep1Size + 1 + word.getGrandDependentList().size());
+		    }else{
+				mapSum.put("dep2h", sum + dep1Size + word.getGrandDependentList().size());
+		    }        
+			
+			num = mapCount.get("dep2h");
+			mapCount.put("dep2h", num + 1);
+			
+        //if(structure.equals("srlarguments")) {
+			sum = mapSum.get("srlarguments");
+			int count = 0;
+	        Set<NLPNode> set = sargs.get(word);
+	        if (set != null) {
+	            for (NLPNode s: set) count++;
+	         }				
+			mapSum.put("srlarguments", sum + dep1Size + count);
+			
+			num = mapCount.get("srlarguments");
+			mapCount.put("srlarguments", num + 1);
+			
+        //if(structure.equals("closestSiblings")){
+			sum = mapSum.get("closestSiblings");
+			count = 0;
+        	if(word.getRightNearestSibling()!= null) count += 1;
+        	if(word.getLeftNearestSibling()!= null) count += 1;
+			mapSum.put("closestSiblings", sum + dep1Size + count);
+			
+			num = mapCount.get("closestSiblings");
+			mapCount.put("closestSiblings", num + 1);
+			
+        //if(structure.equals("allSibilings")) {
+			sum = mapSum.get("allSibilings");
+			if(getAllSiblings(word)!= null) mapSum.put("allSibilings", sum + dep1Size + getAllSiblings(word).size());
+			else mapSum.put("allSibilings", sum + dep1Size);        
+			
+			num = mapCount.get("allSibilings");
+			mapCount.put("allSibilings", num + 1);
     }
 
     void skipGram(List<NLPNode> words, int index, Random rand, float[] neu1e, Map<NLPNode,Set<NLPNode>> sargs) {
@@ -475,52 +470,6 @@ public class SyntacticWord2Vec extends Word2Vec
         }
 
         return map;
-    }
-
-
-    void testBagOfWords(List<NLPNode> words, int index, Random rand, float[] neu1e, float[] neu1) {
-        int k, l, wc = 0;
-        NLPNode word = words.get(index);
-        int word_index = out_vocab.indexOf(getWordLabel(word));
-        if (word_index < 0) return;
-
-        Set<NLPNode> context_words = new HashSet<NLPNode>();
-        context_words.addAll(word.getDependentList());
-
-        // input -> hidden
-        for (NLPNode context : context_words)
-        {
-            int context_index = in_vocab.indexOf(getWordLabel(context));
-            if (context_index < 0) continue;
-            l = context_index * vector_size;
-            for (k=0; k<vector_size; k++) neu1[k] += W[k+l];
-            wc++;
-        }
-
-        if (wc == 0) return;
-        for (k=0; k<vector_size; k++) neu1[k] /= wc;
-        optimizer.testBagOfWords(rand, word_index, V, neu1, neu1e, alpha_global);
-    }
-
-    void testSkipGram(List<NLPNode> words, int index, Random rand, float[] neu1e)
-    {
-        int l1;
-        NLPNode word = words.get(index);
-        int word_index = out_vocab.indexOf(getWordLabel(word));
-        if (word_index < 0) return;
-
-        Set<NLPNode> context_words = new HashSet<NLPNode>();
-        context_words.addAll(word.getDependentList());
-
-        for (NLPNode context : context_words)
-        {
-            int context_index = in_vocab.indexOf(getWordLabel(context));
-            if (context_index < 0) continue;
-
-            l1 = context_index * vector_size;
-            Arrays.fill(neu1e, 0);
-            optimizer.testSkipGram(rand, word_index, W, V, neu1e, alpha_global, l1);
-        }
     }
 
     public Map<String,float[]> toMap2(boolean normalize)

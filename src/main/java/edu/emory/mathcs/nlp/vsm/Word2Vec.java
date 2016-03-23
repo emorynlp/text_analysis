@@ -144,6 +144,7 @@ public class Word2Vec implements Serializable
             }
             else
                 filenames = FileUtils.getFileList(train_path, train_ext, false);
+            	filenames.addAll(FileUtils.getFileList("/mnt/ainos-research/corpus/wikipedia2015/tree/", train_ext, false));
             train(filenames);
         }
         catch (Exception e) {e.printStackTrace();}
