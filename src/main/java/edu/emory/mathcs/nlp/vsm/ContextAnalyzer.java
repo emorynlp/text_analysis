@@ -513,5 +513,5 @@ public class ContextAnalyzer extends Word2Vec
         out.close();
     }
 
-    static public void main(String[] args) { new SyntacticWord2Vec(args); }
+    static public void main(String[] args) { new ContextAnalyzer(args); }
 }
