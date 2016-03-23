@@ -109,8 +109,8 @@ public class ContextAnalyzer extends Word2Vec
     	    Map<String, Integer> map = entry.getValue();
     	    map.put("dep", 0);
     	    map.put("deph", 0);
-    	    map.put("dep1", 0);
-    	    map.put("dep1h", 0);
+    	    map.put("dep2", 0);
+    	    map.put("dep2h", 0);
     	    map.put("srlarguments", 0);
     	    map.put("closestSiblings", 0);
     	    map.put("allSibilings", 0);
