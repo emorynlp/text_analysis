@@ -55,8 +55,6 @@ public class ContextAnalyzer extends Word2Vec
     Map<String, Map<String, Integer>> sums;
     Map<String, Map<String, Integer>> counts;
 	String[] strucs = {"dep", "deph", "dep2", "dep2h", "srlarguments", "closestSiblings", "allSibilings"};
-	String[] pos = {"adjective", "adverb", "allPos", "noun", "verb"};
-
 	
 	
     int window;
@@ -76,7 +74,8 @@ public class ContextAnalyzer extends Word2Vec
     {
 
     	//stuff to save
-    
+    	String[] posTypes = {"adjective", "adverb", "allPos", "noun", "verb"};
+
     	int allContextSum;
     	int contextsRun;
     	
@@ -177,8 +176,8 @@ public class ContextAnalyzer extends Word2Vec
         BufferedWriter bw = new BufferedWriter(new FileWriter(new File(output_file + ".txt")));
         
         
-        for (int i = 0; i < pos.length; i++) {
-        	String str = pos[i];
+        for (int i = 0; i < posTypes.length; i++) {
+        	String str = posTypes[i];
         	bw.write("POS: " + str + "\n");
         	Map<String, Integer> cnt = counts.get(str);
         	Map<String, Integer> sms = sums.get(str);
