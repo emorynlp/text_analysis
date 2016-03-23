@@ -17,12 +17,8 @@ package edu.emory.mathcs.nlp.vsm;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,11 +31,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import edu.emory.mathcs.nlp.common.random.XORShiftRandom;
 import edu.emory.mathcs.nlp.common.util.BinUtils;
 import edu.emory.mathcs.nlp.component.template.node.NLPNode;
-import edu.emory.mathcs.nlp.vsm.optimizer.HierarchicalSoftmax;
-import edu.emory.mathcs.nlp.vsm.optimizer.NegativeSampling;
 import edu.emory.mathcs.nlp.vsm.reader.Reader;
 import edu.emory.mathcs.nlp.vsm.reader.DEPTreeReader;
 import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
@@ -69,16 +62,14 @@ public class ContextAnalyzer extends Word2Vec
         return word.getLemma();
     }
 
-    @Override
+    @SuppressWarnings("resource")
+	@Override
     public void train(List<String> filenames) throws Exception
     {
 
     	//stuff to save
     	String[] posTypes = {"adjective", "adverb", "allPos", "noun", "verb"};
 
-    	int allContextSum;
-    	int contextsRun;
-    	
     	sums = new HashMap<String, Map<String, Integer>>();
     	sums.put("adjective", new HashMap<String, Integer>());
     	sums.put("adverb", new HashMap<String, Integer>());
@@ -142,18 +133,14 @@ public class ContextAnalyzer extends Word2Vec
 
             BinUtils.LOG.info(String.format("- types = %d, tokens = %d\n", in_vocab.size(), word_count_train));
 
-
-        BinUtils.LOG.info("Initializing optimizer.\n");
-        //optimizer = isNegativeSampling() ? new NegativeSampling(in_vocab, sigmoid, vector_size, negative_size) : new HierarchicalSoftmax(in_vocab, sigmoid, vector_size);
-
         BinUtils.LOG.info("Training vectors:");
         word_count_global = 0;
-        alpha_global      = alpha_init;
-        subsample_size    = subsample_threshold * word_count_train;
-        ExecutorService executor = Executors.newFixedThreadPool(1);
+        ExecutorService executor = Executors.newFixedThreadPool(thread_size);
 
         start_time = System.currentTimeMillis();
+        BinUtils.LOG.info("time" + start_time   + "\n");
 
+        
         int id = 0;
         for (Reader<NLPNode> r: train_readers)
         {
@@ -212,20 +199,18 @@ public class ContextAnalyzer extends Word2Vec
         @Override
         public void run()
         {
-            Random rand  = new XORShiftRandom(reader.hashCode());
-            //float[] neu1  = cbow ? new float[vector_size] : null;
-            //float[] neu1e = new float[vector_size];
-            int     iter  = 0;
             int     index;
             List<NLPNode> words = null;
             Map<NLPNode,Set<NLPNode>> sargs;
+
+            
+            BinUtils.LOG.info("Entering while Loop");
 
             while (true)
             {
                 try {
                     words = reader.next();
                     word_count_global += words == null ? 0 : words.size();
-                    num_sentences++;
                 } catch (IOException e) {
                     System.err.println("Reader failure: progress "+reader.progress());
                     e.printStackTrace();
@@ -239,28 +224,20 @@ public class ContextAnalyzer extends Word2Vec
 
                 sargs = getSemanticArgumentMap(words);
 
-                for (index=0; index<words.size(); index++)
-                {
-
+                for (index=0; index<words.size(); index++){
                 	//context here
-                	
                 	measureContext(words, index, sargs);
-                    //skipGram  (words, index, rand, neu1e, sargs);
                 }
-
-
             }
         }
     }
     
     
     void measureContext(List<NLPNode> words, int index, Map<NLPNode,Set<NLPNode>> sargs){
-        int k, l1;
         NLPNode word = words.get(index);
         int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;        
-        analyzePOS(word, sargs);
-     
+        analyzePOS(word, sargs);     
     }
     
     void analyzePOS(NLPNode word, Map<NLPNode, Set<NLPNode>> sargs) {
@@ -269,7 +246,6 @@ public class ContextAnalyzer extends Word2Vec
         	if(pos.length() > 2) {
         		pos = pos.substring(0, 2);
         	}
-            int count = 0;
             switch (pos) {
             	case "VB": //verb
             		countContextPOS("verb", word, sargs);
@@ -342,9 +318,7 @@ public class ContextAnalyzer extends Word2Vec
 			sum = mapSum.get("srlarguments");
 			int count = 0;
 	        Set<NLPNode> set = sargs.get(word);
-	        if (set != null) {
-	            for (NLPNode s: set) count++;
-	         }				
+	        if (set != null) count+=set.size();
 			mapSum.put("srlarguments", sum + dep1Size + count);
 			
 			num = mapCount.get("srlarguments");
