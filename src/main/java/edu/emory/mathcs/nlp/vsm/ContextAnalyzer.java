@@ -89,9 +89,13 @@ public class ContextAnalyzer extends Word2Vec
     	sums.put("verb", new HashMap<String, Integer>());
     	for (Map.Entry<String, Map<String, Integer>> entry : sums.entrySet()) {
     	    Map<String, Integer> map = entry.getValue();
-    	    for(String str: strucs) {
-        	    map.put(str, 0);
-    	    }
+    	    map.put("dep", 0);
+    	    map.put("deph", 0);
+    	    map.put("dep2", 0);
+    	    map.put("dep2h", 0);
+    	    map.put("srlarguments", 0);
+    	    map.put("closestSiblings", 0);
+    	    map.put("allSibilings", 0);
     	}    	
     	
     	counts = new HashMap<String, Map<String, Integer>>();
@@ -103,9 +107,13 @@ public class ContextAnalyzer extends Word2Vec
     	counts.put("verb", new HashMap<String, Integer>());
     	for (Map.Entry<String, Map<String, Integer>> entry : counts.entrySet()) {
     	    Map<String, Integer> map = entry.getValue();
-    	    for(String str: strucs) {
-        	    map.put(str, 0);
-    	    }
+    	    map.put("dep", 0);
+    	    map.put("deph", 0);
+    	    map.put("dep2", 0);
+    	    map.put("dep2h", 0);
+    	    map.put("srlarguments", 0);
+    	    map.put("closestSiblings", 0);
+    	    map.put("allSibilings", 0);
     	} 
     	
     	
