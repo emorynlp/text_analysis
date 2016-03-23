@@ -174,17 +174,22 @@ public class ContextAnalyzer extends Word2Vec
 
         BinUtils.LOG.info("Writing output of things.\n");
         
+        BufferedWriter bw = new BufferedWriter(new FileWriter(new File(output_file + ".txt")));
+        
+        
         for (String str: pos) {
-        	System.out.println("POS: " + str);
+        	bw.write("POS: " + str + "\n");
         	Map<String, Integer> cnt = counts.get(str);
         	Map<String, Integer> sms = sums.get(str);
         	for (Map.Entry<String, Integer> entry : cnt.entrySet()) {
         		String struct = entry.getKey();
-            	System.out.print("\tStruct: " + struct + "  ");
+            	bw.write("\tStruct: " + struct + "  ");
             	double avg =  (double) sms.get(struct) / (double) entry.getValue();
-            	System.out.println(avg);
+            	bw.write(avg + "\n");
         	}
         }
+        bw.flush();
+        bw.close();
 
         
     }
