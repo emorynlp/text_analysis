@@ -54,7 +54,7 @@ public class ContextAnalyzer extends Word2Vec
     private static final long serialVersionUID = -5597377581114506257L;
     Map<String, Map<String, Integer>> sums;
     Map<String, Map<String, Integer>> counts;
-	String[] strucs = {"dep", "deph", "dep1", "dep1h", "srlarguments", "closestSiblings", "allSibilings"};
+	String[] strucs = {"dep", "deph", "dep2", "dep2h", "srlarguments", "closestSiblings", "allSibilings"};
 	String[] pos = {"adjective", "adverb", "allPos", "noun", "verb"};
 
 	
@@ -89,13 +89,9 @@ public class ContextAnalyzer extends Word2Vec
     	sums.put("verb", new HashMap<String, Integer>());
     	for (Map.Entry<String, Map<String, Integer>> entry : sums.entrySet()) {
     	    Map<String, Integer> map = entry.getValue();
-    	    map.put("dep", 0);
-    	    map.put("deph", 0);
-    	    map.put("dep1", 0);
-    	    map.put("dep1h", 0);
-    	    map.put("srlarguments", 0);
-    	    map.put("closestSiblings", 0);
-    	    map.put("allSibilings", 0);
+    	    for(String str: strucs) {
+        	    map.put(str, 0);
+    	    }
     	}    	
     	
     	counts = new HashMap<String, Map<String, Integer>>();
@@ -107,13 +103,9 @@ public class ContextAnalyzer extends Word2Vec
     	counts.put("verb", new HashMap<String, Integer>());
     	for (Map.Entry<String, Map<String, Integer>> entry : counts.entrySet()) {
     	    Map<String, Integer> map = entry.getValue();
-    	    map.put("dep", 0);
-    	    map.put("deph", 0);
-    	    map.put("dep2", 0);
-    	    map.put("dep2h", 0);
-    	    map.put("srlarguments", 0);
-    	    map.put("closestSiblings", 0);
-    	    map.put("allSibilings", 0);
+    	    for(String str: strucs) {
+        	    map.put(str, 0);
+    	    }
     	} 
     	
     	
