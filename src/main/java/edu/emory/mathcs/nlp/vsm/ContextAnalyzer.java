@@ -47,9 +47,9 @@ public class ContextAnalyzer extends Word2Vec
     private static final long serialVersionUID = -5597377581114506257L;
     Map<String, Map<String, Integer>> sums;
     Map<String, Map<String, Integer>> counts;
-	String[] strucs = {"dep", "deph", "dep2", "dep2h", "srlarguments", "closestSiblings", "allSibilings"};
-	
-	
+    String[] strucs = {"dep", "deph", "dep2", "dep2h", "srlarguments", "closestSiblings", "allSibilings"};
+    
+    
     int window;
     public ContextAnalyzer(String[] args) {
         super(args);
@@ -63,53 +63,53 @@ public class ContextAnalyzer extends Word2Vec
     }
 
     @SuppressWarnings("resource")
-	@Override
+    @Override
     public void train(List<String> filenames) throws Exception
     {
 
-    	//stuff to save
-    	String[] posTypes = {"adjective", "adverb", "allPos", "noun", "verb"};
+        //stuff to save
+        String[] posTypes = {"adjective", "adverb", "allPos", "noun", "verb"};
 
-    	sums = new HashMap<String, Map<String, Integer>>();
-    	sums.put("adjective", new HashMap<String, Integer>());
-    	sums.put("adverb", new HashMap<String, Integer>());
-    	sums.put("allPos", new HashMap<String, Integer>());
-    	sums.put("noun", new HashMap<String, Integer>());
-    	sums.put("previousVerb", new HashMap<String, Integer>());
-    	sums.put("verb", new HashMap<String, Integer>());
-    	for (Map.Entry<String, Map<String, Integer>> entry : sums.entrySet()) {
-    	    Map<String, Integer> map = entry.getValue();
-    	    map.put("dep", 0);
-    	    map.put("deph", 0);
-    	    map.put("dep2", 0);
-    	    map.put("dep2h", 0);
-    	    map.put("srlarguments", 0);
-    	    map.put("closestSiblings", 0);
-    	    map.put("allSibilings", 0);
-    	}    	
-    	
-    	counts = new HashMap<String, Map<String, Integer>>();
-    	counts.put("adjective", new HashMap<String, Integer>());
-    	counts.put("adverb", new HashMap<String, Integer>());
-    	counts.put("allPos", new HashMap<String, Integer>());
-    	counts.put("noun", new HashMap<String, Integer>());
-    	counts.put("previousVerb", new HashMap<String, Integer>());
-    	counts.put("verb", new HashMap<String, Integer>());
-    	for (Map.Entry<String, Map<String, Integer>> entry : counts.entrySet()) {
-    	    Map<String, Integer> map = entry.getValue();
-    	    map.put("dep", 0);
-    	    map.put("deph", 0);
-    	    map.put("dep2", 0);
-    	    map.put("dep2h", 0);
-    	    map.put("srlarguments", 0);
-    	    map.put("closestSiblings", 0);
-    	    map.put("allSibilings", 0);
-    	} 
-    	
-    	
-    	
-    	
-    	//run
+        sums = new HashMap<String, Map<String, Integer>>();
+        sums.put("adjective", new HashMap<String, Integer>());
+        sums.put("adverb", new HashMap<String, Integer>());
+        sums.put("allPos", new HashMap<String, Integer>());
+        sums.put("noun", new HashMap<String, Integer>());
+        sums.put("previousVerb", new HashMap<String, Integer>());
+        sums.put("verb", new HashMap<String, Integer>());
+        for (Map.Entry<String, Map<String, Integer>> entry : sums.entrySet()) {
+            Map<String, Integer> map = entry.getValue();
+            map.put("dep", 0);
+            map.put("deph", 0);
+            map.put("dep2", 0);
+            map.put("dep2h", 0);
+            map.put("srlarguments", 0);
+            map.put("closestSiblings", 0);
+            map.put("allSibilings", 0);
+        }        
+        
+        counts = new HashMap<String, Map<String, Integer>>();
+        counts.put("adjective", new HashMap<String, Integer>());
+        counts.put("adverb", new HashMap<String, Integer>());
+        counts.put("allPos", new HashMap<String, Integer>());
+        counts.put("noun", new HashMap<String, Integer>());
+        counts.put("previousVerb", new HashMap<String, Integer>());
+        counts.put("verb", new HashMap<String, Integer>());
+        for (Map.Entry<String, Map<String, Integer>> entry : counts.entrySet()) {
+            Map<String, Integer> map = entry.getValue();
+            map.put("dep", 0);
+            map.put("deph", 0);
+            map.put("dep2", 0);
+            map.put("dep2h", 0);
+            map.put("srlarguments", 0);
+            map.put("closestSiblings", 0);
+            map.put("allSibilings", 0);
+        } 
+        
+        
+        
+        
+        //run
         List<Reader<NLPNode>> train_readers;
         List<Reader<NLPNode>> readers;
 
@@ -164,16 +164,16 @@ public class ContextAnalyzer extends Word2Vec
         
         
         for (int i = 0; i < posTypes.length; i++) {
-        	String str = posTypes[i];
-        	bw.write("POS: " + str + "\n");
-        	Map<String, Integer> cnt = counts.get(str);
-        	Map<String, Integer> sms = sums.get(str);
-        	for (Map.Entry<String, Integer> entry : cnt.entrySet()) {
-        		String struct = entry.getKey();
-            	bw.write("\tStruct: " + struct + "  ");
-            	double avg =  (double) sms.get(struct) / (double) entry.getValue();
-            	bw.write(avg + "\n");
-        	}
+            String str = posTypes[i];
+            bw.write("POS: " + str + "\n");
+            Map<String, Integer> cnt = counts.get(str);
+            Map<String, Integer> sms = sums.get(str);
+            for (Map.Entry<String, Integer> entry : cnt.entrySet()) {
+                String struct = entry.getKey();
+                bw.write("\tStruct: " + struct + "  ");
+                double avg =  (double) sms.get(struct) / (double) entry.getValue();
+                bw.write(avg + "\n");
+            }
         }
         bw.flush();
         bw.close();
@@ -225,8 +225,8 @@ public class ContextAnalyzer extends Word2Vec
                 sargs = getSemanticArgumentMap(words);
 
                 for (index=0; index<words.size(); index++){
-                	//context here
-                	measureContext(words, index, sargs);
+                    //context here
+                    measureContext(words, index, sargs);
                 }
             }
         }
@@ -243,104 +243,104 @@ public class ContextAnalyzer extends Word2Vec
     void analyzePOS(NLPNode word, Map<NLPNode, Set<NLPNode>> sargs) {
         String pos = word.getPartOfSpeechTag();
         if(pos.length() > 1) {
-        	if(pos.length() > 2) {
-        		pos = pos.substring(0, 2);
-        	}
+            if(pos.length() > 2) {
+                pos = pos.substring(0, 2);
+            }
             switch (pos) {
-            	case "VB": //verb
-            		countContextPOS("verb", word, sargs);
-            		countContextPOS("allPos", word, sargs);
-            		break;
-            	case "NN": //noun
-            		countContextPOS("noun", word, sargs);
-            		countContextPOS("allPos", word, sargs);
-            		break;
-            	case "JJ": //adjective
-            		countContextPOS("adjective", word, sargs);
-            		countContextPOS("allPos", word, sargs);
-            		break;
-            	case "RB": //adverb
-            		countContextPOS("adverb", word, sargs);
-            		countContextPOS("allPos", word, sargs);
-            		break;
+                case "VB": //verb
+                    countContextPOS("verb", word, sargs);
+                    countContextPOS("allPos", word, sargs);
+                    break;
+                case "NN": //noun
+                    countContextPOS("noun", word, sargs);
+                    countContextPOS("allPos", word, sargs);
+                    break;
+                case "JJ": //adjective
+                    countContextPOS("adjective", word, sargs);
+                    countContextPOS("allPos", word, sargs);
+                    break;
+                case "RB": //adverb
+                    countContextPOS("adverb", word, sargs);
+                    countContextPOS("allPos", word, sargs);
+                    break;
             }
         }
     }
-		
-	
+        
+    
 
 
-	void countContextPOS(String pos, NLPNode word, Map<NLPNode,Set<NLPNode>> sargs){
-		Map<String, Integer> mapSum = sums.get(pos);
-		int sum;
-		int dep1Size = word.getDependentList().size();
-		Map<String, Integer> mapCount = counts.get(pos);
-		int num;
-		
-		
+    void countContextPOS(String pos, NLPNode word, Map<NLPNode,Set<NLPNode>> sargs){
+        Map<String, Integer> mapSum = sums.get(pos);
+        int sum;
+        int dep1Size = word.getDependentList().size();
+        Map<String, Integer> mapCount = counts.get(pos);
+        int num;
+        
+        
         //if(structure.equals("dep")) {
-			sum = mapSum.get("dep");
+            sum = mapSum.get("dep");
             mapSum.put("dep", sum + dep1Size);
             
-			num = mapCount.get("dep");
-			mapCount.put("dep", num + 1);
-			
+            num = mapCount.get("dep");
+            mapCount.put("dep", num + 1);
+            
         //if(structure.equals("deph")) {
-			sum = mapSum.get("deph");
-        	if(word.getDependencyHead() != null) {
+            sum = mapSum.get("deph");
+            if(word.getDependencyHead() != null) {
                 mapSum.put("deph", sum + dep1Size + 1);
-        	}else{
+            }else{
                 mapSum.put("deph", sum + dep1Size);
-        	}
-        	
-			num = mapCount.get("deph");
-			mapCount.put("deph", num + 1);
-			
+            }
+            
+            num = mapCount.get("deph");
+            mapCount.put("deph", num + 1);
+            
         //if(structure.equals("dep2")) {
-			sum = mapSum.get("dep2");
+            sum = mapSum.get("dep2");
             mapSum.put("dep2", sum + dep1Size + word.getGrandDependentList().size());  
             
-			num = mapCount.get("dep2");
-			mapCount.put("dep2", num + 1);
-			
+            num = mapCount.get("dep2");
+            mapCount.put("dep2", num + 1);
+            
         //if(structure.equals("dep2h")) {
-			sum = mapSum.get("dep2h");
-			if(word.getDependencyHead() != null) {
-				mapSum.put("dep2h", sum + dep1Size + 1 + word.getGrandDependentList().size());
-		    }else{
-				mapSum.put("dep2h", sum + dep1Size + word.getGrandDependentList().size());
-		    }        
-			
-			num = mapCount.get("dep2h");
-			mapCount.put("dep2h", num + 1);
-			
+            sum = mapSum.get("dep2h");
+            if(word.getDependencyHead() != null) {
+                mapSum.put("dep2h", sum + dep1Size + 1 + word.getGrandDependentList().size());
+            }else{
+                mapSum.put("dep2h", sum + dep1Size + word.getGrandDependentList().size());
+            }        
+            
+            num = mapCount.get("dep2h");
+            mapCount.put("dep2h", num + 1);
+            
         //if(structure.equals("srlarguments")) {
-			sum = mapSum.get("srlarguments");
-			int count = 0;
-	        Set<NLPNode> set = sargs.get(word);
-	        if (set != null) count+=set.size();
-			mapSum.put("srlarguments", sum + dep1Size + count);
-			
-			num = mapCount.get("srlarguments");
-			mapCount.put("srlarguments", num + 1);
-			
+            sum = mapSum.get("srlarguments");
+            int count = 0;
+            Set<NLPNode> set = sargs.get(word);
+            if (set != null) count+=set.size();
+            mapSum.put("srlarguments", sum + dep1Size + count);
+            
+            num = mapCount.get("srlarguments");
+            mapCount.put("srlarguments", num + 1);
+            
         //if(structure.equals("closestSiblings")){
-			sum = mapSum.get("closestSiblings");
-			count = 0;
-        	if(word.getRightNearestSibling()!= null) count += 1;
-        	if(word.getLeftNearestSibling()!= null) count += 1;
-			mapSum.put("closestSiblings", sum + dep1Size + count);
-			
-			num = mapCount.get("closestSiblings");
-			mapCount.put("closestSiblings", num + 1);
-			
+            sum = mapSum.get("closestSiblings");
+            count = 0;
+            if(word.getRightNearestSibling()!= null) count += 1;
+            if(word.getLeftNearestSibling()!= null) count += 1;
+            mapSum.put("closestSiblings", sum + dep1Size + count);
+            
+            num = mapCount.get("closestSiblings");
+            mapCount.put("closestSiblings", num + 1);
+            
         //if(structure.equals("allSibilings")) {
-			sum = mapSum.get("allSibilings");
-			if(getAllSiblings(word)!= null) mapSum.put("allSibilings", sum + dep1Size + getAllSiblings(word).size());
-			else mapSum.put("allSibilings", sum + dep1Size);        
-			
-			num = mapCount.get("allSibilings");
-			mapCount.put("allSibilings", num + 1);
+            sum = mapSum.get("allSibilings");
+            if(getAllSiblings(word)!= null) mapSum.put("allSibilings", sum + dep1Size + getAllSiblings(word).size());
+            else mapSum.put("allSibilings", sum + dep1Size);        
+            
+            num = mapCount.get("allSibilings");
+            mapCount.put("allSibilings", num + 1);
     }
 
     void skipGram(List<NLPNode> words, int index, Random rand, float[] neu1e, Map<NLPNode,Set<NLPNode>> sargs) {
@@ -357,29 +357,29 @@ public class ContextAnalyzer extends Word2Vec
         }
         if(structure.equals("deph")) {
             context_words.addAll(word.getDependentList());
-        	if(word.getDependencyHead() != null) context_words.add(word.getDependencyHead());
+            if(word.getDependencyHead() != null) context_words.add(word.getDependencyHead());
         }
         if(structure.equals("dep2")) {
             context_words.addAll(word.getDependentList());
-        	context_words.addAll(word.getGrandDependentList());
+            context_words.addAll(word.getGrandDependentList());
         }
         if(structure.equals("dep2h")) {
             context_words.addAll(word.getDependentList());
-        	context_words.add(word.getDependencyHead());
-        	context_words.addAll(word.getGrandDependentList());
+            context_words.add(word.getDependencyHead());
+            context_words.addAll(word.getGrandDependentList());
         }
         if(structure.equals("srlarguments")) {
             context_words.addAll(word.getDependentList());
-        	addSRLNodes(word, context_words, sargs);
+            addSRLNodes(word, context_words, sargs);
         }
         if(structure.equals("closestSiblings")){
             context_words.addAll(word.getDependentList());
-        	if(word.getRightNearestSibling()!= null) context_words.add(word.getRightNearestSibling());
-        	if(word.getLeftNearestSibling()!= null) context_words.add(word.getLeftNearestSibling());
+            if(word.getRightNearestSibling()!= null) context_words.add(word.getRightNearestSibling());
+            if(word.getLeftNearestSibling()!= null) context_words.add(word.getLeftNearestSibling());
         }
         if(structure.equals("allSibilings")) {
             context_words.addAll(word.getDependentList());
-        	context_words.addAll(getAllSiblings(word));
+            context_words.addAll(getAllSiblings(word));
         }
         if(structure.equals("w2vdep")) {
             context_words.addAll(word.getDependentList());
