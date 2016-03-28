@@ -34,39 +34,41 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Reid Kilgore, Austin Blodgett
  */
-public class AnalogyTestMulti
+public class EnsembleAnalogyTest
 {
 
-    @Option(name="-input", usage="file of word vectors to evaluate.", required=true, metaVar="<filename>")
-    String vector_file = null;
     @Option(name="-output", usage="output file to save evaluation.", required=false, metaVar="<filename>")
     String output_file = null;
     @Option(name="-test-file", usage="file of tests.", required=false, metaVar="<filename>")
     String test_file = null;
+    @Option(name="-score-file", usage="file of vector scores.", required=false, metaVar="<filename>")
+    String scoreFile = null;
+    @Option(name="-vector-file-path", usage="directory of vector models.", required=true)
+    String vector_path = "./";
+    @Option(name="-vector-file-list", usage="list of file of vector models.", required=true)
+    String vector_files = null;
+    @Option(name="-vector-file-delim", usage="list of file of vector models.", required=true)
+    String delimiter = null;
     @Option(name="-threads", usage="number of threads to use.", required=false, metaVar="<int>")
     int threads = 4;
 
 
-    Map<String,float[]> map = null;
     int totalTests;
-
-    //Not necessary for current implementation yet
-    Map<String,Map<String,Float>> matrix = new HashMap<>();
 
     volatile Map<String,float[]> memo = new HashMap<>();
     volatile Map<String,int[]> results = new HashMap<>();
     volatile Map<String,List<String[]>> analogyMap = new HashMap<String,List<String[]>>();
+    volatile EnsembleModel ensemble;
 
 
-    public AnalogyTestMulti(String[] args)
+    public EnsembleAnalogyTest(String[] args)
     {
         System.out.println("Loading...");
         BinUtils.initArgs(args, this);
-        try { map = getVectors(new File(vector_file)); }
-        catch (IOException e) { System.err.println("Could not load Word2Vec vectors."); e.printStackTrace(); System.exit(1); }
 
-        try { buildTestMap(new File(test_file));}
-        catch (IOException e) { System.err.println("Could not read word file."); e.printStackTrace(); System.exit(1);}
+        ensemble = new EnsembleModel();
+        try{ buildTestMap(new File(test_file));}
+        catch (Exception e) {e.printStackTrace();}
 
         int splitTasks = totalTests/threads;
 
@@ -143,12 +145,17 @@ public class AnalogyTestMulti
         String category;
         public int total = 0;
         public int correct = 0;
+        public Map<String,float[]> map;
 
         public AnalogyTask(String category, List<String[]> analogies, int id)
         {
             this.analogies = analogies;
             this.id = id;
             this.category = category;
+            this.map = ensemble.selectModel(category);
+            System.out.println("Selecting model for " + category + " getting " + ensemble.modelPicker.get(category));
+            if(this.map == null)
+                System.out.println("Map is null");
         }
 
         @Override
@@ -157,29 +164,111 @@ public class AnalogyTestMulti
             System.out.println("Thread " + id + " running task");
             int l = analogies.size();
             int res;
+            System.out.println("Thread " + id + " has keys " + map.keySet().size());
+
             for(String[] analogy : analogies){
-                res = runTest(analogy);
-                if(res != -1)
-                    correct += res;
+                res = runTest(map, analogy);
+                if(res != -1)   correct += res;
                 total++;
-                if(total % 100 == 0)
-                    System.out.println("Task " + id + " total: " + total + " Progress: " + (float)total/(float)l);
+
+                if(total % 100 == 0)    System.out.println("Task " + id + " total: " + total + " Progress: " + (float)total/(float)l);
             }
+
             synchronized(results){
                 results.get(category)[0] += total;
                 results.get(category)[1] += correct;
             }
+
             System.out.println(category + " correct is now " + results.get(category)[1] + " because of " + correct + " write");
             System.out.println("Thread " + id + " finished task");
         }
 
     }
 
+    class EnsembleModel
+    {
+        Map<String, Map<String,float[]>>    models;
+        Map<String, String>                 modelPicker;
+        String[] model_files;
+
+        public EnsembleModel()
+        {
+            models          = new HashMap<String, Map<String,float[]>>();
+            model_files     = vector_files.split(delimiter);
+            System.out.println("Building Ensemble Model with " + model_files.length + " possible models");
+            try{ modelPicker     = buildModelPicker(model_files);}
+            catch (Exception e) {e.printStackTrace();}
+
+            for(String model_file : model_files)
+            {
+                System.out.println("Adding model " + model_file);
+                if(vector_path.charAt(vector_path.length()-1) != '/')
+                    vector_path = vector_path + "/";
+
+                try{ models.put(model_file, getVectors(vector_path + model_file)); }
+                catch (Exception e) { e.printStackTrace(); }
+            }
+            System.out.println("Finished building ensemble model, have models: " + models.keySet().size());
+        }
+
+        private Map<String,float[]> selectModel(String category)
+        {
+            return models.get(modelPicker.get(category));
+        }
+
+        private Map<String, String> buildModelPicker(String[] model_files) throws IOException
+        {
+            FileReader scoreFileReader;
+            BufferedReader scoreReader;
+            scoreFileReader  = new FileReader(scoreFile);
+            scoreReader    = new BufferedReader(scoreFileReader);
+
+            Map<String,String> modelPicker = new HashMap<String,String>();
+            String line;
+            String category = scoreReader.readLine().substring(2);
+            System.out.println("Seeking best model for " + category);
+            System.out.println("Possible models are " + Arrays.toString(model_files));
+            Boolean goToNextCategory = false;
+            while( ( line = scoreReader.readLine() ) != null)
+            {
+                if(line.charAt(0) == ':' && goToNextCategory)
+                {
+                    category = line.substring(2);
+                    System.out.println("Seeking best model for " + category);
+                    goToNextCategory = false;
+                }
+                else if(!goToNextCategory)
+                {
+                    for(String model : model_files)
+                    {
+                        if(model.equals(line+".vectors")) // best possible model for category
+                        {
+                            System.out.println("Setting optimal model for [" + category + "]");
+                            modelPicker.put("["+category+"]", model);
+                            goToNextCategory = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            scoreReader.close();
+            scoreFileReader.close();
+            return modelPicker;
+
+        }
+
+}
+
+    private Map<String,float[]> getVectors(String vector_file) throws IOException
+    {
+        return getVectors(new File(vector_file));
+    }
+
     private Map<String,float[]> getVectors(File vector_file) throws IOException
     {
         Map<String,float[]> map = new HashMap<>();
-
         BufferedReader in = new BufferedReader(new FileReader(vector_file));
+
         String line;
         while((line = in.readLine()) != null)
         {
@@ -215,7 +304,6 @@ public class AnalogyTestMulti
                 testList = new ArrayList<String[]>();
                 // expects format:
                     //: category-name
-                System.out.println("Building for " + category + " with size " + testList.size());
                 analogyMap.put(category, testList);
                 results.put(category, new int[] {0, 0});
             }
@@ -247,14 +335,14 @@ public class AnalogyTestMulti
         return a;
     }
 
-    float[] getTestVector(String w1, String w2, String w3)
+    float[] getTestVector(Map<String,float[]> map, String w1, String w2, String w3)
     {
         if( !(map.containsKey(w1) && map.containsKey(w2) && map.containsKey(w3)) )
             return null;
         return getTestVector(map.get(w1), map.get(w2), map.get(w3));
     }
 
-    private int runTest(String[] analogy)
+    private int runTest(Map<String,float[]> map, String[] analogy)
     {
         float[] answerVector;
         String pos1 = analogy[2].toLowerCase();
@@ -262,14 +350,14 @@ public class AnalogyTestMulti
         String pos2 = analogy[1].toLowerCase();
 
         String gold = analogy[3].toLowerCase();
-        answerVector = getTestVector(pos1, neg1, pos2);
+        answerVector = getTestVector(map, pos1, neg1, pos2);
         if(answerVector == null){
             analogy[4] = "OOV";
             analogy[5] = "OOV";
             return -1;
         }
 
-        String prediction = getNearestWord(answerVector);
+        String prediction = getNearestWord(map, answerVector);
         analogy[4] = prediction;
         if(prediction.equals(gold)){
             analogy[5] = "correct";
@@ -298,14 +386,14 @@ public class AnalogyTestMulti
        return c;
     }
 
-    private String getNearestWord(String word){
+    private String getNearestWord(Map<String, float[]> map, String word){
         String nearest = null;
         float maxSimilarity = -Float.MAX_VALUE;
         float cos;
 
         for (String word2 : map.keySet())
         {
-            cos = cosine(word, word2);
+            cos = cosine(map, word, word2);
             if ( cos > maxSimilarity)
             {
                 nearest = word2;
@@ -315,24 +403,24 @@ public class AnalogyTestMulti
         return nearest;
     }
 
-    private String getNearestWord(float[] vector){
+    private String getNearestWord(Map<String,float[]> map, float[] vector){
         String nearest = null;
         float maxSimilarity = -Float.MAX_VALUE;
         float cos;
 
-        for (String word2 : map.keySet())
+        for (Object word2 : map.keySet())
         {
-            cos = cosine(vector, map.get(word2));
+            cos = cosine(vector, map.get((String)word2));
             if ( cos > maxSimilarity)
             {
-                nearest = word2;
+                nearest = (String)word2;
                 maxSimilarity = cos;
             }
         }
         return nearest;
     }
 
-    float cosine(String w1, String w2)
+    float cosine(Map<String, float[]> map, String w1, String w2)
     {
         return cosine(map.get(w1), map.get(w2));
     }
@@ -354,30 +442,9 @@ public class AnalogyTestMulti
     }
 
 
-    void buildCosineMatrix()
-    {
-        float similarity = 0;
-        for(String key : map.keySet())
-        {
-            for(String key2 : map.keySet())
-            {
-                if(!matrix.containsKey(key))
-                    matrix.put(key, new HashMap<>());
-                if(!matrix.containsKey(key2))
-                    matrix.put(key2, new HashMap<>());
-                if(matrix.get(key).containsKey(key2))
-                    continue;
-
-                matrix.get(key).put(key2, cosine(key, key2));
-                if(! key.equals(key2) )
-                    matrix.get(key2).put(key, matrix.get(key).get(key2));
-            }
-        }
-    }
-
     public static void main(String[] args) throws IOException
     {
-        new AnalogyTestMulti(args);
+        new EnsembleAnalogyTest(args);
     }
 
 }

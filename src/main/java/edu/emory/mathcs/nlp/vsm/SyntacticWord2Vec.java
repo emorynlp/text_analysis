@@ -151,6 +151,7 @@ public class SyntacticWord2Vec extends Word2Vec
         save2(new File(output_file+".2"));
         if (write_vocab_file != null)
         {
+            System.out.println("USING " + write_vocab_file);
             File f = new File(write_vocab_file);
             if (!f.isFile()) f.createNewFile();
             in_vocab.writeVocab(f);
@@ -301,7 +302,6 @@ public class SyntacticWord2Vec extends Word2Vec
 
     Set<NLPNode> addContext(Set<NLPNode> context_words, String structure, NLPNode word, List<NLPNode> words, int index)
     {
-        if(structure == null)   structure = "w2v";
         switch(structure)
         {
             case "dep1h":
@@ -309,20 +309,65 @@ public class SyntacticWord2Vec extends Word2Vec
             case "dep1":
                 context_words.addAll(word.getDependentList());
                 break;
+
             case "dep2h":
                 if(word.getDependencyHead() != null)    context_words.add(word.getDependencyHead());
             case "dep2":
                 context_words.add(word.getDependencyHead());
                 context_words.addAll(word.getGrandDependentList());
                 break;
+
             case "srlargs":
                 //Not implemented TODO
                 //addSRLNodes(word, context_words, sargs);
                 break;
+
+            case "sib2dep1":
+                context_words.addAll(word.getDependentList());
+                if(word.getRightNearestSibling()!= null)    context_words.add(word.getRightNearestSibling());
+                if(word.getLeftNearestSibling()!= null)     context_words.add(word.getLeftNearestSibling());
+                if(word.getRightNearestSibling()!= null)
+                    if(word.getRightNearestSibling().getRightNearestSibling() != null)
+                        context_words.add(word.getRightNearestSibling().getRightNearestSibling());
+                if(word.getLeftNearestSibling()!= null)
+                    if(word.getLeftNearestSibling().getLeftNearestSibling() != null)
+                        context_words.add(word.getLeftNearestSibling().getLeftNearestSibling());
+                break;
+
+            case "sib2dep2":
+                context_words.addAll(word.getDependentList());
+                context_words.addAll(word.getGrandDependentList());
+                if(word.getRightNearestSibling()!= null)    context_words.add(word.getRightNearestSibling());
+                if(word.getLeftNearestSibling()!= null)     context_words.add(word.getLeftNearestSibling());
+                if(word.getRightNearestSibling()!= null)
+                    if(word.getRightNearestSibling().getRightNearestSibling() != null)
+                        context_words.add(word.getRightNearestSibling().getRightNearestSibling());
+                if(word.getLeftNearestSibling()!= null)
+                    if(word.getLeftNearestSibling().getLeftNearestSibling() != null)
+                        context_words.add(word.getLeftNearestSibling().getLeftNearestSibling());
+                break;
+
+            case "sib1dep2":
+                context_words.addAll(word.getDependentList());
+                context_words.addAll(word.getGrandDependentList());
+                if(word.getRightNearestSibling()!= null)    context_words.add(word.getRightNearestSibling());
+                if(word.getLeftNearestSibling()!= null)     context_words.add(word.getLeftNearestSibling());
+                break;
+
             case "sib1dep1h":
                 if(word.getDependencyHead() != null)    context_words.add(word.getDependencyHead());
             case "sib1dep1":
                 context_words.addAll(word.getDependentList());
+                if(word.getRightNearestSibling()!= null)    context_words.add(word.getRightNearestSibling());
+                if(word.getLeftNearestSibling()!= null)     context_words.add(word.getLeftNearestSibling());
+                break;
+            case "sib2":
+                if(word.getRightNearestSibling()!= null)
+                    if(word.getRightNearestSibling().getRightNearestSibling() != null)
+                        context_words.add(word.getRightNearestSibling().getRightNearestSibling());
+                if(word.getLeftNearestSibling()!= null)
+                    if(word.getLeftNearestSibling().getLeftNearestSibling() != null)
+                        context_words.add(word.getLeftNearestSibling().getLeftNearestSibling());
             case "sib1":
                 if(word.getRightNearestSibling()!= null)    context_words.add(word.getRightNearestSibling());
                 if(word.getLeftNearestSibling()!= null)     context_words.add(word.getLeftNearestSibling());

@@ -123,7 +123,7 @@ public class AnalogyTest
         Map<String,float[]> memo = new HashMap<>();
 
         for(String[] list : testList){
-            if(list.length != 4){
+            if(list[0].charAt(0) == ':'){
                 if(lastSection != null)
                 {
 

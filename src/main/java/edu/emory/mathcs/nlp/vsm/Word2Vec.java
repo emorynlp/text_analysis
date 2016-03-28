@@ -78,7 +78,7 @@ public class Word2Vec implements Serializable
     float subsample_threshold = 0.001f;
     @Option(name="-negative", usage="number of negative examples (default: 5; common values are 3 - 10). If negative = 0, use Hierarchical Softmax instead of Negative Sampling.", required=false, metaVar="<int>")
     int negative_size = 5;
-    @Option(name="-iter", usage="number of training iterations (default: 5).", required=false, metaVar="<int>")
+    @Option(name="-w", usage="number of training iterations (default: 5).", required=false, metaVar="<int>")
     int train_iteration = 5;
     @Option(name="-min-count", usage="min-count of words (default: 5). This will discard words that appear less than <int> times.", required=false, metaVar="<int>")
     int min_count = 5;
@@ -91,6 +91,8 @@ public class Word2Vec implements Serializable
     boolean cbow = false;
     @Option(name="-normalize", usage="If set, normalize each vector.", required=false, metaVar="<boolean>")
     boolean normalize = false;
+    @Option(name="-save-iter", usage="If set, save the model at each iteration.", required=false, metaVar="<boolean>")
+    boolean saveIter = false;
     /* End Training Options */
 
     /* Debugging */
@@ -231,26 +233,60 @@ public class Word2Vec implements Serializable
         catch (InterruptedException e) {e.printStackTrace();}
 
 
-        BinUtils.LOG.info("Saving word vectors.\n");
-        //Output Vectors for eval
-        save(new File(output_file));
-        if (write_vocab_file != null)
-        {
-            File f = new File(write_vocab_file);
-            if (!f.isFile()) f.createNewFile();
-            in_vocab.writeVocab(f);
-        }
-        if (feature_file != null) saveFeatures(new File(feature_file));
-
         //Full Model
-        BinUtils.LOG.info("Saving model.\n");
-        VSMModel model = new VSMModel(W, V, in_vocab, out_vocab);
-        FileOutputStream out = new FileOutputStream(output_file + ".model");
-        ObjectOutputStream object = new ObjectOutputStream(out);
-        object.writeObject(model);
-        object.flush();
-        object.close();
-        out.close();
+        saveModel();
+        // BinUtils.LOG.info("Saving model.\n");
+        // VSMModel model = new VSMModel(W, V, in_vocab, out_vocab);
+        // FileOutputStream out = new FileOutputStream(output_file + ".model");
+        // ObjectOutputStream object = new ObjectOutputStream(out);
+        // object.writeObject(model);
+        // object.close();
+        // out.close();
+    }
+
+    void saveModel()
+    {
+        try{
+            BinUtils.LOG.info("Saving word vectors.\n");
+            save(new File(output_file));
+            if (write_vocab_file != null)
+            {
+                File f = new File(write_vocab_file);
+                if (!f.isFile()) f.createNewFile();
+                in_vocab.writeVocab(f);
+            }
+
+            if (feature_file != null) saveFeatures(new File(feature_file));
+            BinUtils.LOG.info("Saving model.\n");
+            VSMModel model = new VSMModel(W, V, in_vocab, out_vocab);
+            FileOutputStream out = new FileOutputStream(output_file + ".model");
+            ObjectOutputStream object = new ObjectOutputStream(out);
+            object.writeObject(model);
+            object.close();
+            out.close();
+        } catch (Exception e) {e.printStackTrace();}
+    }
+
+    void saveModel(int id)
+    {
+        try{
+            BinUtils.LOG.info("Saving word vectors.\n");
+            save(new File(output_file + "." + id));
+            if (write_vocab_file != null)
+            {
+                File f = new File(write_vocab_file + "." + id);
+                if (!f.isFile()) f.createNewFile();
+                in_vocab.writeVocab(f);
+            }
+
+            BinUtils.LOG.info("Saving model " + id + ".\n");
+            VSMModel model = new VSMModel(W, V, in_vocab, out_vocab);
+            FileOutputStream out = new FileOutputStream(output_file + ".model." + id);
+            ObjectOutputStream object = new ObjectOutputStream(out);
+            object.writeObject(model);
+            object.close();
+            out.close();
+        } catch (Exception e) {e.printStackTrace();}
     }
 
     class TrainTask implements Runnable
