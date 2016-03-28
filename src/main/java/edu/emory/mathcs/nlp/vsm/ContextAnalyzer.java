@@ -42,7 +42,7 @@ import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
  *
  * @author Austin Blodgett
  */
-public class ContextAnalyzer extends Word2Vec
+public class POSContextAnalyzer extends Word2Vec
 {
     private static final long serialVersionUID = -5597377581114506257L;
     Map<String, Map<String, Integer>> sums;
@@ -71,12 +71,12 @@ public class ContextAnalyzer extends Word2Vec
         String[] posTypes = {"adjective", "adverb", "allPos", "noun", "verb"};
 
         sums = new HashMap<String, Map<String, Integer>>();
-        sums.put("adjective", new HashMap<String, Integer>());
-        sums.put("adverb", new HashMap<String, Integer>());
-        sums.put("allPos", new HashMap<String, Integer>());
-        sums.put("noun", new HashMap<String, Integer>());
+        for(String posType : posTypes)
+            sums.put(posType, new HashMap<String, Integer>());
+
+        //Extra, not a posType
         sums.put("previousVerb", new HashMap<String, Integer>());
-        sums.put("verb", new HashMap<String, Integer>());
+
         for (Map.Entry<String, Map<String, Integer>> entry : sums.entrySet()) {
             Map<String, Integer> map = entry.getValue();
             map.put("dep", 0);
@@ -263,6 +263,8 @@ public class ContextAnalyzer extends Word2Vec
                     countContextPOS("adverb", word, sargs);
                     countContextPOS("allPos", word, sargs);
                     break;
+                default:
+                    BinUtils.LOG.info(pos + " defaulted in counter");
             }
         }
     }
@@ -487,5 +489,5 @@ public class ContextAnalyzer extends Word2Vec
         out.close();
     }
 
-    static public void main(String[] args) { new ContextAnalyzer(args); }
+    static public void main(String[] args) { new POSContextAnalyzer(args); }
 }
