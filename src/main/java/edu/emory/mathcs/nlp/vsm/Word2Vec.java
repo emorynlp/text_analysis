@@ -28,7 +28,6 @@ import edu.emory.mathcs.nlp.vsm.reader.Reader;
 import edu.emory.mathcs.nlp.vsm.reader.SentenceReader;
 import edu.emory.mathcs.nlp.vsm.util.Vocabulary;
 import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.spi.BooleanOptionHandler;
 
 import java.io.*;
 import java.util.*;
@@ -106,12 +105,6 @@ public class Word2Vec implements Serializable
     int thread_size = 12;
 
 
-
-    /* TODO Austin
-     * Add cmd line options
-     * tokenize, lowercase, border, evaluate
-     */
-
     final float ALPHA_MIN_RATE  = 0.0001f;
 
     /* Note that in regular word2vec, the input and output layers
@@ -153,6 +146,7 @@ public class Word2Vec implements Serializable
             }
             else
                 filenames = FileUtils.getFileList(train_path, train_ext, false);
+            	filenames.addAll(FileUtils.getFileList("/mnt/ainos-research/corpus/wikipedia2015/tree/", train_ext, false));
             train(filenames);
         }
         catch (Exception e) {e.printStackTrace();}
@@ -221,16 +215,25 @@ public class Word2Vec implements Serializable
         int id = 0;
         for (Reader<String> r: train_readers)
         {
+            r.open();
             executor.execute(new TrainTask(r,id));
             id++;
         }
-        if (evaluate) executor.execute(new TestTask(test_reader,id));
-        // -----------------------------------------------------------
+        if (evaluate)
+        {
+            test_reader.open();
+            executor.execute(new TestTask(test_reader,id));
+        }
 
         executor.shutdown();
 
         try { executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
         catch (InterruptedException e) {e.printStackTrace();}
+
+        // -----------------------------------------------------------
+
+        for (Reader<String> r: train_readers) r.close();
+        if (evaluate) test_reader.close();
 
 
         //Full Model

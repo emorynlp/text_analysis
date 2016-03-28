@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 
 import edu.emory.mathcs.nlp.common.util.FileUtils;
-import edu.emory.mathcs.nlp.vsm.reader.Reader;
-import edu.emory.mathcs.nlp.vsm.reader.SentenceReader;
 
 /**
  * Created by austin on 12/24/2015.
@@ -29,8 +27,10 @@ public class SentenceReaderTest {
         StringBuilder sb1 = new StringBuilder();
         int c;
         for (Reader<String> r : readers) {
+            r.open();
             while ((c = r.read()) != -1)
                 sb1.append((char) c);
+            r.close();
         }
 
         InputStream in;
@@ -48,11 +48,11 @@ public class SentenceReaderTest {
 
         // test restart
         StringBuilder sb3 = new StringBuilder();
-        for (Reader<String> r : readers)
-            r.restart();
         for (Reader<String> r : readers) {
+            r.open();
             while ((c = r.read()) != -1)
                 sb3.append((char) c);
+            r.close();
         }
 
         System.out.println(sb1.toString());
@@ -61,7 +61,6 @@ public class SentenceReaderTest {
 
 
         assert(sb3.toString().equals(sb2.toString()));
-        for (Reader<String> reader : readers) reader.close();
     }
 
     @Test
@@ -72,6 +71,8 @@ public class SentenceReaderTest {
 
         StringBuilder sb = new StringBuilder();
 
+        reader.open();
+
         List<String> words;
         while((words = reader.next()) != null)
         {
@@ -80,6 +81,7 @@ public class SentenceReaderTest {
             sb.append("\n");
         }
         System.out.println(sb);
+
         reader.close();
     }
 
@@ -92,6 +94,7 @@ public class SentenceReaderTest {
         List<String> words;
         for (Reader<String> r : reader.splitParallel(2))
         {
+            r.open();
             StringBuilder sb = new StringBuilder();
             while ((words = r.next()) != null)
             {
@@ -100,8 +103,8 @@ public class SentenceReaderTest {
                 sb.append("\n");
             }
             System.out.println(sb);
+            r.close();
         }
-        reader.close();
     }
 
     @Test
@@ -113,6 +116,7 @@ public class SentenceReaderTest {
         List<String> words;
         for (Reader<String> r : reader.splitTrainAndTest(0.8f))
         {
+            r.open();
             StringBuilder sb = new StringBuilder();
             while ((words = r.next()) != null)
             {
@@ -121,8 +125,8 @@ public class SentenceReaderTest {
                 sb.append("\n");
             }
             System.out.println(sb);
+            r.close();
         }
-        reader.close();
     }
 
     @Test
@@ -134,6 +138,7 @@ public class SentenceReaderTest {
         List<String> words;
         for (Reader<String> r : reader.splitParallel(2))
         {
+            r.open();
             while ((words = r.next()) != null)
             {
                 for (String w : words)
@@ -142,8 +147,8 @@ public class SentenceReaderTest {
                 System.out.println(r.progress());
             }
             System.out.println();
+            r.close();
         }
-        reader.close();
     }
 
     @Test
@@ -152,6 +157,7 @@ public class SentenceReaderTest {
         Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                 .stream().map(File::new).collect(Collectors.toList()));
 
+        reader.open();
         while(reader.next() != null);
 
         // restart
@@ -173,9 +179,11 @@ public class SentenceReaderTest {
     public void testAddFilter() throws Exception
     {
         @SuppressWarnings("resource")
-		Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
+        Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                                             .stream().map(File::new).collect(Collectors.toList()))
                                             .addFilter(w -> w.contains("o"));
+
+        reader.open();
 
         StringBuilder sb = new StringBuilder();
         List<String> words;
@@ -186,6 +194,7 @@ public class SentenceReaderTest {
             sb.append("\n");
         }
         System.out.println(sb);
+
         reader.close();
     }
 
@@ -193,11 +202,13 @@ public class SentenceReaderTest {
     public void testAddFeature() throws Exception
     {
         @SuppressWarnings("resource")
-		Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
+        Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                                         .stream().map(File::new).collect(Collectors.toList()))
                                         .addFeature(String::toUpperCase)
                                         .addFeature(String::toLowerCase);
-        
+
+        reader.open();
+
         StringBuilder sb = new StringBuilder();
         List<String> words;
         while((words = reader.next()) != null)
@@ -207,6 +218,8 @@ public class SentenceReaderTest {
             sb.append("\n");
         }
         System.out.println(sb);
+
+        reader.close();
     }
 
     @Test
@@ -217,6 +230,8 @@ public class SentenceReaderTest {
                                             .stream().map(File::new).collect(Collectors.toList()))
                                             .addFeature(String::hashCode);
 
+        reader.open();
+
         StringBuilder sb = new StringBuilder();
         List<Integer> words;
         while((words = reader.next()) != null)
@@ -226,6 +241,8 @@ public class SentenceReaderTest {
             sb.append("\n");
         }
         System.out.println(sb);
+
+        reader.close();
     }
 
     @Test
@@ -235,6 +252,8 @@ public class SentenceReaderTest {
         Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                                             .stream().map(File::new).collect(Collectors.toList()))
                                             .addMap(l -> l.subList(0, l.size()/2));
+
+        reader.open();
 
         StringBuilder sb = new StringBuilder();
 

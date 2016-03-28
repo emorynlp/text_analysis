@@ -15,6 +15,7 @@
  */
 package edu.emory.mathcs.nlp.vsm.util;
 
+import edu.emory.mathcs.nlp.vsm.reader.Reader;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
@@ -25,7 +26,6 @@ import java.util.List;
 import java.util.concurrent.*;
 
 import edu.emory.mathcs.nlp.common.util.Joiner;
-import edu.emory.mathcs.nlp.vsm.reader.Reader;
 
 /**
  * @author Jinho D. Choi ({@code jinho.choi@emory.edu})
@@ -59,7 +59,7 @@ public class Vocabulary implements Serializable
 	 * Add every word in reader to vocabulary,
 	 * then sort vocabulary and restart reader.
 	 *
-	 * @param reader - source of words of type nlp.reader.Reader
+	 * @param reader - source of words of type nlp.reader.AbstractReader
 	 */
 	public void learn(Reader<String> reader) throws IOException { learn(reader, 0); }
 
@@ -68,11 +68,13 @@ public class Vocabulary implements Serializable
 	 * then sort vocabulary and restart reader.
 	 * Remove words with count less than min_word_count
 	 *
-	 * @param reader - source of words of type nlp.reader.Reader
+	 * @param reader - source of words of type nlp.reader.AbstractReader
 	 * @param min_word_count - words with counts less than this will be removed
 	 */
 	public void learn(Reader<String> reader, int min_word_count) throws IOException {
 		int word_counter = 0;
+
+		reader.open();
 
 		List<String> words;
 		while ((words = reader.next()) != null) {
@@ -85,7 +87,7 @@ public class Vocabulary implements Serializable
 			}
 		}
 		System.out.println(total_count + " total word count");
-		reader.restart();
+		reader.close();
 		sort(min_word_count);
 	}
 
@@ -93,7 +95,7 @@ public class Vocabulary implements Serializable
 	 * Add every word in readers to vocabulary in parallel,
 	 * then sort vocabulary and restart reader.
 	 *
-	 * @param readers - source of words of type nlp.reader.Reader
+	 * @param readers - source of words of type nlp.reader.AbstractReader
 	 */
 	public void learnParallel(List<Reader<String>> readers)
 	{
@@ -105,7 +107,7 @@ public class Vocabulary implements Serializable
 	 * then sort vocabulary and restart reader.
 	 * Remove words with count less than min_word_count
 	 *
-	 * @param readers - list of input sources of type nlp.reader.Reader to be run in parallel
+	 * @param readers - list of input sources of type nlp.reader.AbstractReader to be run in parallel
 	 * @param min_word_count - words with counts less than this will be removed
 	 */
 	public void learnParallel(List<Reader<String>> readers, int min_word_count)
@@ -152,6 +154,8 @@ public class Vocabulary implements Serializable
 		public Vocabulary call() throws Exception {
 			int word_counter = 0;
 
+			reader.open();
+
 			List<String> words;
 			while ((words = reader.next()) != null) {
 				for (String word : words)
@@ -165,7 +169,7 @@ public class Vocabulary implements Serializable
 				}
 			}
 			if (id == 0) System.out.print(String.format("%.1f", reader.progress()) + "%\r");
-			reader.restart();
+			reader.close();
 			return vocab;
 		}
 	}

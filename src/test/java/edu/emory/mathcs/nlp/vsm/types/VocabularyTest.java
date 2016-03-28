@@ -107,7 +107,7 @@ public class VocabularyTest {
     @Test
     public void testLearn() throws Exception
     {
-        Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                 .stream().map(File::new).collect(Collectors.toList()));
         Vocabulary vocab = new Vocabulary();
 
@@ -119,7 +119,7 @@ public class VocabularyTest {
     @Test
     public void testLearnParallel() throws Exception
     {
-        Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                                         .stream().map(File::new).collect(Collectors.toList()));
         Vocabulary vocab = new Vocabulary();
 
@@ -132,7 +132,7 @@ public class VocabularyTest {
     @Test
     public void testAddAll() throws Exception
     {
-        Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                                         .stream().map(File::new).collect(Collectors.toList()));
         Vocabulary vocab1 = new Vocabulary();
 
@@ -147,19 +147,19 @@ public class VocabularyTest {
     @Test
     public void testWriteVocab() throws Exception
     {
-        Reader<String> reader = new SentenceReader(FileUtils.getFileList("src/test/resources/dat/test_files","*")
+        Reader<String> reader = new SentenceReader(FileUtils.getFileList("resources/dat/test_files","*")
                 .stream().map(File::new).collect(Collectors.toList()));
         Vocabulary vocab = new Vocabulary();
 
         vocab.learn(reader);
-        vocab.writeVocab(new File("src/test/resources/dat/vocab"));
+        vocab.writeVocab(new File("resources/dat/vocab"));
     }
 
     @Test
     public void testReadVocab() throws Exception
     {
         Vocabulary vocab = new Vocabulary();
-        vocab.readVocab(new File("src/test/resources/dat/vocab"), 0);
+        vocab.readVocab(new File("resources/dat/vocab"), 0);
 
         System.out.println(vocab);
     }
