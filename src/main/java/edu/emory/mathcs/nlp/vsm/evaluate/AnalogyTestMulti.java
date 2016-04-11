@@ -257,9 +257,9 @@ public class AnalogyTestMulti
     private int runTest(String[] analogy)
     {
         float[] answerVector;
-        String pos1 = analogy[2].toLowerCase();
+        String pos1 = analogy[1].toLowerCase();
         String neg1 = analogy[0].toLowerCase();
-        String pos2 = analogy[1].toLowerCase();
+        String pos2 = analogy[2].toLowerCase();
 
         String gold = analogy[3].toLowerCase();
         answerVector = getTestVector(pos1, neg1, pos2);
