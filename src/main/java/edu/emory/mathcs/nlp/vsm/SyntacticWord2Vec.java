@@ -61,6 +61,9 @@ public class SyntacticWord2Vec extends Word2Vec
     @Override
     public void train(List<String> filenames) throws Exception
     {
+    	if(ensemble) {
+    		BinUtils.LOG.info("Running Ensemble Method:\n");
+    	}
         BinUtils.LOG.info("Reading vocabulary:\n");
 
         // ------- Austin's code -------------------------------------
