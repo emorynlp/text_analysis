@@ -53,15 +53,6 @@ public class SyntacticWord2Vec extends Word2Vec
         super(args);
     }
 
-    /*String getWordLabel(NLPNode word)
-    {
-        String POS = word.getPartOfSpeechTag();
-        if (POS.startsWith("VB")) POS = "VB";
-        else if (POS.startsWith("NN")) POS = "NN";
-
-        return POS+"_"+word.getLemma();
-    }*/
-
     String getWordLabel(NLPNode word)
     {
         return word.getLemma();
@@ -485,9 +476,9 @@ public class SyntacticWord2Vec extends Word2Vec
 
         for (String word : map.keySet())
         {
-            out.write(word+"\t");
+            out.write(word+ "\t");
             for (float f : map.get(word))
-                out.write(f+"\t");
+                out.write(f + "\t");
             out.write("\n");
         }
         out.close();
