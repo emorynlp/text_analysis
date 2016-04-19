@@ -305,7 +305,15 @@ public class SyntacticWord2Vec extends Word2Vec
         NLPNode word = words.get(index);
         int word_index = out_vocab.indexOf(getWordLabel(word));
         if (word_index < 0) return;
-
+        	
+        //do ensemble method if set
+        if (ensemble){
+        	String s = getEnsembleStructure(word);
+        	if(s!=null) {
+        		structure = s;
+        	}
+        }
+        	
         Set<NLPNode> context_words = new HashSet<NLPNode>();
         context_words.addAll(word.getDependentList());
         
@@ -315,7 +323,7 @@ public class SyntacticWord2Vec extends Word2Vec
         }
         if(structure.equals("dep2")) context_words.addAll(word.getGrandDependentList());
         if(structure.equals("dep2h")) {
-        	context_words.add(word.getDependencyHead());
+        	if(word.getDependencyHead() != null) context_words.add(word.getDependencyHead());
         	context_words.addAll(word.getGrandDependentList());
         }
         if(structure.equals("srlarguments")) addSRLNodes(word, context_words, sargs);
@@ -324,7 +332,8 @@ public class SyntacticWord2Vec extends Word2Vec
         	if(word.getLeftNearestSibling()!= null) context_words.add(word.getLeftNearestSibling());
         }
         if(structure.equals("allSibilings")) context_words.addAll(getAllSiblings(word));
-
+        
+        //train
         for (NLPNode context : context_words)
         {
             int context_index = in_vocab.indexOf(getWordLabel(context));
@@ -338,6 +347,30 @@ public class SyntacticWord2Vec extends Word2Vec
             for (k=0; k<vector_size; k++) W[l1+k] += neu1e[k];
         }
     }
+    
+    String getEnsembleStructure(NLPNode word){
+        String partOfSpeech = word.getPartOfSpeechTag();
+        	
+        if(partOfSpeech.length() > 1) {
+            	if(partOfSpeech.length() > 2) {
+            		partOfSpeech = partOfSpeech.substring(0, 2);
+            	}
+                switch (partOfSpeech) {
+                	case "NN": //noun
+                		return "allSibilings";
+                	case "JJ": //adjective
+                		return "allSibilings";
+                	case "RB": //adverb
+                		return "deph";
+                	case "VB": //verb
+                		return "dep1";
+                }
+        }  
+        return null;
+    }
+    
+    
+    
     
     void addSRLNodes(NLPNode word, Set<NLPNode> context_words, Map<NLPNode,Set<NLPNode>> sargs) {
         context_words.addAll(word.getDependentList());

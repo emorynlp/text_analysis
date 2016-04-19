@@ -83,6 +83,8 @@ public class Word2Vec implements Serializable
 	boolean debug = false;
 	@Option(name="-structure", usage="If set, use the context structure specificed.", required=false, metaVar="<string>")
 	String structure = "";
+	@Option(name="-ensemble", usage="If set, use the ensemble method to pick syntatic structure.", required=false, metaVar="<boolean>")
+	boolean ensemble = false;
 
 	/* TODO Austin
 	 * Add cmd line options
